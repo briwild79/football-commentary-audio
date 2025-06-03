@@ -274,6 +274,7 @@
         let analyser = null;
         let dataArray = null;
         let source = null;
+        let audioConnected = {}; // Track which audio elements have been connected
         
         const commentaries = [
             { 
@@ -331,21 +332,27 @@
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
                 
-                // Create analyser node
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
-                analyser.smoothingTimeConstant = 0.7;
-                
-                // Create source from audio element
-                source = audioContext.createMediaElementSource(audio);
-                source.connect(analyser);
-                analyser.connect(audioContext.destination);
-                
-                // Setup data array for frequency data
-                const bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-                
-                console.log('✅ Audio analyser setup complete');
+                // Only create source once per audio element
+                if (!audioConnected[audio.src]) {
+                    // Create analyser node
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 256;
+                    analyser.smoothingTimeConstant = 0.7;
+                    
+                    // Create source from audio element
+                    source = audioContext.createMediaElementSource(audio);
+                    source.connect(analyser);
+                    analyser.connect(audioContext.destination);
+                    
+                    // Mark this audio as connected
+                    audioConnected[audio.src] = true;
+                    
+                    // Setup data array for frequency data
+                    const bufferLength = analyser.frequencyBinCount;
+                    dataArray = new Uint8Array(bufferLength);
+                    
+                    console.log('✅ Audio analyser setup complete');
+                }
                 return true;
             } catch (error) {
                 console.error('❌ Audio analyser setup failed:', error);
@@ -477,10 +484,7 @@
                     console.log('✅ Playing successfully:', commentary.text);
                     
                     // Setup audio analyser after play starts
-                    if (!analyserSetup && !currentAudio.analysed) {
-                        analyserSetup = setupAudioAnalyser(currentAudio);
-                        currentAudio.analysed = true;
-                    }
+                    setupAudioAnalyser(currentAudio);
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error.message);
