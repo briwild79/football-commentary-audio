@@ -267,6 +267,12 @@
         let currentCommentaryIndex = 0;
         let currentAudio = null;
         
+        // Audio visualization setup
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let source = null;
+        
         const commentaries = [
             { 
                 time: "82'", 
@@ -316,20 +322,76 @@
         
         const bars = document.querySelectorAll('.wave-bar');
         
-        // Simple waveform animation
+        // Setup audio analyser for real visualization
+        function setupAudioAnalyser(audio) {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Create analyser node
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.smoothingTimeConstant = 0.7;
+                
+                // Create source from audio element
+                source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                
+                // Setup data array for frequency data
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                console.log('✅ Audio analyser setup complete');
+                return true;
+            } catch (error) {
+                console.error('❌ Audio analyser setup failed:', error);
+                return false;
+            }
+        }
+        
+        // Animate waveform with real audio data
         function animateWaveform() {
-            bars.forEach((bar, index) => {
-                const delay = index * 0.02;
-                setTimeout(() => {
-                    const height = Math.random() * 60 + 20;
+            if (analyser && dataArray && isPlaying) {
+                // Get frequency data
+                analyser.getByteFrequencyData(dataArray);
+                
+                // Map frequency data to our bars
+                const barCount = bars.length;
+                const samplesPerBar = Math.floor(dataArray.length / barCount);
+                
+                bars.forEach((bar, index) => {
+                    // Get average frequency for this bar's range
+                    let sum = 0;
+                    const offset = index * samplesPerBar;
+                    
+                    for (let i = 0; i < samplesPerBar; i++) {
+                        sum += dataArray[offset + i];
+                    }
+                    
+                    const average = sum / samplesPerBar;
+                    // Scale to percentage (20% minimum height for visual appeal)
+                    const height = Math.max(20, (average / 255) * 100);
+                    
+                    // Apply with smooth transition
                     bar.style.height = `${height}%`;
-                }, delay * 1000);
-            });
+                    
+                    // Add color intensity based on height
+                    const intensity = average / 255;
+                    bar.style.opacity = 0.5 + (intensity * 0.5);
+                });
+            } else {
+                // Fallback animation when no audio data
+                bars.forEach((bar, index) => {
+                    const height = 20 + Math.sin(Date.now() / 300 + index * 0.5) * 20;
+                    bar.style.height = `${height}%`;
+                    bar.style.opacity = '0.8';
+                });
+            }
             
             if (isPlaying) {
-                animationId = requestAnimationFrame(() => {
-                    setTimeout(animateWaveform, 300);
-                });
+                animationId = requestAnimationFrame(animateWaveform);
             }
         }
         
@@ -353,6 +415,11 @@
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
+                // Disconnect source if exists
+                if (source) {
+                    source.disconnect();
+                    source = null;
+                }
             }
             
             // Create and play new audio
@@ -362,10 +429,19 @@
             currentAudio = new Audio(commentary.audio);
             currentAudio.volume = volumeSlider.value / 100;
             
+            // Only setup analyser once per audio element
+            let analyserSetup = false;
+            
             // Play with better error handling
             currentAudio.play()
                 .then(() => {
                     console.log('✅ Playing successfully:', commentary.text);
+                    
+                    // Setup audio analyser after play starts
+                    if (!analyserSetup && !currentAudio.analysed) {
+                        analyserSetup = setupAudioAnalyser(currentAudio);
+                        currentAudio.analysed = true;
+                    }
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error.message);
@@ -403,6 +479,11 @@
         playButton.addEventListener('click', () => {
             isPlaying = !isPlaying;
             
+            // Initialize audio context on user interaction (required by browsers)
+            if (!audioContext && isPlaying) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
             if (isPlaying) {
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'block';
@@ -435,6 +516,7 @@
                 
                 bars.forEach(bar => {
                     bar.style.height = '20%';
+                    bar.style.opacity = '0.8';
                 });
             }
         });
