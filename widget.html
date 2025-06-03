@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Football Commentary Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0e1a;
+            display: flex;
+            align-items: flex-end;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .commentary-widget {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(15, 20, 35, 0.98), rgba(15, 20, 35, 0.95));
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 20px;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .match-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .live-badge {
+            background: #ff3b3b;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .match-teams {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e0e6ed;
+        }
+
+        .match-time {
+            font-size: 13px;
+            color: #8b92a8;
+            margin-left: 8px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .play-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-button svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+            margin-left: 2px;
+        }
+
+        .play-button.playing svg {
+            margin-left: 0;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .waveform-container {
+            height: 60px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .waveform-container.active {
+            opacity: 1;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            gap: 2px;
+        }
+
+        .wave-bar {
+            width: 3px;
+            background: linear-gradient(to top, #00d4ff, #0099ff);
+            border-radius: 2px;
+            transition: height 0.15s ease;
+            opacity: 0.8;
+        }
+
+        .commentary-text {
+            position: absolute;
+            bottom: 100%;
+            left: 20px;
+            right: 20px;
+            background: rgba(15, 20, 35, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #e0e6ed;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            max-width: 600px;
+        }
+
+        .commentary-text.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .commentary-text .time {
+            color: #00d4ff;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .minimized {
+            padding: 12px 20px;
+        }
+
+        .minimized .waveform-container,
+        .minimized .commentary-text {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="commentary-widget" id="widget">
+        <div class="commentary-text" id="commentaryText">
+            <span class="time">82'</span>
+            <span id="commentaryContent">What a save! Martinez dives to his left and keeps out a powerful header from Kane!</span>
+        </div>
+        
+        <div class="widget-header">
+            <div class="match-info">
+                <div class="live-badge">LIVE</div>
+                <div class="match-teams">
+                    Manchester United vs Arsenal
+                    <span class="match-time">82' - 2nd Half</span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="play-button" id="playButton">
+                    <svg viewBox="0 0 24 24" id="playIcon">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg viewBox="0 0 24 24" id="pauseIcon" style="display: none;">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                    </svg>
+                </button>
+                
+                <div class="volume-control">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                    </svg>
+                    <input type="range" class="volume-slider" min="0" max="100" value="70" id="volumeSlider">
+                </div>
+            </div>
+        </div>
+        
+        <div class="waveform-container" id="waveformContainer">
+            <div class="waveform" id="waveform"></div>
+        </div>
+    </div>
+
+    <script>
+        const playButton = document.getElementById('playButton');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const waveformContainer = document.getElementById('waveformContainer');
+        const waveform = document.getElementById('waveform');
+        const commentaryText = document.getElementById('commentaryText');
+        const commentaryContent = document.getElementById('commentaryContent');
+        const widget = document.getElementById('widget');
+        const volumeSlider = document.getElementById('volumeSlider');
+        
+        let isPlaying = false;
+        let animationId = null;
+        let currentCommentaryIndex = 0;
+        let currentAudio = null;
+        
+        const commentaries = [
+            { 
+                time: "82'", 
+                text: "What a save! Martinez dives to his left and keeps out a powerful header from Kane!",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_82.mp3"
+            },
+            { 
+                time: "83'", 
+                text: "Corner kick for Arsenal. Saka steps up to take it...",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_83.mp3"
+            },
+            { 
+                time: "84'", 
+                text: "GOOOAAL! Saliba rises highest and powers the header into the net! Arsenal lead 2-1!",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_84.mp3"
+            },
+            { 
+                time: "85'", 
+                text: "Manchester United immediately on the attack. Bruno Fernandes with a through ball...",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_85.mp3"
+            },
+            { 
+                time: "86'", 
+                text: "Rashford breaks free but the flag is up! Offside by the narrowest of margins.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_86.mp3"
+            },
+            { 
+                time: "87'", 
+                text: "Yellow card for Rice after a late challenge on Casemiro.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_87.mp3"
+            },
+            { 
+                time: "88'", 
+                text: "Free kick in a dangerous position for United. This could be their chance...",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_88.mp3"
+            }
+        ];
+        
+        // Create waveform bars
+        const barCount = 80;
+        for (let i = 0; i < barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'wave-bar';
+            bar.style.height = '20%';
+            waveform.appendChild(bar);
+        }
+        
+        const bars = document.querySelectorAll('.wave-bar');
+        
+        // Simple waveform animation
+        function animateWaveform() {
+            bars.forEach((bar, index) => {
+                const delay = index * 0.02;
+                setTimeout(() => {
+                    const height = Math.random() * 60 + 20;
+                    bar.style.height = `${height}%`;
+                }, delay * 1000);
+            });
+            
+            if (isPlaying) {
+                animationId = requestAnimationFrame(() => {
+                    setTimeout(animateWaveform, 300);
+                });
+            }
+        }
+        
+        function updateCommentary() {
+            const commentary = commentaries[currentCommentaryIndex];
+            commentaryText.querySelector('.time').textContent = commentary.time;
+            commentaryContent.textContent = commentary.text;
+            
+            commentaryText.classList.remove('show');
+            setTimeout(() => {
+                commentaryText.classList.add('show');
+            }, 100);
+        }
+        
+        function playNextCommentary() {
+            if (!isPlaying) return;
+            
+            updateCommentary();
+            
+            // Stop current audio if playing
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            
+            // Create and play new audio
+            const commentary = commentaries[currentCommentaryIndex];
+            console.log('🎵 Attempting to play:', commentary.audio);
+            
+            currentAudio = new Audio(commentary.audio);
+            currentAudio.volume = volumeSlider.value / 100;
+            
+            // Play with better error handling
+            currentAudio.play()
+                .then(() => {
+                    console.log('✅ Playing successfully:', commentary.text);
+                })
+                .catch(error => {
+                    console.error('❌ Playback failed:', error.message);
+                    console.error('🔍 Audio source:', currentAudio.src);
+                    console.error('💡 Tip: If using file://, serve via HTTP instead!');
+                    
+                    // Show user-friendly error
+                    commentaryContent.textContent = "⚠️ Audio playback failed - please serve this file via HTTP, not file://";
+                    
+                    // Continue to next after delay
+                    setTimeout(() => {
+                        currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                        playNextCommentary();
+                    }, 5000);
+                });
+            
+            // When audio ends, play next
+            currentAudio.onended = () => {
+                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                playNextCommentary();
+            };
+        }
+        
+        // Add this helpful message when page loads
+        console.log('🎙️ Football Commentary Widget Loaded!');
+        console.log('📍 Current URL protocol:', window.location.protocol);
+        if (window.location.protocol === 'file:') {
+            console.warn('⚠️ WARNING: You are running from file:// which will block audio!');
+            console.warn('💡 Please serve this file via HTTP using:');
+            console.warn('   - VS Code Live Server extension');
+            console.warn('   - Python: python -m http.server 8000');
+            console.warn('   - Or upload to GitHub Pages');
+        }
+        
+        playButton.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                playButton.classList.add('playing');
+                waveformContainer.classList.add('active');
+                widget.classList.remove('minimized');
+                
+                animateWaveform();
+                playNextCommentary();
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                playButton.classList.remove('playing');
+                
+                if (currentAudio) {
+                    currentAudio.pause();
+                }
+                
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                
+                setTimeout(() => {
+                    if (!isPlaying) {
+                        waveformContainer.classList.remove('active');
+                        commentaryText.classList.remove('show');
+                        widget.classList.add('minimized');
+                    }
+                }, 300);
+                
+                bars.forEach(bar => {
+                    bar.style.height = '20%';
+                });
+            }
+        });
+        
+        // Volume control
+        volumeSlider.addEventListener('input', (e) => {
+            if (currentAudio) {
+                currentAudio.volume = e.target.value / 100;
+            }
+        });
+    </script>
+</body>
+</html>
