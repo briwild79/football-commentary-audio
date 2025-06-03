@@ -272,7 +272,6 @@
         let audioContext = null;
         let analyser = null;
         let dataArray = null;
-        let gainNode = null; // Add gain node for smooth connections
         
         const commentaries = [
             { 
@@ -328,18 +327,10 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // Create nodes
+                // Create analyser only
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 128;
                 analyser.smoothingTimeConstant = 0.3;
-                
-                // Create gain node for smooth transitions
-                gainNode = audioContext.createGain();
-                gainNode.gain.value = 1;
-                
-                // Connect nodes
-                gainNode.connect(analyser);
-                analyser.connect(audioContext.destination);
                 
                 // Setup data array
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -353,12 +344,13 @@
             try {
                 if (!audio._connected && audioContext) {
                     const source = audioContext.createMediaElementSource(audio);
-                    source.connect(gainNode);
+                    source.connect(analyser);
+                    analyser.connect(audioContext.destination);
                     audio._connected = true;
                     console.log('✅ Audio connected to analyser');
                 }
             } catch (error) {
-                console.log('⚠️ Audio connection skipped:', error.message);
+                console.log('⚠️ Audio already connected');
             }
         }
         
@@ -473,16 +465,8 @@
             
             updateCommentary();
             
-            // Fade out current audio if playing
-            if (currentAudio && gainNode) {
-                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
-                setTimeout(() => {
-                    if (currentAudio) {
-                        currentAudio.pause();
-                        currentAudio.currentTime = 0;
-                    }
-                }, 100);
-            } else if (currentAudio) {
+            // Stop current audio if playing
+            if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
             }
@@ -499,16 +483,10 @@
                 .then(() => {
                     console.log('✅ Audio started');
                     
-                    // Fade in after brief delay to avoid click
-                    if (gainNode) {
-                        gainNode.gain.value = 0;
-                        gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.2);
-                    }
-                    
                     // Connect to analyser after audio starts
                     setTimeout(() => {
                         connectAudioToAnalyser(currentAudio);
-                    }, 50);
+                    }, 100);
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error.message);
@@ -521,6 +499,7 @@
             
             // When audio ends, play next
             currentAudio.onended = () => {
+                console.log('🔄 Moving to next commentary');
                 currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
                 playNextCommentary();
             };
