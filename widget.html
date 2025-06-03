@@ -479,13 +479,14 @@
             currentAudio = new Audio(commentary.audio);
             currentAudio.volume = volumeSlider.value / 100;
             
-            // Setup analyser after setting volume
-            setupAudioAnalyser(currentAudio);
-            
-            // Play audio
+            // Play audio first
             currentAudio.play()
                 .then(() => {
                     console.log('✅ Playing:', commentary.text);
+                    // Setup analyser after playback starts
+                    if (audioContext) {
+                        setupAudioAnalyser(currentAudio);
+                    }
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error);
