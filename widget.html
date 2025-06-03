@@ -476,17 +476,32 @@
             console.log('🎵 Playing:', commentary.text);
             
             currentAudio = new Audio(commentary.audio);
-            currentAudio.volume = volumeSlider.value / 100;
+            
+            // Start with zero volume to prevent pop
+            currentAudio.volume = 0;
             
             // Play audio
             currentAudio.play()
                 .then(() => {
                     console.log('✅ Audio started');
                     
-                    // Connect to analyser after audio starts
+                    // Fade in volume smoothly
+                    const targetVolume = volumeSlider.value / 100;
+                    let currentVol = 0;
+                    const fadeIn = setInterval(() => {
+                        currentVol += 0.05;
+                        if (currentVol >= targetVolume) {
+                            currentAudio.volume = targetVolume;
+                            clearInterval(fadeIn);
+                        } else {
+                            currentAudio.volume = currentVol;
+                        }
+                    }, 10); // Smooth 200ms fade in
+                    
+                    // Connect to analyser after fade starts
                     setTimeout(() => {
                         connectAudioToAnalyser(currentAudio);
-                    }, 100);
+                    }, 150);
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error.message);
