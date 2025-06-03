@@ -159,15 +159,17 @@
             display: flex;
             align-items: center;
             height: 100%;
-            gap: 2px;
+            gap: 3px;
+            justify-content: center;
         }
 
         .wave-bar {
-            width: 3px;
+            width: 6px;
             background: linear-gradient(to top, #00d4ff, #0099ff);
-            border-radius: 2px;
-            transition: height 0.15s ease;
-            opacity: 0.8;
+            border-radius: 3px;
+            transition: height 0.08s ease-out;
+            opacity: 0.9;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
 
         .commentary-text {
@@ -312,7 +314,7 @@
         ];
         
         // Create waveform bars
-        const barCount = 80;
+        const barCount = 40; // Fewer bars = thicker appearance
         for (let i = 0; i < barCount; i++) {
             const bar = document.createElement('div');
             bar.className = 'wave-bar';
@@ -357,49 +359,73 @@
                 // Get frequency data
                 analyser.getByteFrequencyData(dataArray);
                 
+                // Calculate overall audio energy
+                let totalEnergy = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    totalEnergy += dataArray[i];
+                }
+                const averageEnergy = totalEnergy / dataArray.length;
+                const energyMultiplier = 1 + (averageEnergy / 128); // Boost based on loudness
+                
                 // Map frequency data to our bars
                 const barCount = bars.length;
                 const centerIndex = barCount / 2;
                 
                 bars.forEach((bar, index) => {
-                    // Calculate distance from center (0 to 1)
+                    // Calculate distance from center
                     const distanceFromCenter = Math.abs(index - centerIndex) / centerIndex;
                     
-                    // Create a bell curve multiplier (higher in center)
-                    const centerMultiplier = 1 - (distanceFromCenter * 0.7);
+                    // Create a sharper peak in center
+                    const centerMultiplier = Math.pow(1 - (distanceFromCenter * 0.5), 1.5);
                     
-                    // Sample audio data from the middle frequencies (voice range)
-                    const dataIndex = Math.floor((dataArray.length * 0.3) + (index * 0.5));
+                    // Sample from voice frequency range (100-1000Hz typically)
+                    const dataIndex = Math.floor(10 + (index * 2));
                     const audioValue = dataArray[Math.min(dataIndex, dataArray.length - 1)];
                     
-                    // Calculate height with center bias
-                    const rawHeight = (audioValue / 255) * 100;
-                    const height = Math.max(15, rawHeight * centerMultiplier);
+                    // Add adjacent frequency data for more movement
+                    const audioValue2 = dataArray[Math.min(dataIndex + 5, dataArray.length - 1)];
+                    const combinedValue = (audioValue + audioValue2) / 2;
                     
-                    // Add some random variation for organic feel
-                    const variation = Math.random() * 5;
-                    const finalHeight = height + variation;
+                    // Calculate height with lots of energy
+                    const rawHeight = (combinedValue / 255) * 100;
+                    const baseHeight = 25 * centerMultiplier; // Higher base
+                    const dynamicHeight = rawHeight * centerMultiplier * energyMultiplier;
                     
-                    // Apply with smooth transition
+                    // Add reactive pulsing
+                    const pulse = Math.sin(Date.now() / 100 + index * 0.2) * 5 * energyMultiplier;
+                    const bounce = (Math.random() - 0.5) * 10 * (combinedValue / 255);
+                    
+                    const finalHeight = Math.max(20, Math.min(95, baseHeight + dynamicHeight + pulse + bounce));
+                    
+                    // Apply with very fast transition for responsiveness
                     bar.style.height = `${finalHeight}%`;
                     
-                    // Opacity also higher in center
-                    const opacity = 0.4 + (centerMultiplier * 0.4) + (audioValue / 255) * 0.2;
+                    // Dynamic glow effect
+                    const glowIntensity = combinedValue / 255;
+                    bar.style.boxShadow = `0 0 ${15 * glowIntensity}px rgba(0, 212, 255, ${0.5 + glowIntensity * 0.5})`;
+                    
+                    // Pulsing opacity
+                    const opacity = 0.7 + (centerMultiplier * 0.3) + (glowIntensity * 0.3);
                     bar.style.opacity = opacity;
                 });
             } else {
-                // Fallback animation with center peak
+                // Energetic idle animation
                 bars.forEach((bar, index) => {
                     const centerIndex = bars.length / 2;
                     const distanceFromCenter = Math.abs(index - centerIndex) / centerIndex;
-                    const centerMultiplier = 1 - (distanceFromCenter * 0.6);
+                    const centerMultiplier = Math.pow(1 - (distanceFromCenter * 0.4), 1.5);
                     
-                    const baseHeight = 15 + (centerMultiplier * 25);
-                    const wave = Math.sin(Date.now() / 300 + index * 0.1) * 10 * centerMultiplier;
-                    const height = baseHeight + wave;
+                    const time = Date.now() / 200;
+                    const wave1 = Math.sin(time + index * 0.15) * 20;
+                    const wave2 = Math.cos(time * 1.3 + index * 0.1) * 15;
+                    const bounce = Math.random() * 10 * centerMultiplier;
+                    
+                    const baseHeight = 30 * centerMultiplier;
+                    const height = Math.max(25, baseHeight + wave1 + wave2 + bounce);
                     
                     bar.style.height = `${height}%`;
-                    bar.style.opacity = 0.5 + (centerMultiplier * 0.3);
+                    bar.style.opacity = 0.6 + (centerMultiplier * 0.4);
+                    bar.style.boxShadow = `0 0 ${8 * centerMultiplier}px rgba(0, 212, 255, 0.6)`;
                 });
             }
             
