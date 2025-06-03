@@ -167,9 +167,8 @@
             width: 6px;
             background: linear-gradient(to top, #00d4ff, #0099ff);
             border-radius: 3px;
-            transition: height 0.08s ease-out;
+            transition: height 0.05s ease-out;
             opacity: 0.9;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
         }
 
         .commentary-text {
@@ -328,112 +327,133 @@
         // Setup audio analyser for real visualization
         function setupAudioAnalyser(audio) {
             try {
-                if (!audioContext) {
+                // Create new context if needed
+                if (!audioContext || audioContext.state === 'closed') {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
                 
-                // Only create source once per audio element
-                if (!audioConnected[audio.src]) {
-                    // Create analyser node
-                    analyser = audioContext.createAnalyser();
-                    analyser.fftSize = 256;
-                    analyser.smoothingTimeConstant = 0.7;
-                    
-                    // Create source from audio element
-                    source = audioContext.createMediaElementSource(audio);
-                    source.connect(analyser);
-                    analyser.connect(audioContext.destination);
-                    
-                    // Mark this audio as connected
-                    audioConnected[audio.src] = true;
-                    
-                    // Setup data array for frequency data
-                    const bufferLength = analyser.frequencyBinCount;
-                    dataArray = new Uint8Array(bufferLength);
-                    
-                    console.log('✅ Audio analyser setup complete');
+                // Resume context if suspended
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
                 }
+                
+                // Disconnect previous source if exists
+                if (source) {
+                    try {
+                        source.disconnect();
+                    } catch (e) {}
+                }
+                
+                // Create fresh analyser
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 128; // Smaller for faster response
+                analyser.smoothingTimeConstant = 0.3; // Less smoothing = more reactive
+                
+                // Create source from audio element
+                source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                
+                // Setup data array
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                console.log('✅ Audio analyser connected');
                 return true;
             } catch (error) {
-                console.error('❌ Audio analyser setup failed:', error);
+                console.error('❌ Audio analyser error:', error);
+                // Don't break audio playback
                 return false;
             }
         }
         
         // Animate waveform with real audio data
         function animateWaveform() {
-            if (analyser && dataArray && isPlaying) {
+            if (analyser && dataArray && isPlaying && currentAudio && !currentAudio.paused) {
                 // Get frequency data
                 analyser.getByteFrequencyData(dataArray);
                 
-                // Calculate overall audio energy
-                let totalEnergy = 0;
+                // Calculate overall volume
+                let sum = 0;
                 for (let i = 0; i < dataArray.length; i++) {
-                    totalEnergy += dataArray[i];
+                    sum += dataArray[i];
                 }
-                const averageEnergy = totalEnergy / dataArray.length;
-                const energyMultiplier = 1 + (averageEnergy / 128); // Boost based on loudness
+                const averageVolume = sum / dataArray.length;
+                const volumeBoost = 1 + (averageVolume / 50); // More aggressive boost
                 
-                // Map frequency data to our bars
                 const barCount = bars.length;
-                const centerIndex = barCount / 2;
+                const halfBars = Math.floor(barCount / 2);
                 
-                bars.forEach((bar, index) => {
-                    // Calculate distance from center
-                    const distanceFromCenter = Math.abs(index - centerIndex) / centerIndex;
+                // Process bars from center outward for perfect symmetry
+                for (let i = 0; i < halfBars; i++) {
+                    // Get mirrored indices
+                    const leftIndex = halfBars - 1 - i;
+                    const rightIndex = halfBars + i;
                     
-                    // Create a sharper peak in center
-                    const centerMultiplier = Math.pow(1 - (distanceFromCenter * 0.5), 1.5);
+                    // Distance from center (0 at center, 1 at edges)
+                    const distanceRatio = i / halfBars;
                     
-                    // Sample from voice frequency range (100-1000Hz typically)
-                    const dataIndex = Math.floor(10 + (index * 2));
-                    const audioValue = dataArray[Math.min(dataIndex, dataArray.length - 1)];
+                    // Sharp center peak
+                    const centerMultiplier = Math.pow(1 - distanceRatio, 1.2);
                     
-                    // Add adjacent frequency data for more movement
-                    const audioValue2 = dataArray[Math.min(dataIndex + 5, dataArray.length - 1)];
-                    const combinedValue = (audioValue + audioValue2) / 2;
+                    // Sample audio data (focus on voice frequencies)
+                    const dataIndex = Math.min(5 + i * 2, dataArray.length - 1);
+                    const audioValue = dataArray[dataIndex] || 0;
                     
-                    // Calculate height with lots of energy
-                    const rawHeight = (combinedValue / 255) * 100;
-                    const baseHeight = 25 * centerMultiplier; // Higher base
-                    const dynamicHeight = rawHeight * centerMultiplier * energyMultiplier;
+                    // Calculate dynamic height
+                    const baseHeight = 35 * centerMultiplier;
+                    const audioHeight = (audioValue / 255) * 60 * centerMultiplier * volumeBoost;
                     
-                    // Add reactive pulsing
-                    const pulse = Math.sin(Date.now() / 100 + index * 0.2) * 5 * energyMultiplier;
-                    const bounce = (Math.random() - 0.5) * 10 * (combinedValue / 255);
+                    // Add energy waves
+                    const time = Date.now() / 50; // Faster time = more movement
+                    const wave = Math.sin(time + i * 0.3) * 8 * volumeBoost;
+                    const pulse = Math.cos(time * 1.5 - i * 0.2) * 6 * centerMultiplier;
                     
-                    const finalHeight = Math.max(20, Math.min(95, baseHeight + dynamicHeight + pulse + bounce));
+                    // Random energy spikes
+                    const spike = Math.random() > 0.85 ? Math.random() * 20 * volumeBoost : 0;
                     
-                    // Apply with very fast transition for responsiveness
-                    bar.style.height = `${finalHeight}%`;
+                    const totalHeight = Math.min(90, Math.max(25, 
+                        baseHeight + audioHeight + wave + pulse + spike
+                    ));
                     
-                    // Dynamic glow effect
-                    const glowIntensity = combinedValue / 255;
-                    bar.style.boxShadow = `0 0 ${15 * glowIntensity}px rgba(0, 212, 255, ${0.5 + glowIntensity * 0.5})`;
-                    
-                    // Pulsing opacity
-                    const opacity = 0.7 + (centerMultiplier * 0.3) + (glowIntensity * 0.3);
-                    bar.style.opacity = opacity;
-                });
+                    // Apply to both mirrored bars
+                    if (bars[leftIndex]) {
+                        bars[leftIndex].style.height = `${totalHeight}%`;
+                        bars[leftIndex].style.opacity = 0.7 + centerMultiplier * 0.3;
+                    }
+                    if (bars[rightIndex]) {
+                        bars[rightIndex].style.height = `${totalHeight}%`;
+                        bars[rightIndex].style.opacity = 0.7 + centerMultiplier * 0.3;
+                    }
+                }
             } else {
-                // Energetic idle animation
-                bars.forEach((bar, index) => {
-                    const centerIndex = bars.length / 2;
-                    const distanceFromCenter = Math.abs(index - centerIndex) / centerIndex;
-                    const centerMultiplier = Math.pow(1 - (distanceFromCenter * 0.4), 1.5);
+                // Energetic idle animation - also perfectly symmetrical
+                const barCount = bars.length;
+                const halfBars = Math.floor(barCount / 2);
+                const time = Date.now() / 80; // Fast idle animation
+                
+                for (let i = 0; i < halfBars; i++) {
+                    const leftIndex = halfBars - 1 - i;
+                    const rightIndex = halfBars + i;
                     
-                    const time = Date.now() / 200;
-                    const wave1 = Math.sin(time + index * 0.15) * 20;
-                    const wave2 = Math.cos(time * 1.3 + index * 0.1) * 15;
-                    const bounce = Math.random() * 10 * centerMultiplier;
+                    const distanceRatio = i / halfBars;
+                    const centerMultiplier = Math.pow(1 - distanceRatio, 1.2);
                     
-                    const baseHeight = 30 * centerMultiplier;
-                    const height = Math.max(25, baseHeight + wave1 + wave2 + bounce);
+                    // Multiple wave patterns
+                    const wave1 = Math.sin(time + i * 0.2) * 15 * centerMultiplier;
+                    const wave2 = Math.cos(time * 1.3 - i * 0.15) * 10 * centerMultiplier;
+                    const bounce = (Math.random() - 0.5) * 8;
                     
-                    bar.style.height = `${height}%`;
-                    bar.style.opacity = 0.6 + (centerMultiplier * 0.4);
-                    bar.style.boxShadow = `0 0 ${8 * centerMultiplier}px rgba(0, 212, 255, 0.6)`;
-                });
+                    const height = Math.max(20, 35 * centerMultiplier + wave1 + wave2 + bounce);
+                    
+                    if (bars[leftIndex]) {
+                        bars[leftIndex].style.height = `${height}%`;
+                        bars[leftIndex].style.opacity = 0.7 + centerMultiplier * 0.3;
+                    }
+                    if (bars[rightIndex]) {
+                        bars[rightIndex].style.height = `${height}%`;
+                        bars[rightIndex].style.opacity = 0.7 + centerMultiplier * 0.3;
+                    }
+                }
             }
             
             if (isPlaying) {
@@ -461,39 +481,26 @@
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
-                // Disconnect source if exists
-                if (source) {
-                    source.disconnect();
-                    source = null;
-                }
             }
             
             // Create and play new audio
             const commentary = commentaries[currentCommentaryIndex];
-            console.log('🎵 Attempting to play:', commentary.audio);
+            console.log('🎵 Playing:', commentary.text);
             
             currentAudio = new Audio(commentary.audio);
             currentAudio.volume = volumeSlider.value / 100;
             
-            // Only setup analyser once per audio element
-            let analyserSetup = false;
-            
-            // Play with better error handling
+            // Play audio first
             currentAudio.play()
                 .then(() => {
-                    console.log('✅ Playing successfully:', commentary.text);
-                    
-                    // Setup audio analyser after play starts
-                    setupAudioAnalyser(currentAudio);
+                    console.log('✅ Audio started');
+                    // Setup analyser AFTER audio starts playing
+                    setTimeout(() => {
+                        setupAudioAnalyser(currentAudio);
+                    }, 100);
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error.message);
-                    console.error('🔍 Audio source:', currentAudio.src);
-                    console.error('💡 Tip: If using file://, serve via HTTP instead!');
-                    
-                    // Show user-friendly error
-                    commentaryContent.textContent = "⚠️ Audio playback failed - please serve this file via HTTP, not file://";
-                    
                     // Continue to next after delay
                     setTimeout(() => {
                         currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
