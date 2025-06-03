@@ -490,14 +490,12 @@
             currentAudio = new Audio(commentary.audio);
             currentAudio.volume = volumeSlider.value / 100;
             
-            // Play audio first
+            // Play audio first - DON'T connect analyser immediately
             currentAudio.play()
                 .then(() => {
                     console.log('✅ Audio started');
-                    // Setup analyser AFTER audio starts playing
-                    setTimeout(() => {
-                        setupAudioAnalyser(currentAudio);
-                    }, 100);
+                    // Don't setup analyser - let audio play clean
+                    // The waveform will use fallback animation
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error.message);
