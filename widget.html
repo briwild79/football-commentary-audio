@@ -359,34 +359,47 @@
                 
                 // Map frequency data to our bars
                 const barCount = bars.length;
-                const samplesPerBar = Math.floor(dataArray.length / barCount);
+                const centerIndex = barCount / 2;
                 
                 bars.forEach((bar, index) => {
-                    // Get average frequency for this bar's range
-                    let sum = 0;
-                    const offset = index * samplesPerBar;
+                    // Calculate distance from center (0 to 1)
+                    const distanceFromCenter = Math.abs(index - centerIndex) / centerIndex;
                     
-                    for (let i = 0; i < samplesPerBar; i++) {
-                        sum += dataArray[offset + i];
-                    }
+                    // Create a bell curve multiplier (higher in center)
+                    const centerMultiplier = 1 - (distanceFromCenter * 0.7);
                     
-                    const average = sum / samplesPerBar;
-                    // Scale to percentage (20% minimum height for visual appeal)
-                    const height = Math.max(20, (average / 255) * 100);
+                    // Sample audio data from the middle frequencies (voice range)
+                    const dataIndex = Math.floor((dataArray.length * 0.3) + (index * 0.5));
+                    const audioValue = dataArray[Math.min(dataIndex, dataArray.length - 1)];
+                    
+                    // Calculate height with center bias
+                    const rawHeight = (audioValue / 255) * 100;
+                    const height = Math.max(15, rawHeight * centerMultiplier);
+                    
+                    // Add some random variation for organic feel
+                    const variation = Math.random() * 5;
+                    const finalHeight = height + variation;
                     
                     // Apply with smooth transition
-                    bar.style.height = `${height}%`;
+                    bar.style.height = `${finalHeight}%`;
                     
-                    // Add color intensity based on height
-                    const intensity = average / 255;
-                    bar.style.opacity = 0.5 + (intensity * 0.5);
+                    // Opacity also higher in center
+                    const opacity = 0.4 + (centerMultiplier * 0.4) + (audioValue / 255) * 0.2;
+                    bar.style.opacity = opacity;
                 });
             } else {
-                // Fallback animation when no audio data
+                // Fallback animation with center peak
                 bars.forEach((bar, index) => {
-                    const height = 20 + Math.sin(Date.now() / 300 + index * 0.5) * 20;
+                    const centerIndex = bars.length / 2;
+                    const distanceFromCenter = Math.abs(index - centerIndex) / centerIndex;
+                    const centerMultiplier = 1 - (distanceFromCenter * 0.6);
+                    
+                    const baseHeight = 15 + (centerMultiplier * 25);
+                    const wave = Math.sin(Date.now() / 300 + index * 0.1) * 10 * centerMultiplier;
+                    const height = baseHeight + wave;
+                    
                     bar.style.height = `${height}%`;
-                    bar.style.opacity = '0.8';
+                    bar.style.opacity = 0.5 + (centerMultiplier * 0.3);
                 });
             }
             
