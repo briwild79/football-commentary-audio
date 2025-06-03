@@ -272,6 +272,8 @@
         let audioContext = null;
         let analyser = null;
         let dataArray = null;
+        let source = null;
+        let currentSource = null;
         
         const commentaries = [
             { 
@@ -322,35 +324,36 @@
         
         const bars = document.querySelectorAll('.wave-bar');
         
-        // Setup audio analyser with smooth connection
-        function setupAudioContext() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // Create analyser only
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 128;
-                analyser.smoothingTimeConstant = 0.3;
-                
-                // Setup data array
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
-                
-                console.log('✅ Audio context initialized');
-            }
-        }
-        
-        // Connect audio element to analyser
-        function connectAudioToAnalyser(audio) {
+        // Setup audio analyser for real visualization
+        function setupAudioAnalyser(audio) {
             try {
-                if (!audio._connected && audioContext) {
-                    const source = audioContext.createMediaElementSource(audio);
-                    source.connect(analyser);
-                    analyser.connect(audioContext.destination);
-                    audio._connected = true;
-                    console.log('✅ Audio connected to analyser');
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
+                
+                // Only create analyser once
+                if (!analyser) {
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 128;
+                    analyser.smoothingTimeConstant = 0.3;
+                    analyser.connect(audioContext.destination);
+                    
+                    const bufferLength = analyser.frequencyBinCount;
+                    dataArray = new Uint8Array(bufferLength);
+                }
+                
+                // Only create source if this audio element hasn't been connected
+                if (!audio.audioSource) {
+                    currentSource = audioContext.createMediaElementSource(audio);
+                    currentSource.connect(analyser);
+                    audio.audioSource = currentSource;
+                    console.log('✅ Audio analyser setup complete');
+                }
+                
+                return true;
             } catch (error) {
-                console.log('⚠️ Audio already connected');
+                console.error('Audio analyser setup failed:', error);
+                return false;
             }
         }
         
@@ -473,38 +476,19 @@
             
             // Create and play new audio
             const commentary = commentaries[currentCommentaryIndex];
-            console.log('🎵 Playing:', commentary.text);
-            
             currentAudio = new Audio(commentary.audio);
+            currentAudio.volume = volumeSlider.value / 100;
             
-            // Start with zero volume to prevent pop
-            currentAudio.volume = 0;
+            // Setup analyser after setting volume
+            setupAudioAnalyser(currentAudio);
             
             // Play audio
             currentAudio.play()
                 .then(() => {
-                    console.log('✅ Audio started');
-                    
-                    // Fade in volume smoothly
-                    const targetVolume = volumeSlider.value / 100;
-                    let currentVol = 0;
-                    const fadeIn = setInterval(() => {
-                        currentVol += 0.05;
-                        if (currentVol >= targetVolume) {
-                            currentAudio.volume = targetVolume;
-                            clearInterval(fadeIn);
-                        } else {
-                            currentAudio.volume = currentVol;
-                        }
-                    }, 10); // Smooth 200ms fade in
-                    
-                    // Connect to analyser after fade starts
-                    setTimeout(() => {
-                        connectAudioToAnalyser(currentAudio);
-                    }, 150);
+                    console.log('✅ Playing:', commentary.text);
                 })
                 .catch(error => {
-                    console.error('❌ Playback failed:', error.message);
+                    console.error('❌ Playback failed:', error);
                     // Continue to next after delay
                     setTimeout(() => {
                         currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
@@ -514,7 +498,6 @@
             
             // When audio ends, play next
             currentAudio.onended = () => {
-                console.log('🔄 Moving to next commentary');
                 currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
                 playNextCommentary();
             };
@@ -534,9 +517,9 @@
         playButton.addEventListener('click', () => {
             isPlaying = !isPlaying;
             
-            // Initialize audio context on first play
+            // Initialize audio context on user interaction (required by browsers)
             if (!audioContext && isPlaying) {
-                setupAudioContext();
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
             
             if (isPlaying) {
