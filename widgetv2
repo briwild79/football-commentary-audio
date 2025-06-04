@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible Live Commentary Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            color: #1a1a1a;
+        }
+
+        /* Mobile demo container */
+        .demo-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 600px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Accessible Commentary Widget */
+        .commentary-widget {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Collapsed State - Clean and Clear */
+        .widget-bar {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            min-height: 72px; /* Accessible height */
+            gap: 12px;
+        }
+
+        /* Play Button - Large and Clear */
+        .play-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #ff6900;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(255, 105, 0, 0.3);
+        }
+
+        .play-button:focus {
+            outline: 2px solid #ff6900;
+            outline-offset: 2px;
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-button svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        /* Live indicator */
+        .live-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #ff3b3b;
+            border-radius: 50%;
+            border: 2px solid white;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .play-button.playing .live-dot {
+            opacity: 1;
+            transform: scale(1);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Main Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        /* Match Info - Always Visible */
+        .match-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .teams {
+            font-weight: 600;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff6900;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .time {
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        /* Commentary Line - Readable */
+        .commentary-line {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .commentary-line.active {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .commentary-time {
+            color: #ff6900;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .commentary-text {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Expand Button */
+        .expand-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .expand-button:hover {
+            background: #e0e0e0;
+        }
+
+        .expand-button:focus {
+            outline: 2px solid #666;
+            outline-offset: 2px;
+        }
+
+        .expand-button svg {
+            width: 20px;
+            height: 20px;
+            fill: #666;
+            transition: transform 0.3s ease;
+        }
+
+        .commentary-widget.expanded .expand-button svg {
+            transform: rotate(180deg);
+        }
+
+        /* Visual Waveform */
+        .waveform {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 20px;
+            padding-bottom: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .waveform.active {
+            opacity: 1;
+        }
+
+        .wave-bar {
+            width: 3px;
+            background: #ff6900;
+            border-radius: 2px;
+            opacity: 0.3;
+            transition: all 0.1s ease;
+        }
+
+        /* Expanded State */
+        .expanded-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .commentary-widget.expanded .expanded-content {
+            max-height: 300px;
+        }
+
+        .expanded-inner {
+            padding: 16px;
+        }
+
+        /* Game List */
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .game-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .game-item:hover {
+            border-color: #ff6900;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .game-item:focus {
+            outline: 2px solid #ff6900;
+            outline-offset: 2px;
+        }
+
+        .game-item.active {
+            border-color: #ff6900;
+            background: #fff5f0;
+        }
+
+        .game-badge {
+            width: 32px;
+            height: 32px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        /* Settings Bar */
+        .settings-bar {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .setting-option {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .setting-option:hover {
+            border-color: #ff6900;
+            color: #ff6900;
+        }
+
+        .setting-option:focus {
+            outline: 2px solid #ff6900;
+            outline-offset: 2px;
+        }
+
+        /* Accessibility Features */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Focus visible for keyboard users */
+        *:focus-visible {
+            outline: 2px solid #ff6900;
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .play-button {
+                border: 2px solid currentColor;
+            }
+            
+            .game-item {
+                border-width: 2px;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Demo content -->
+        <div style="padding: 20px;">
+            <h2 style="margin-bottom: 20px;">Your Bets</h2>
+            <div style="background: #f5f5f5; height: 100px; border-radius: 8px; margin-bottom: 12px;"></div>
+            <div style="background: #f5f5f5; height: 100px; border-radius: 8px; margin-bottom: 12px;"></div>
+        </div>
+
+        <!-- Accessible Commentary Widget -->
+        <div class="commentary-widget" role="region" aria-label="Live match commentary">
+            <div class="widget-bar">
+                <!-- Large, accessible play button -->
+                <button class="play-button" id="playButton" aria-label="Play live commentary" aria-pressed="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" id="playIcon">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" id="pauseIcon" style="display: none;">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                    </svg>
+                    <div class="live-dot" aria-hidden="true"></div>
+                    <span class="sr-only" id="playState">Paused</span>
+                </button>
+
+                <!-- Main content area -->
+                <div class="content-area">
+                    <!-- Always visible match info -->
+                    <div class="match-info" role="status" aria-live="polite">
+                        <span class="teams">Man United vs Arsenal</span>
+                        <span class="score" aria-label="Score: 1 to 2">1-2</span>
+                        <span class="time" aria-label="84th minute">84'</span>
+                    </div>
+
+                    <!-- Commentary line -->
+                    <div class="commentary-line" role="status" aria-live="polite" id="commentaryLine">
+                        <span class="commentary-time">84'</span>
+                        <span class="commentary-text">Press play for live commentary</span>
+                    </div>
+                </div>
+
+                <!-- Visual waveform (decorative) -->
+                <div class="waveform" aria-hidden="true" id="waveform">
+                    <!-- Bars will be generated -->
+                </div>
+
+                <!-- Expand button -->
+                <button class="expand-button" id="expandButton" aria-label="More options" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Expanded content -->
+            <div class="expanded-content" id="expandedContent">
+                <div class="expanded-inner">
+                    <!-- Game selection -->
+                    <div class="game-list" role="list" aria-label="Select a match">
+                        <div class="game-item active" role="listitem" tabindex="0" aria-current="true">
+                            <div class="game-badge">MU</div>
+                            <div class="match-info" style="margin: 0;">
+                                <span class="teams">Man United vs Arsenal</span>
+                                <span class="score">1-2</span>
+                                <span class="time">84'</span>
+                            </div>
+                        </div>
+                        <div class="game-item" role="listitem" tabindex="0">
+                            <div class="game-badge">LI</div>
+                            <div class="match-info" style="margin: 0;">
+                                <span class="teams">Liverpool vs Chelsea</span>
+                                <span class="score">0-0</span>
+                                <span class="time">12'</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="settings-bar" role="group" aria-label="Commentary settings">
+                        <button class="setting-option" aria-label="Language: English">English</button>
+                        <button class="setting-option" aria-label="Voice: Sarah">Voice: Sarah</button>
+                        <button class="setting-option" aria-label="Speed: Normal">Speed: 1x</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const widget = document.querySelector('.commentary-widget');
+        const playButton = document.getElementById('playButton');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playState = document.getElementById('playState');
+        const expandButton = document.getElementById('expandButton');
+        const commentaryLine = document.getElementById('commentaryLine');
+        const waveform = document.getElementById('waveform');
+
+        // State
+        let isPlaying = false;
+        let isExpanded = false;
+        let commentaryInterval = null;
+        let waveformInterval = null;
+        let currentCommentaryIndex = 0;
+
+        // Commentary data
+        const commentaries = [
+            { time: "84'", text: "GOAL! Saliba heads home from the corner!" },
+            { time: "85'", text: "United pushing forward desperately" },
+            { time: "86'", text: "Rashford's shot saved by Ramsdale!" },
+            { time: "87'", text: "Yellow card for Rice - time wasting" },
+            { time: "88'", text: "Free kick in dangerous position" }
+        ];
+
+        // Generate waveform bars
+        for (let i = 0; i < 15; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'wave-bar';
+            bar.style.height = '4px';
+            waveform.appendChild(bar);
+        }
+
+        const bars = waveform.querySelectorAll('.wave-bar');
+
+        // Update commentary
+        function updateCommentary() {
+            const commentary = commentaries[currentCommentaryIndex];
+            commentaryLine.innerHTML = `
+                <span class="commentary-time">${commentary.time}</span>
+                <span class="commentary-text">${commentary.text}</span>
+            `;
+            commentaryLine.classList.add('active');
+            
+            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+        }
+
+        // Animate waveform
+        function animateWaveform() {
+            bars.forEach((bar, index) => {
+                const center = Math.floor(bars.length / 2);
+                const distance = Math.abs(index - center);
+                const maxHeight = 16 - (distance * 2);
+                const height = Math.random() * maxHeight + 4;
+                bar.style.height = `${height}px`;
+                bar.style.opacity = 0.3 + (Math.random() * 0.4);
+            });
+        }
+
+        // Play/pause functionality
+        playButton.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                playButton.classList.add('playing');
+                playButton.setAttribute('aria-pressed', 'true');
+                playState.textContent = 'Playing';
+                waveform.classList.add('active');
+                
+                updateCommentary();
+                commentaryInterval = setInterval(updateCommentary, 5000);
+                waveformInterval = setInterval(animateWaveform, 150);
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                playButton.classList.remove('playing');
+                playButton.setAttribute('aria-pressed', 'false');
+                playState.textContent = 'Paused';
+                waveform.classList.remove('active');
+                commentaryLine.classList.remove('active');
+                
+                if (commentaryInterval) clearInterval(commentaryInterval);
+                if (waveformInterval) clearInterval(waveformInterval);
+                
+                // Reset waveform
+                bars.forEach(bar => {
+                    bar.style.height = '4px';
+                    bar.style.opacity = '0.3';
+                });
+            }
+        });
+
+        // Expand/collapse
+        expandButton.addEventListener('click', () => {
+            isExpanded = !isExpanded;
+            widget.classList.toggle('expanded', isExpanded);
+            expandButton.setAttribute('aria-expanded', isExpanded);
+        });
+
+        // Game selection
+        document.querySelectorAll('.game-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.game-item').forEach(i => {
+                    i.classList.remove('active');
+                    i.removeAttribute('aria-current');
+                });
+                item.classList.add('active');
+                item.setAttribute('aria-current', 'true');
+                
+                // Update main display
+                const teams = item.querySelector('.teams').textContent;
+                const score = item.querySelector('.score').textContent;
+                const time = item.querySelector('.time').textContent;
+                
+                widget.querySelector('.widget-bar .teams').textContent = teams;
+                widget.querySelector('.widget-bar .score').textContent = score;
+                widget.querySelector('.widget-bar .time').textContent = time;
+                
+                // Collapse
+                isExpanded = false;
+                widget.classList.remove('expanded');
+                expandButton.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // Keyboard navigation
+        document.querySelectorAll('.game-item').forEach(item => {
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    item.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
