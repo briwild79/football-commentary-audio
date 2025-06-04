@@ -41,6 +41,37 @@
             background: #ffffff;
             border-top: 1px solid #e0e0e0;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            overflow: visible;
+        }
+
+        /* Match Progress Bar */
+        .progress-bar {
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e0e0e0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ff6900;
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: -2px;
+            width: 6px;
+            height: 6px;
+            background: #ff6900;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px white;
         }
 
         /* Collapsed State - Clean and Clear */
@@ -238,27 +269,7 @@
             opacity: 0.9;
         }
 
-        /* Expand indicator */
-        .expand-indicator {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
-            background: #ff6900;
-            border-radius: 2px;
-            opacity: 0.5;
-            transition: all 0.3s ease;
-        }
-
-        .waveform-button:hover .expand-indicator {
-            opacity: 0.8;
-        }
-
-        .commentary-widget.expanded .expand-indicator {
-            transform: translateX(-50%) scaleY(-1);
-        }
+        /* Remove expand indicator styles */
 
         /* Remove old expand button styles */
         .expand-button {
@@ -401,15 +412,13 @@
 </head>
 <body>
     <div class="demo-container">
-        <!-- Demo content -->
-        <div style="padding: 20px;">
-            <h2 style="margin-bottom: 20px;">Your Bets</h2>
-            <div style="background: #f5f5f5; height: 100px; border-radius: 8px; margin-bottom: 12px;"></div>
-            <div style="background: #f5f5f5; height: 100px; border-radius: 8px; margin-bottom: 12px;"></div>
-        </div>
-
         <!-- Accessible Commentary Widget -->
         <div class="commentary-widget" role="region" aria-label="Live match commentary">
+            <!-- Progress Bar -->
+            <div class="progress-bar" role="progressbar" aria-label="Match progress" aria-valuenow="84" aria-valuemin="0" aria-valuemax="90">
+                <div class="progress-fill" id="progressFill" style="width: 93.3%;"></div>
+            </div>
+            
             <div class="widget-bar">
                 <!-- Large, accessible play button -->
                 <button class="play-button" id="playButton" aria-label="Play live commentary" aria-pressed="false">
@@ -444,7 +453,6 @@
                     <div class="waveform" aria-hidden="true" id="waveform">
                         <!-- Bars will be generated -->
                     </div>
-                    <div class="expand-indicator" aria-hidden="true"></div>
                 </button>
             </div>
 
@@ -492,13 +500,38 @@
         const expandButton = document.getElementById('expandButton');
         const commentaryLine = document.getElementById('commentaryLine');
         const waveform = document.getElementById('waveform');
+        const progressFill = document.getElementById('progressFill');
+        const progressBar = document.querySelector('.progress-bar');
 
         // State
         let isPlaying = false;
         let isExpanded = false;
         let commentaryInterval = null;
         let waveformInterval = null;
+        let progressInterval = null;
         let currentCommentaryIndex = 0;
+        let currentMinute = 84; // Starting minute
+
+        // Update progress bar
+        function updateProgress() {
+            if (currentMinute < 90) {
+                currentMinute += 0.1; // Increment by 0.1 minute
+            } else if (currentMinute < 94) { // Extra time
+                currentMinute += 0.05; // Slower in extra time
+            }
+            
+            const progress = (currentMinute / 94) * 100;
+            progressFill.style.width = `${Math.min(progress, 100)}%`;
+            progressBar.setAttribute('aria-valuenow', Math.floor(currentMinute));
+            
+            // Update time display
+            const timeDisplay = document.querySelector('.time');
+            if (currentMinute >= 90) {
+                timeDisplay.textContent = `90+${Math.floor(currentMinute - 90)}'`;
+            } else {
+                timeDisplay.textContent = `${Math.floor(currentMinute)}'`;
+            }
+        }
 
         // Commentary data
         const commentaries = [
@@ -556,6 +589,7 @@
                 updateCommentary();
                 commentaryInterval = setInterval(updateCommentary, 5000);
                 waveformInterval = setInterval(animateWaveform, 150);
+                progressInterval = setInterval(updateProgress, 1000); // Update every second
             } else {
                 playIcon.style.display = 'block';
                 pauseIcon.style.display = 'none';
@@ -567,6 +601,7 @@
                 
                 if (commentaryInterval) clearInterval(commentaryInterval);
                 if (waveformInterval) clearInterval(waveformInterval);
+                if (progressInterval) clearInterval(progressInterval);
                 
                 // Reset waveform to static state
                 bars.forEach((bar, index) => {
