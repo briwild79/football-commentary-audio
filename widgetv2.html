@@ -185,12 +185,12 @@
             text-overflow: ellipsis;
         }
 
-        /* Expand Button */
-        .expand-button {
+        /* Waveform as Expand Button */
+        .waveform-button {
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: #f5f5f5;
+            background: transparent;
             border: none;
             cursor: pointer;
             display: flex;
@@ -198,54 +198,71 @@
             justify-content: center;
             transition: all 0.2s ease;
             flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
         }
 
-        .expand-button:hover {
-            background: #e0e0e0;
+        .waveform-button:hover .wave-bar {
+            opacity: 0.8;
         }
 
-        .expand-button:focus {
-            outline: 2px solid #666;
+        .waveform-button:focus {
+            outline: 2px solid #ff6900;
             outline-offset: 2px;
         }
 
-        .expand-button svg {
-            width: 20px;
-            height: 20px;
-            fill: #666;
-            transition: transform 0.3s ease;
+        .waveform-button:active {
+            transform: scale(0.95);
         }
 
-        .commentary-widget.expanded .expand-button svg {
-            transform: rotate(180deg);
-        }
-
-        /* Visual Waveform */
+        /* Waveform bars inside button */
         .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: #ff6900;
+            border-radius: 2px;
+            opacity: 0.5;
+            transition: all 0.15s ease;
+            height: 16px;
+        }
+
+        .waveform-button.playing .wave-bar {
+            opacity: 0.9;
+        }
+
+        /* Expand indicator */
+        .expand-indicator {
             position: absolute;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            height: 20px;
-            padding-bottom: 4px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-
-        .waveform.active {
-            opacity: 1;
-        }
-
-        .wave-bar {
-            width: 3px;
+            width: 20px;
+            height: 3px;
             background: #ff6900;
             border-radius: 2px;
-            opacity: 0.3;
-            transition: all 0.1s ease;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .waveform-button:hover .expand-indicator {
+            opacity: 0.8;
+        }
+
+        .commentary-widget.expanded .expand-indicator {
+            transform: translateX(-50%) scaleY(-1);
+        }
+
+        /* Remove old expand button styles */
+        .expand-button {
+            display: none;
         }
 
         /* Expanded State */
@@ -422,16 +439,12 @@
                     </div>
                 </div>
 
-                <!-- Visual waveform (decorative) -->
-                <div class="waveform" aria-hidden="true" id="waveform">
-                    <!-- Bars will be generated -->
-                </div>
-
-                <!-- Expand button -->
-                <button class="expand-button" id="expandButton" aria-label="More options" aria-expanded="false">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M7 10l5 5 5-5z"/>
-                    </svg>
+                <!-- Waveform as expand button -->
+                <button class="waveform-button" id="expandButton" aria-label="More options - Audio visualizer" aria-expanded="false">
+                    <div class="waveform" aria-hidden="true" id="waveform">
+                        <!-- Bars will be generated -->
+                    </div>
+                    <div class="expand-indicator" aria-hidden="true"></div>
                 </button>
             </div>
 
@@ -497,10 +510,9 @@
         ];
 
         // Generate waveform bars
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 5; i++) {
             const bar = document.createElement('div');
             bar.className = 'wave-bar';
-            bar.style.height = '4px';
             waveform.appendChild(bar);
         }
 
@@ -521,12 +533,11 @@
         // Animate waveform
         function animateWaveform() {
             bars.forEach((bar, index) => {
-                const center = Math.floor(bars.length / 2);
-                const distance = Math.abs(index - center);
-                const maxHeight = 16 - (distance * 2);
-                const height = Math.random() * maxHeight + 4;
+                const heights = [16, 28, 40, 28, 16]; // Bigger range to fill circle
+                const baseHeight = heights[index];
+                const variation = Math.random() * 12 - 6;
+                const height = Math.max(12, Math.min(44, baseHeight + variation));
                 bar.style.height = `${height}px`;
-                bar.style.opacity = 0.3 + (Math.random() * 0.4);
             });
         }
 
@@ -540,7 +551,7 @@
                 playButton.classList.add('playing');
                 playButton.setAttribute('aria-pressed', 'true');
                 playState.textContent = 'Playing';
-                waveform.classList.add('active');
+                expandButton.classList.add('playing');
                 
                 updateCommentary();
                 commentaryInterval = setInterval(updateCommentary, 5000);
@@ -551,16 +562,16 @@
                 playButton.classList.remove('playing');
                 playButton.setAttribute('aria-pressed', 'false');
                 playState.textContent = 'Paused';
-                waveform.classList.remove('active');
+                expandButton.classList.remove('playing');
                 commentaryLine.classList.remove('active');
                 
                 if (commentaryInterval) clearInterval(commentaryInterval);
                 if (waveformInterval) clearInterval(waveformInterval);
                 
-                // Reset waveform
-                bars.forEach(bar => {
-                    bar.style.height = '4px';
-                    bar.style.opacity = '0.3';
+                // Reset waveform to static state
+                bars.forEach((bar, index) => {
+                    const heights = [16, 28, 40, 28, 16];
+                    bar.style.height = `${heights[index]}px`;
                 });
             }
         });
