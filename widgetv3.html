@@ -195,7 +195,7 @@
             min-width: fit-content; /* Only take space needed */
         }
 
-        /* Commentary Line - Apple Typography */
+        /* Commentary Line with Ticker - Apple Typography */
         .commentary-line {
             font-size: 14px; /* Refined from 16px to 14px for better hierarchy */
             color: #86868b; /* Apple's secondary text color */
@@ -206,6 +206,7 @@
             transition: all 0.3s ease;
             line-height: 1.38;
             letter-spacing: -0.08px;
+            position: relative;
         }
 
         .commentary-line.active {
@@ -240,6 +241,40 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* Ticker Container */
+        .ticker-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            height: 20px;
+            mask: linear-gradient(to right, transparent 0%, black 10%, black 85%, transparent 100%);
+            -webkit-mask: linear-gradient(to right, transparent 0%, black 10%, black 85%, transparent 100%);
+        }
+
+        /* Ticker Content */
+        .ticker-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: ticker-scroll 20s linear infinite;
+            padding-right: 100px; /* Add space before text repeats */
+        }
+
+        /* Ticker Animation */
+        @keyframes ticker-scroll {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Pause ticker on hover */
+        .commentary-line:hover .ticker-content {
+            animation-play-state: paused;
+        }
+
+        /* Static text fallback for non-ticker content */
         .commentary-text {
             flex: 1;
             white-space: nowrap;
@@ -420,8 +455,6 @@
             outline-offset: 2px;
         }
 
-
-
         /* Accessibility Features */
         .sr-only {
             position: absolute;
@@ -454,6 +487,10 @@
 
         /* Reduced motion support */
         @media (prefers-reduced-motion: reduce) {
+            .ticker-content {
+                animation: none !important;
+            }
+            
             * {
                 animation-duration: 0.01ms !important;
                 transition-duration: 0.01ms !important;
@@ -570,37 +607,37 @@
         const commentaries = [
             { 
                 time: "82'", 
-                text: "What a save! Martinez dives to his left and keeps out a powerful header from Kane!",
+                text: "What a save! Martinez dives to his left and keeps out a powerful header from Kane! The crowd erupts as the goalkeeper shows incredible reflexes to deny what looked like a certain goal.",
                 audio: "https://briwild79.github.io/football-commentary-audio/commentary_82.mp3"
             },
             { 
                 time: "83'", 
-                text: "Corner kick for Arsenal. Saka steps up to take it...",
+                text: "Corner kick for Arsenal. Saka steps up to take it... The players are jostling for position in the box as the winger prepares to deliver the ball.",
                 audio: "https://briwild79.github.io/football-commentary-audio/commentary_83.mp3"
             },
             { 
                 time: "84'", 
-                text: "GOOOAAL! Saliba rises highest and powers the header into the net! Arsenal lead 2-1!",
+                text: "GOOOAAL! Saliba rises highest and powers the header into the net! Arsenal lead 2-1! What a crucial goal at this stage of the match!",
                 audio: "https://briwild79.github.io/football-commentary-audio/commentary_84.mp3"
             },
             { 
                 time: "85'", 
-                text: "Manchester United immediately on the attack. Bruno Fernandes with a through ball...",
+                text: "Manchester United immediately on the attack. Bruno Fernandes with a through ball... The Portuguese midfielder is orchestrating the comeback attempt.",
                 audio: "https://briwild79.github.io/football-commentary-audio/commentary_85.mp3"
             },
             { 
                 time: "86'", 
-                text: "Rashford breaks free but the flag is up! Offside by the narrowest of margins.",
+                text: "Rashford breaks free but the flag is up! Offside by the narrowest of margins. The VAR check confirms the assistant referee's decision.",
                 audio: "https://briwild79.github.io/football-commentary-audio/commentary_86.mp3"
             },
             { 
                 time: "87'", 
-                text: "Yellow card for Rice after a late challenge on Casemiro.",
+                text: "Yellow card for Rice after a late challenge on Casemiro. The referee had no choice but to book the Arsenal midfielder for that reckless tackle.",
                 audio: "https://briwild79.github.io/football-commentary-audio/commentary_87.mp3"
             },
             { 
                 time: "88'", 
-                text: "Free kick in a dangerous position for United. This could be their chance...",
+                text: "Free kick in a dangerous position for United. This could be their chance to equalize with just minutes remaining in this thrilling encounter.",
                 audio: "https://briwild79.github.io/football-commentary-audio/commentary_88.mp3"
             }
         ];
@@ -691,9 +728,6 @@
             const progress = (currentMinute / 94) * 100;
             progressFill.style.width = `${Math.min(progress, 100)}%`;
             progressBar.setAttribute('aria-valuenow', Math.floor(currentMinute));
-            
-            // Update time in commentary since we removed the time pill
-            // Time now shows in the commentary line
         }
 
         // Animate waveform with real audio data
@@ -762,25 +796,22 @@
             
             const commentary = commentaries[currentCommentaryIndex];
             
-            // Update visual commentary with ticker effect
+            // Update visual commentary with working ticker
             commentaryLine.innerHTML = `
                 <span class="commentary-time">${commentary.time}</span>
-                <span class="commentary-text" id="tickerText">${commentary.text}</span>
+                <div class="ticker-container">
+                    <div class="ticker-content">
+                        <span>${commentary.text}</span>
+                    </div>
+                </div>
             `;
             commentaryLine.classList.add('active');
-            
-            // Start ticker animation
-            const tickerText = document.getElementById('tickerText');
-            setTimeout(() => {
-                tickerText.classList.add('ticker-animate');
-            }, 100); // Small delay to ensure DOM is ready
             
             // Check if this is a goal moment and add special styling
             if (commentary.text.toLowerCase().includes('goal') || 
                 commentary.text.toLowerCase().includes('goooal')) {
                 commentaryLine.classList.add('goal-moment');
                 
-                // Remove the goal styling after animation completes
                 setTimeout(() => {
                     commentaryLine.classList.remove('goal-moment');
                 }, 3000);
