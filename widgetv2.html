@@ -16,25 +16,14 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             color: #1a1a1a;
-        }
-
-        /* Mobile demo container */
-        .demo-container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
-            min-height: 600px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
         }
 
         /* Accessible Commentary Widget */
         .commentary-widget {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
@@ -42,6 +31,7 @@
             border-top: 1px solid #e0e0e0;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
             overflow: visible;
+            z-index: 1000;
         }
 
         /* Match Progress Bar */
@@ -411,13 +401,12 @@
     </style>
 </head>
 <body>
-    <div class="demo-container">
-        <!-- Accessible Commentary Widget -->
-        <div class="commentary-widget" role="region" aria-label="Live match commentary">
-            <!-- Progress Bar -->
-            <div class="progress-bar" role="progressbar" aria-label="Match progress" aria-valuenow="84" aria-valuemin="0" aria-valuemax="90">
-                <div class="progress-fill" id="progressFill" style="width: 93.3%;"></div>
-            </div>
+    <!-- Accessible Commentary Widget -->
+    <div class="commentary-widget" role="region" aria-label="Live match commentary">
+        <!-- Progress Bar -->
+        <div class="progress-bar" role="progressbar" aria-label="Match progress" aria-valuenow="84" aria-valuemin="0" aria-valuemax="90">
+            <div class="progress-fill" id="progressFill" style="width: 93.3%;"></div>
+        </div>
             
             <div class="widget-bar">
                 <!-- Large, accessible play button -->
@@ -551,7 +540,7 @@
 
         const bars = waveform.querySelectorAll('.wave-bar');
 
-        // Update commentary
+        // Update commentary and play audio
         function updateCommentary() {
             const commentary = commentaries[currentCommentaryIndex];
             commentaryLine.innerHTML = `
@@ -560,7 +549,40 @@
             `;
             commentaryLine.classList.add('active');
             
+            // Play audio if available
+            if (commentary.audio) {
+                playAudio(commentary.audio);
+            }
+            
             currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+        }
+
+        // Play audio function
+        function playAudio(audioUrl) {
+            // Stop current audio if playing
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            
+            // Create and play new audio
+            currentAudio = new Audio(audioUrl);
+            currentAudio.volume = 0.7;
+            
+            currentAudio.play().catch(error => {
+                console.log('Audio playback failed:', error);
+            });
+            
+            // When audio ends, play next commentary
+            currentAudio.onended = () => {
+                if (isPlaying) {
+                    // Clear interval and immediately play next
+                    clearInterval(commentaryInterval);
+                    updateCommentary();
+                    // Restart interval for subsequent commentary
+                    commentaryInterval = setInterval(updateCommentary, 5000);
+                }
+            };
         }
 
         // Animate waveform
@@ -602,6 +624,12 @@
                 if (commentaryInterval) clearInterval(commentaryInterval);
                 if (waveformInterval) clearInterval(waveformInterval);
                 if (progressInterval) clearInterval(progressInterval);
+                
+                // Stop audio
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
                 
                 // Reset waveform to static state
                 bars.forEach((bar, index) => {
