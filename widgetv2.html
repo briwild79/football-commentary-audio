@@ -252,7 +252,8 @@
             border-radius: 2px;
             opacity: 0.5;
             transition: all 0.05s ease;
-            height: 16px;
+            height: 4px; /* Start as small circles */
+            min-height: 4px; /* Always maintain circular appearance when quiet */
         }
 
         .waveform-button.playing .wave-bar {
@@ -622,30 +623,43 @@
                 const volumeBoost = 1 + (averageVolume / 50);
                 
                 bars.forEach((bar, index) => {
-                    const heights = [16, 28, 40, 28, 16];
-                    const baseHeight = heights[index];
                     const dataIndex = Math.min(5 + index * 2, dataArray.length - 1);
                     const audioValue = dataArray[dataIndex] || 0;
-                    const audioHeight = (audioValue / 255) * 20 * volumeBoost;
                     
-                    const time = Date.now() / 100;
-                    const wave = Math.sin(time + index * 0.5) * 4;
+                    // Calculate height based on audio intensity
+                    // Start at 4px (circle) and grow up to 44px based on audio
+                    const minHeight = 4; // Circle size
+                    const maxHeight = 44; // Full bar height
+                    const audioIntensity = (audioValue / 255) * volumeBoost;
                     
-                    const totalHeight = Math.min(44, Math.max(12, 
-                        baseHeight + audioHeight + wave
-                    ));
+                    // Add some variation between bars for natural look
+                    const baseVariation = [0.8, 1.0, 1.2, 1.0, 0.8][index] || 1.0;
+                    const dynamicHeight = minHeight + (audioIntensity * (maxHeight - minHeight) * baseVariation);
+                    
+                    // Add subtle wave motion only when audio is present
+                    const time = Date.now() / 200;
+                    const wave = audioIntensity > 0.1 ? Math.sin(time + index * 0.5) * 2 : 0;
+                    
+                    const totalHeight = Math.max(minHeight, Math.min(maxHeight, dynamicHeight + wave));
                     
                     bar.style.height = `${totalHeight}px`;
+                    
+                    // Adjust opacity based on activity
+                    bar.style.opacity = 0.6 + (audioIntensity * 0.4);
                 });
             } else {
-                // Idle animation
-                const time = Date.now() / 100;
+                // Idle animation - keep as small circles with subtle pulse
+                const time = Date.now() / 400; // Slower idle animation
                 bars.forEach((bar, index) => {
-                    const heights = [16, 28, 40, 28, 16];
-                    const baseHeight = heights[index];
-                    const wave = Math.sin(time + index * 0.5) * 6;
-                    const height = Math.max(12, baseHeight + wave);
+                    const minHeight = 4; // Circle size
+                    const pulseAmount = 2; // Very subtle pulse
+                    
+                    // Gentle breathing effect
+                    const pulse = Math.sin(time + index * 0.3) * pulseAmount;
+                    const height = Math.max(minHeight, minHeight + pulse);
+                    
                     bar.style.height = `${height}px`;
+                    bar.style.opacity = 0.5 + Math.sin(time + index * 0.2) * 0.1; // Subtle opacity changes
                 });
             }
             
@@ -674,8 +688,36 @@
             }
             
             // Create and play new audio
-            currentAudio = new Audio(commentary.audio);
+            console.log('🎵 Attempting to load:', commentary.audio);
+            currentAudio = new Audio();
+            currentAudio.crossOrigin = "anonymous"; // Handle CORS
             currentAudio.volume = 0.7; // Default volume
+            
+            // Add detailed error handling
+            currentAudio.addEventListener('error', (e) => {
+                console.error('❌ Audio error:', e);
+                console.error('❌ Error code:', currentAudio.error?.code);
+                console.error('❌ Error message:', currentAudio.error?.message);
+                console.error('❌ Failed URL:', commentary.audio);
+                
+                // Continue to next after delay
+                setTimeout(() => {
+                    currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                    playNextCommentary();
+                }, 3000);
+            });
+            
+            currentAudio.addEventListener('canplaythrough', () => {
+                console.log('✅ Audio ready:', commentary.text);
+            });
+            
+            currentAudio.addEventListener('loadstart', () => {
+                console.log('📡 Loading audio...');
+            });
+            
+            // Set source and load
+            currentAudio.src = commentary.audio;
+            currentAudio.load();
             
             currentAudio.play()
                 .then(() => {
@@ -684,14 +726,32 @@
                 })
                 .catch(error => {
                     console.error('❌ Playback failed:', error);
-                    setTimeout(() => {
-                        currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                        playNextCommentary();
-                    }, 5000);
+                    console.error('❌ Error name:', error.name);
+                    console.error('❌ Error message:', error.message);
+                    
+                    // Try without crossOrigin
+                    if (currentAudio.crossOrigin) {
+                        console.log('🔄 Retrying without CORS...');
+                        currentAudio.crossOrigin = null;
+                        currentAudio.load();
+                        currentAudio.play().catch(retryError => {
+                            console.error('❌ Retry also failed:', retryError);
+                            setTimeout(() => {
+                                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                                playNextCommentary();
+                            }, 3000);
+                        });
+                    } else {
+                        setTimeout(() => {
+                            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                            playNextCommentary();
+                        }, 3000);
+                    }
                 });
             
             // When audio ends, play next
             currentAudio.onended = () => {
+                console.log('🏁 Audio finished, playing next...');
                 currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
                 playNextCommentary();
             };
@@ -734,10 +794,10 @@
                     currentAudio.currentTime = 0;
                 }
                 
-                // Reset waveform to static state
-                bars.forEach((bar, index) => {
-                    const heights = [16, 28, 40, 28, 16];
-                    bar.style.height = `${heights[index]}px`;
+                // Reset waveform to small circles (idle state)
+                bars.forEach((bar) => {
+                    bar.style.height = '4px'; // Small circles when stopped
+                    bar.style.opacity = '0.5';
                 });
             }
         });
