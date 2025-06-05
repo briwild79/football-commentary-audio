@@ -213,6 +213,26 @@
             font-weight: 400; /* Apple's regular weight */
         }
 
+        /* Goal moment styling - subtle emphasis */
+        .commentary-line.goal-moment {
+            animation: goalGlow 3s ease-out;
+        }
+
+        @keyframes goalGlow {
+            0% { 
+                background: rgba(255, 105, 0, 0.1);
+                border-radius: 6px;
+                transform: scale(1.01);
+            }
+            50% { 
+                background: rgba(255, 105, 0, 0.05);
+            }
+            100% { 
+                background: transparent;
+                transform: scale(1);
+            }
+        }
+
         .commentary-time {
             color: #ff6900;
             font-weight: 590; /* Apple's medium weight */
@@ -748,6 +768,17 @@
                 <span class="commentary-text">${commentary.text}</span>
             `;
             commentaryLine.classList.add('active');
+            
+            // Check if this is a goal moment and add special styling
+            if (commentary.text.toLowerCase().includes('goal') || 
+                commentary.text.toLowerCase().includes('goooal')) {
+                commentaryLine.classList.add('goal-moment');
+                
+                // Remove the goal styling after animation completes
+                setTimeout(() => {
+                    commentaryLine.classList.remove('goal-moment');
+                }, 3000);
+            }
             
             // Stop current audio if playing
             if (currentAudio) {
