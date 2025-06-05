@@ -13,12 +13,14 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
             margin: 0;
             padding: 0;
-            color: #1a1a1a;
+            color: #1d1d1f; /* Apple's primary text color */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Accessible Commentary Widget */
@@ -144,66 +146,78 @@
             min-width: 0;
         }
 
-        /* Match Info - Always Visible */
+        /* Match Info - Apple Typography */
         .match-info {
             display: flex;
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            font-size: 14px;
-            color: #1a1a1a;
-            gap: 12px;
+            font-size: 15px; /* Apple's body text size */
+            color: #1d1d1f; /* Apple's primary text */
+            gap: 8px; /* Reduced gap for more space */
+            line-height: 1.33; /* Apple's standard line height */
         }
 
         .team-left {
-            font-weight: 600;
+            font-weight: 590; /* Apple's medium weight */
             flex: 1;
             text-align: left;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: #1a1a1a;
+            color: #1d1d1f;
+            letter-spacing: -0.24px; /* Apple's tight letter spacing */
+            min-width: 0; /* Allows proper flex shrinking */
+            max-width: calc(50% - 40px); /* Leave more room, account for score width */
         }
 
         .team-right {
-            font-weight: 600;
+            font-weight: 590; /* Apple's medium weight */
             flex: 1;
             text-align: right;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: #1a1a1a;
+            color: #1d1d1f;
+            letter-spacing: -0.24px;
+            min-width: 0; /* Allows proper flex shrinking */
+            max-width: calc(50% - 40px); /* Leave more room, account for score width */
         }
 
         .score {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 17px; /* Apple's headline size */
+            font-weight: 600; /* Apple's semibold */
             color: #ff6900;
             font-variant-numeric: tabular-nums;
             flex-shrink: 0;
-            padding: 0 16px;
+            padding: 0 8px; /* Reduced padding for more team name space */
+            letter-spacing: -0.43px; /* Apple's headline letter spacing */
+            min-width: fit-content; /* Only take space needed */
         }
 
-        /* Commentary Line - Readable */
+        /* Commentary Line - Apple Typography */
         .commentary-line {
-            font-size: 13px;
-            color: #666;
+            font-size: 13px; /* Apple's footnote size */
+            color: #86868b; /* Apple's secondary text color */
             display: flex;
             align-items: center;
             gap: 8px;
             min-height: 20px;
             transition: all 0.3s ease;
+            line-height: 1.38;
+            letter-spacing: -0.08px;
         }
 
         .commentary-line.active {
-            color: #1a1a1a;
-            font-weight: 500;
+            color: #1d1d1f; /* Apple's primary text when active */
+            font-weight: 400; /* Apple's regular weight */
         }
 
         .commentary-time {
             color: #ff6900;
-            font-weight: 600;
+            font-weight: 590; /* Apple's medium weight */
             flex-shrink: 0;
+            font-variant-numeric: tabular-nums;
         }
 
         .commentary-text {
@@ -292,6 +306,7 @@
             margin-bottom: 16px;
         }
 
+        /* Game List - Apple Typography */
         .game-item {
             display: flex;
             align-items: center;
@@ -301,6 +316,29 @@
             border: 1px solid #e0e0e0;
             cursor: pointer;
             transition: all 0.2s ease;
+        }
+
+        .game-item .match-info {
+            font-size: 15px; /* Apple's body text */
+            color: #1d1d1f;
+        }
+
+        .game-item .teams {
+            font-weight: 590; /* Apple's medium weight */
+            letter-spacing: -0.24px;
+        }
+
+        .game-item .score {
+            font-size: 17px; /* Apple's headline */
+            font-weight: 600; /* Apple's semibold */
+            letter-spacing: -0.43px;
+        }
+
+        .game-item .time {
+            font-size: 13px; /* Apple's footnote */
+            color: #86868b; /* Apple's secondary text */
+            font-weight: 400;
+            letter-spacing: -0.08px;
         }
 
         .game-item:hover {
