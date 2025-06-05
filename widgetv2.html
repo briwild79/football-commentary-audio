@@ -148,14 +148,26 @@
         .match-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
+            width: 100%;
             font-size: 14px;
             color: #1a1a1a;
+            gap: 12px;
         }
 
-        .teams {
+        .team-left {
             font-weight: 600;
             flex: 1;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .team-right {
+            font-weight: 600;
+            flex: 1;
+            text-align: right;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -166,15 +178,8 @@
             font-weight: 700;
             color: #ff6900;
             font-variant-numeric: tabular-nums;
-        }
-
-        .time {
-            padding: 4px 8px;
-            background: #f0f0f0;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #666;
+            flex-shrink: 0;
+            padding: 0 16px;
         }
 
         /* Commentary Line - Readable */
@@ -421,9 +426,9 @@
             <div class="content-area">
                 <!-- Always visible match info -->
                 <div class="match-info" role="status" aria-live="polite">
-                    <span class="teams">Man United vs Arsenal</span>
+                    <span class="team-left">Man United</span>
                     <span class="score" aria-label="Score: 1 to 2">1-2</span>
-                    <span class="time" aria-label="82nd minute">82'</span>
+                    <span class="team-right">Arsenal</span>
                 </div>
 
                 <!-- Commentary line -->
@@ -627,12 +632,8 @@
             progressFill.style.width = `${Math.min(progress, 100)}%`;
             progressBar.setAttribute('aria-valuenow', Math.floor(currentMinute));
             
-            const timeDisplay = document.querySelector('.time');
-            if (currentMinute >= 90) {
-                timeDisplay.textContent = `90+${Math.floor(currentMinute - 90)}'`;
-            } else {
-                timeDisplay.textContent = `${Math.floor(currentMinute)}'`;
-            }
+            // Update time in commentary since we removed the time pill
+            // Time now shows in the commentary line
         }
 
         // Animate waveform with real audio data
@@ -847,13 +848,14 @@
                 item.setAttribute('aria-current', 'true');
                 
                 // Update main display
-                const teams = item.querySelector('.teams').textContent;
+                const teamNames = item.querySelector('.teams').textContent.split(' vs ');
                 const score = item.querySelector('.score').textContent;
-                const time = item.querySelector('.time').textContent;
                 
-                widget.querySelector('.widget-bar .teams').textContent = teams;
+                if (teamNames.length === 2) {
+                    widget.querySelector('.widget-bar .team-left').textContent = teamNames[0];
+                    widget.querySelector('.widget-bar .team-right').textContent = teamNames[1];
+                }
                 widget.querySelector('.widget-bar .score').textContent = score;
-                widget.querySelector('.widget-bar .time').textContent = time;
                 
                 // Collapse
                 isExpanded = false;
