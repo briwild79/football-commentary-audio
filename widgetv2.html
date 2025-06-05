@@ -583,11 +583,8 @@
             currentAudio.onended = () => {
                 console.log('Audio ended, playing next');
                 if (isPlaying) {
-                    // Clear interval and immediately play next
-                    clearInterval(commentaryInterval);
+                    // Move to next commentary
                     updateCommentary();
-                    // Restart interval for subsequent commentary
-                    commentaryInterval = setInterval(updateCommentary, 5000);
                 }
             };
         }
@@ -615,10 +612,11 @@
                 playState.textContent = 'Playing';
                 expandButton.classList.add('playing');
                 
-                updateCommentary();
-                commentaryInterval = setInterval(updateCommentary, 5000);
+                // Start everything
+                updateCommentary(); // This will also trigger audio
+                commentaryInterval = setInterval(updateCommentary, 30000); // 30 seconds between commentary
                 waveformInterval = setInterval(animateWaveform, 150);
-                progressInterval = setInterval(updateProgress, 1000); // Update every second
+                progressInterval = setInterval(updateProgress, 1000);
             } else {
                 playIcon.style.display = 'block';
                 pauseIcon.style.display = 'none';
