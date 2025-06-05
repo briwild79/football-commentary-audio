@@ -626,10 +626,12 @@
                     const dataIndex = Math.min(5 + index * 2, dataArray.length - 1);
                     const audioValue = dataArray[dataIndex] || 0;
                     
-                    // Calculate height based on audio intensity
-                    // Start at 4px (circle) and grow up to 44px based on audio
+                    // Calculate max height for each bar to maintain circular shape
+                    // Center bars can be tallest, outer bars shorter to avoid cropping
+                    const maxHeights = [28, 36, 44, 36, 28]; // Circular profile
                     const minHeight = 4; // Circle size
-                    const maxHeight = 44; // Full bar height
+                    const maxHeight = maxHeights[index];
+                    
                     const audioIntensity = (audioValue / 255) * volumeBoost;
                     
                     // Add some variation between bars for natural look
@@ -648,18 +650,18 @@
                     bar.style.opacity = 0.6 + (audioIntensity * 0.4);
                 });
             } else {
-                // Idle animation - keep as small circles with subtle pulse
-                const time = Date.now() / 400; // Slower idle animation
+                // Idle animation - keep as small circles with more noticeable pulse
+                const time = Date.now() / 300; // Medium speed breathing
                 bars.forEach((bar, index) => {
                     const minHeight = 4; // Circle size
-                    const pulseAmount = 2; // Very subtle pulse
+                    const pulseAmount = 4; // More noticeable pulse (was 2)
                     
-                    // Gentle breathing effect
-                    const pulse = Math.sin(time + index * 0.3) * pulseAmount;
+                    // Enhanced breathing effect with slight delay between bars
+                    const pulse = Math.sin(time + index * 0.2) * pulseAmount;
                     const height = Math.max(minHeight, minHeight + pulse);
                     
                     bar.style.height = `${height}px`;
-                    bar.style.opacity = 0.5 + Math.sin(time + index * 0.2) * 0.1; // Subtle opacity changes
+                    bar.style.opacity = 0.5; // Keep consistent color/opacity
                 });
             }
             
