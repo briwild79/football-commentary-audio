@@ -559,6 +559,8 @@
 
         // Play audio function
         function playAudio(audioUrl) {
+            console.log('Attempting to play audio:', audioUrl);
+            
             // Stop current audio if playing
             if (currentAudio) {
                 currentAudio.pause();
@@ -569,12 +571,17 @@
             currentAudio = new Audio(audioUrl);
             currentAudio.volume = 0.7;
             
-            currentAudio.play().catch(error => {
-                console.log('Audio playback failed:', error);
-            });
+            currentAudio.play()
+                .then(() => {
+                    console.log('Audio playing successfully');
+                })
+                .catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
             
             // When audio ends, play next commentary
             currentAudio.onended = () => {
+                console.log('Audio ended, playing next');
                 if (isPlaying) {
                     // Clear interval and immediately play next
                     clearInterval(commentaryInterval);
@@ -625,8 +632,8 @@
                 if (waveformInterval) clearInterval(waveformInterval);
                 if (progressInterval) clearInterval(progressInterval);
                 
-                // Stop audio
-                if (currentAudio) {
+                // Stop audio if it exists
+                if (typeof currentAudio !== 'undefined' && currentAudio) {
                     currentAudio.pause();
                     currentAudio.currentTime = 0;
                 }
