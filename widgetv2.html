@@ -162,6 +162,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #1a1a1a;
         }
 
         .team-right {
@@ -171,6 +172,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #1a1a1a;
         }
 
         .score {
@@ -717,8 +719,7 @@
             
             // Create and play new audio
             console.log('🎵 Attempting to load:', commentary.audio);
-            currentAudio = new Audio();
-            currentAudio.crossOrigin = "anonymous"; // Handle CORS
+            currentAudio = new Audio(commentary.audio);
             currentAudio.volume = 0.7; // Default volume
             
             // Add detailed error handling
@@ -743,10 +744,6 @@
                 console.log('📡 Loading audio...');
             });
             
-            // Set source and load
-            currentAudio.src = commentary.audio;
-            currentAudio.load();
-            
             currentAudio.play()
                 .then(() => {
                     console.log('✅ Playing:', commentary.text);
@@ -757,24 +754,11 @@
                     console.error('❌ Error name:', error.name);
                     console.error('❌ Error message:', error.message);
                     
-                    // Try without crossOrigin
-                    if (currentAudio.crossOrigin) {
-                        console.log('🔄 Retrying without CORS...');
-                        currentAudio.crossOrigin = null;
-                        currentAudio.load();
-                        currentAudio.play().catch(retryError => {
-                            console.error('❌ Retry also failed:', retryError);
-                            setTimeout(() => {
-                                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                                playNextCommentary();
-                            }, 3000);
-                        });
-                    } else {
-                        setTimeout(() => {
-                            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                            playNextCommentary();
-                        }, 3000);
-                    }
+                    // Continue to next after delay
+                    setTimeout(() => {
+                        currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                        playNextCommentary();
+                    }, 3000);
                 });
             
             // When audio ends, play next
