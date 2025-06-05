@@ -250,7 +250,7 @@
             width: 4px;
             background: #ff6900;
             border-radius: 2px;
-            opacity: 0.5;
+            opacity: 0.9; /* Full color visibility from start */
             transition: all 0.05s ease;
             height: 4px; /* Start as small circles */
             min-height: 4px; /* Always maintain circular appearance when quiet */
@@ -560,6 +560,31 @@
 
         const bars = waveform.querySelectorAll('.wave-bar');
 
+        // Start breathing animation immediately on page load
+        function startIdleAnimation() {
+            function breathe() {
+                if (!isPlaying) { // Only animate when not playing
+                    const time = Date.now() / 300; // Medium speed breathing
+                    bars.forEach((bar, index) => {
+                        const minHeight = 4; // Circle size
+                        const pulseAmount = 4; // Noticeable pulse
+                        
+                        // Enhanced breathing effect with slight delay between bars
+                        const pulse = Math.sin(time + index * 0.2) * pulseAmount;
+                        const height = Math.max(minHeight, minHeight + pulse);
+                        
+                        bar.style.height = `${height}px`;
+                        bar.style.opacity = 0.9; // Keep full color
+                    });
+                }
+                requestAnimationFrame(breathe);
+            }
+            breathe();
+        }
+
+        // Start the idle animation immediately
+        startIdleAnimation();
+
         // Setup audio analyser for real visualization
         function setupAudioAnalyser(audio) {
             try {
@@ -647,7 +672,7 @@
                     bar.style.height = `${totalHeight}px`;
                     
                     // Adjust opacity based on activity
-                    bar.style.opacity = 0.6 + (audioIntensity * 0.4);
+                    bar.style.opacity = 0.9; // Keep full color during audio
                 });
             } else {
                 // Idle animation - keep as small circles with more noticeable pulse
@@ -799,7 +824,7 @@
                 // Reset waveform to small circles (idle state)
                 bars.forEach((bar) => {
                     bar.style.height = '4px'; // Small circles when stopped
-                    bar.style.opacity = '0.5';
+                    bar.style.opacity = '0.9'; // Full color even when stopped
                 });
             }
         });
