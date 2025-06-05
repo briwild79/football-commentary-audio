@@ -540,7 +540,7 @@
 
         const bars = waveform.querySelectorAll('.wave-bar');
 
-        // Update commentary and play audio
+        // Update commentary without audio (for visual only)
         function updateCommentary() {
             const commentary = commentaries[currentCommentaryIndex];
             commentaryLine.innerHTML = `
@@ -548,18 +548,20 @@
                 <span class="commentary-text">${commentary.text}</span>
             `;
             commentaryLine.classList.add('active');
-            
-            // Play audio if available
-            if (commentary.audio) {
-                playAudio(commentary.audio);
-            }
-            
-            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
         }
 
-        // Play audio function
-        function playAudio(audioUrl) {
-            console.log('Attempting to play audio:', audioUrl);
+        // Play commentary with audio
+        function playNextCommentary() {
+            if (!isPlaying) return;
+            
+            const commentary = commentaries[currentCommentaryIndex];
+            
+            // Update visual commentary
+            commentaryLine.innerHTML = `
+                <span class="commentary-time">${commentary.time}</span>
+                <span class="commentary-text">${commentary.text}</span>
+            `;
+            commentaryLine.classList.add('active');
             
             // Stop current audio if playing
             if (currentAudio) {
@@ -567,26 +569,39 @@
                 currentAudio.currentTime = 0;
             }
             
-            // Create and play new audio
-            currentAudio = new Audio(audioUrl);
-            currentAudio.volume = 0.7;
-            
-            currentAudio.play()
-                .then(() => {
-                    console.log('Audio playing successfully');
-                })
-                .catch(error => {
-                    console.error('Audio playback failed:', error);
-                });
-            
-            // When audio ends, play next commentary
-            currentAudio.onended = () => {
-                console.log('Audio ended, playing next');
-                if (isPlaying) {
-                    // Move to next commentary
-                    updateCommentary();
-                }
-            };
+            // Play audio if available
+            if (commentary.audio) {
+                console.log('Attempting to play audio:', commentary.audio);
+                
+                currentAudio = new Audio(commentary.audio);
+                currentAudio.volume = 0.7;
+                
+                currentAudio.play()
+                    .then(() => {
+                        console.log('Audio playing successfully');
+                    })
+                    .catch(error => {
+                        console.error('Audio playback failed:', error);
+                        // Move to next after delay if audio fails
+                        setTimeout(() => {
+                            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                            playNextCommentary();
+                        }, 5000);
+                    });
+                
+                // When audio ends, play next
+                currentAudio.onended = () => {
+                    console.log('Audio ended, playing next');
+                    currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                    playNextCommentary();
+                };
+            } else {
+                // If no audio, move to next after delay
+                setTimeout(() => {
+                    currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                    playNextCommentary();
+                }, 5000);
+            }
         }
 
         // Animate waveform
@@ -612,9 +627,8 @@
                 playState.textContent = 'Playing';
                 expandButton.classList.add('playing');
                 
-                // Start everything
-                updateCommentary(); // This will also trigger audio
-                commentaryInterval = setInterval(updateCommentary, 30000); // 30 seconds between commentary
+                // Start playing commentary with audio
+                playNextCommentary();
                 waveformInterval = setInterval(animateWaveform, 150);
                 progressInterval = setInterval(updateProgress, 1000);
             } else {
@@ -626,7 +640,6 @@
                 expandButton.classList.remove('playing');
                 commentaryLine.classList.remove('active');
                 
-                if (commentaryInterval) clearInterval(commentaryInterval);
                 if (waveformInterval) clearInterval(waveformInterval);
                 if (progressInterval) clearInterval(progressInterval);
                 
