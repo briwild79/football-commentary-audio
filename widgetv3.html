@@ -148,26 +148,26 @@
 
         .team-left {
             font-weight: 590;
-            flex: 1;
-            text-align: left;
+            width: 40%; /* Fixed width for better control */
+            text-align: right; /* Right-align toward score */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            min-width: 0;
+            padding-right: 12px; /* Consistent gap */
         }
 
         .team-right {
             font-weight: 590;
-            flex: 1;
-            text-align: right;
+            width: 40%; /* Fixed width for better control */
+            text-align: left; /* Left-align toward score */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            min-width: 0;
+            padding-left: 12px; /* Consistent gap */
         }
 
         .score {
@@ -176,9 +176,9 @@
             color: #ff6900;
             font-variant-numeric: tabular-nums;
             letter-spacing: -0.43px;
-            padding: 0 16px; /* Comfortable breathing room */
-            flex-shrink: 0;
+            width: 20%; /* Fixed center area */
             text-align: center;
+            flex-shrink: 0;
         }
 
         /* Commentary Line with Ticker */
