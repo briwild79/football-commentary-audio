@@ -157,7 +157,8 @@
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            max-width: calc(50% - 40px);
+            max-width: calc(50% - 20px); /* More space - reduced from 40px to 20px */
+            min-width: 80px; /* Minimum width to prevent over-shrinking */
         }
 
         .team-right {
@@ -169,7 +170,8 @@
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            max-width: calc(50% - 40px);
+            max-width: calc(50% - 20px); /* More space - reduced from 40px to 20px */
+            min-width: 80px; /* Minimum width to prevent over-shrinking */
         }
 
         .score {
@@ -178,8 +180,9 @@
             color: #ff6900;
             font-variant-numeric: tabular-nums;
             flex-shrink: 0;
-            padding: 0 10px;
+            padding: 0 6px; /* Reduced padding from 10px to 6px */
             letter-spacing: -0.43px;
+            min-width: fit-content;
         }
 
         /* Commentary Line with Ticker */
@@ -236,7 +239,19 @@
             }
         }
 
-        /* Ticker Fade Effect */
+        /* Ticker Fade Effects - Both Sides */
+        .ticker-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, white, transparent);
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .ticker-container::after {
             content: '';
             position: absolute;
@@ -410,6 +425,7 @@
                 text-align: left;
             }
             
+            .ticker-container::before,
             .ticker-container::after {
                 display: none;
             }
