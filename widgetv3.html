@@ -712,6 +712,34 @@
             expandButton.setAttribute('aria-expanded', isExpanded);
         });
 
+        // Smart team name abbreviations
+        function getSmartTeamName(teamName) {
+            const abbreviations = {
+                'Manchester United': 'Man United',
+                'Manchester City': 'Man City',
+                'Tottenham Hotspur': 'Tottenham',
+                'West Ham United': 'West Ham',
+                'Newcastle United': 'Newcastle',
+                'Sheffield United': 'Sheffield Utd',
+                'Sheffield Wednesday': 'Sheffield Wed',
+                'Brighton & Hove Albion': 'Brighton',
+                'Wolverhampton Wanderers': 'Wolves',
+                'Leicester City': 'Leicester',
+                'Crystal Palace': 'Crystal Palace',
+                'Nottingham Forest': "Nott'm Forest",
+                'Real Madrid': 'Real Madrid',
+                'Barcelona': 'Barcelona',
+                'Atletico Madrid': 'Atletico',
+                'Bayern Munich': 'Bayern',
+                'Borussia Dortmund': 'Dortmund',
+                'Paris Saint-Germain': 'PSG',
+                'Internazionale': 'Inter Milan',
+                'AC Milan': 'AC Milan'
+            };
+            
+            return abbreviations[teamName] || teamName;
+        }
+
         // Game selection
         document.querySelectorAll('.game-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -721,13 +749,16 @@
                 // Add active to clicked item
                 item.classList.add('active');
                 
-                // Update main display
+                // Update main display with smart abbreviations
                 const teamNames = item.querySelector('.teams').textContent.split(' vs ');
                 const score = item.querySelector('.score').textContent;
                 
                 if (teamNames.length === 2) {
-                    widget.querySelector('.team-left').textContent = teamNames[0];
-                    widget.querySelector('.team-right').textContent = teamNames[1];
+                    const leftTeam = getSmartTeamName(teamNames[0].trim());
+                    const rightTeam = getSmartTeamName(teamNames[1].trim());
+                    
+                    widget.querySelector('.team-left').textContent = leftTeam;
+                    widget.querySelector('.team-right').textContent = rightTeam;
                 }
                 widget.querySelector('.widget-bar .score').textContent = score;
                 
