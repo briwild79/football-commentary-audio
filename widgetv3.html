@@ -151,27 +151,27 @@
         .team-left {
             font-weight: 590;
             flex: 1;
+            min-width: 0;
             text-align: left;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            max-width: calc(50% - 20px); /* More space - reduced from 40px to 20px */
-            min-width: 80px; /* Minimum width to prevent over-shrinking */
+            margin-right: 12px; /* Guaranteed minimum spacing */
         }
 
         .team-right {
             font-weight: 590;
             flex: 1;
+            min-width: 0;
             text-align: right;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            max-width: calc(50% - 20px); /* More space - reduced from 40px to 20px */
-            min-width: 80px; /* Minimum width to prevent over-shrinking */
+            margin-left: 12px; /* Guaranteed minimum spacing */
         }
 
         .score {
@@ -180,7 +180,7 @@
             color: #ff6900;
             font-variant-numeric: tabular-nums;
             flex-shrink: 0;
-            padding: 0 6px; /* Reduced padding from 10px to 6px */
+            margin: 0 12px; /* Consistent spacing on both sides */
             letter-spacing: -0.43px;
             min-width: fit-content;
         }
