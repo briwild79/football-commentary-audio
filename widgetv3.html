@@ -136,7 +136,7 @@
             min-width: 0;
         }
 
-        /* Match Info - Centered Score Approach */
+        /* Match Info - Industry Standard */
         .match-info {
             display: flex;
             align-items: center;
@@ -144,31 +144,30 @@
             font-size: 16px;
             color: #1d1d1f;
             line-height: 1.33;
-            position: relative;
         }
 
         .team-left {
             font-weight: 590;
             flex: 1;
-            text-align: right; /* Right-align to push toward center */
+            text-align: left;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            padding-right: 12px; /* Space from score */
+            min-width: 0;
         }
 
         .team-right {
             font-weight: 590;
             flex: 1;
-            text-align: left; /* Left-align to push toward center */
+            text-align: right;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            padding-left: 12px; /* Space from score */
+            min-width: 0;
         }
 
         .score {
@@ -176,13 +175,10 @@
             font-weight: 800;
             color: #ff6900;
             font-variant-numeric: tabular-nums;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%); /* Perfect center */
             letter-spacing: -0.43px;
-            background: white; /* Ensure it sits above team names */
-            padding: 0 8px; /* Small padding for visual separation */
-            z-index: 1;
+            padding: 0 16px; /* Comfortable breathing room */
+            flex-shrink: 0;
+            text-align: center;
         }
 
         /* Commentary Line with Ticker */
