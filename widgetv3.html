@@ -148,7 +148,9 @@
 
         .team-left {
             font-weight: 590;
-            width: 40%; /* Fixed width for better control */
+            flex: 1;
+            min-width: 0;
+            max-width: 45%; /* Prevent over-expansion */
             text-align: right; /* Right-align toward score */
             white-space: nowrap;
             overflow: hidden;
@@ -160,7 +162,9 @@
 
         .team-right {
             font-weight: 590;
-            width: 40%; /* Fixed width for better control */
+            flex: 1;
+            min-width: 0;
+            max-width: 45%; /* Prevent over-expansion */
             text-align: left; /* Left-align toward score */
             white-space: nowrap;
             overflow: hidden;
@@ -176,9 +180,9 @@
             color: #ff6900;
             font-variant-numeric: tabular-nums;
             letter-spacing: -0.43px;
-            width: 20%; /* Fixed center area */
             text-align: center;
             flex-shrink: 0;
+            min-width: 60px; /* Ensure score has enough space */
         }
 
         /* Commentary Line with Ticker */
