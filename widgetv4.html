@@ -174,16 +174,22 @@
             margin-left: 12px;
         }
 
-        /* Score - Typography: 20px (Most prominent) */
+        /* Score - Typography: 22px (Most prominent) */
         .score {
-            font-size: 20px;
-            font-weight: 800;
+            font-size: 22px;
+            font-weight: 600;
             color: #ff6900;
             font-variant-numeric: tabular-nums;
-            letter-spacing: -0.43px;
+            letter-spacing: normal;
             text-align: center;
             flex-shrink: 0;
             min-width: 60px;
+        }
+
+        /* Add specific spacing around hyphen only */
+        .score::before {
+            content: attr(data-score);
+            white-space: pre;
         }
 
         /* Commentary Line - Typography: 16px (Accessible) */
@@ -452,7 +458,7 @@
                 <!-- Match Info -->
                 <div class="match-info">
                     <span class="team-left">Man United</span>
-                    <span class="score" aria-label="Score: 1 to 2">1-2</span>
+                    <span class="score" aria-label="Score: 1 to 2">1 - 2</span>
                     <span class="team-right">Arsenal</span>
                 </div>
 
@@ -741,7 +747,10 @@
                     widget.querySelector('.team-left').textContent = leftTeam;
                     widget.querySelector('.team-right').textContent = rightTeam;
                 }
-                widget.querySelector('.widget-bar .score').textContent = score;
+                
+                // Format score with proper spacing around hyphen
+                const formattedScore = score.replace('-', ' - ');
+                widget.querySelector('.widget-bar .score').textContent = formattedScore;
                 
                 // Collapse expanded view
                 isExpanded = false;
