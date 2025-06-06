@@ -136,42 +136,39 @@
             min-width: 0;
         }
 
-        /* Match Info */
+        /* Match Info - Centered Score Approach */
         .match-info {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             width: 100%;
             font-size: 16px;
             color: #1d1d1f;
-            gap: 10px;
             line-height: 1.33;
+            position: relative;
         }
 
         .team-left {
             font-weight: 590;
             flex: 1;
-            min-width: 0;
-            text-align: left;
+            text-align: right; /* Right-align to push toward center */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            margin-right: 12px; /* Guaranteed minimum spacing */
+            padding-right: 12px; /* Space from score */
         }
 
         .team-right {
             font-weight: 590;
             flex: 1;
-            min-width: 0;
-            text-align: right;
+            text-align: left; /* Left-align to push toward center */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1d1d1f;
             letter-spacing: -0.24px;
-            margin-left: 12px; /* Guaranteed minimum spacing */
+            padding-left: 12px; /* Space from score */
         }
 
         .score {
@@ -179,10 +176,13 @@
             font-weight: 800;
             color: #ff6900;
             font-variant-numeric: tabular-nums;
-            flex-shrink: 0;
-            margin: 0 12px; /* Consistent spacing on both sides */
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%); /* Perfect center */
             letter-spacing: -0.43px;
-            min-width: fit-content;
+            background: white; /* Ensure it sits above team names */
+            padding: 0 8px; /* Small padding for visual separation */
+            z-index: 1;
         }
 
         /* Commentary Line with Ticker */
