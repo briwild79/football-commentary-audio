@@ -9,6 +9,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* Critical for mobile performance */
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         body {
@@ -17,6 +22,9 @@
             min-height: 100vh;
             overflow-x: hidden;
             user-select: none;
+            /* Mobile optimizations */
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
         }
 
         /* App Content Simulation */
@@ -44,103 +52,135 @@
             will-change: transform, width, height;
         }
 
-        /* Minimal Orb State */
+        /* Mobile-Optimized Orb */
         .player-orb {
-            width: 56px;
-            height: 56px;
+            width: 64px; /* Larger touch target */
+            height: 64px;
             border-radius: 50%;
             background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.4);
-            cursor: grab;
+            cursor: pointer; /* No grab cursor on mobile */
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(20px);
+            /* Simplified for mobile performance */
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s ease-out;
+            transform: scale(1) translateZ(0);
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
         }
 
         .player-orb:active {
-            cursor: grabbing;
+            transform: scale(0.95) translateZ(0);
+            transition: transform 0.1s ease-out;
         }
 
-        /* Audio Visualization */
+        /* Simpler anticipation for mobile */
+        .player-orb.anticipating {
+            transform: scale(1.05) translateZ(0);
+            animation: mobilePulse 0.6s ease-in-out;
+        }
+
+        @keyframes mobilePulse {
+            0%, 100% { transform: scale(1.05) translateZ(0); }
+            50% { transform: scale(1.1) translateZ(0); }
+        }
+
+        /* Simplified Audio Visualization for Mobile */
         .audio-viz {
             position: absolute;
-            inset: 3px;
+            inset: 4px;
             border-radius: 50%;
             background: conic-gradient(from 0deg, 
                 rgba(255, 255, 255, 0.8) 0deg, 
-                rgba(255, 255, 255, 0.4) 90deg,
-                rgba(255, 255, 255, 0.8) 180deg,
-                rgba(255, 255, 255, 0.4) 270deg,
-                rgba(255, 255, 255, 0.8) 360deg);
-            animation: spin 4s linear infinite;
+                rgba(255, 255, 255, 0.2) 120deg,
+                rgba(255, 255, 255, 0.8) 240deg,
+                rgba(255, 255, 255, 0.2) 360deg);
+            animation: mobileAudioSpin 2s linear infinite;
             opacity: 0;
             transition: opacity 0.3s ease;
+            transform: translateZ(0);
         }
 
         .playing .audio-viz {
             opacity: 1;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* Simpler animation for 60fps */
+        @keyframes mobileAudioSpin {
+            0% { transform: rotate(0deg) translateZ(0); }
+            100% { transform: rotate(360deg) translateZ(0); }
         }
 
         .play-icon {
             color: white;
-            font-size: 18px;
+            font-size: 20px; /* Larger for mobile */
             z-index: 2;
-            transition: all 0.3s ease;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            transform: scale(1) translateZ(0);
         }
 
-        /* Pill Player State */
+        .playing .play-icon {
+            transform: scale(0.9) translateZ(0);
+        }
+
+        /* Mobile-Optimized Pill */
         .player-pill {
-            width: calc(100vw - 40px);
-            height: 80px;
-            border-radius: 40px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(40px);
+            width: calc(100vw - 20px); /* Less margin on mobile */
+            height: 88px; /* Taller for easier touch */
+            border-radius: 44px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px); /* Reduced blur */
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
-            padding: 12px 24px;
+            padding: 16px 24px;
             display: none;
             align-items: center;
             color: white;
             overflow: hidden;
-            left: 20px;
+            left: 10px;
             top: 50%;
-            transform: translateY(-50%);
+            transform: translateY(-50%) scale(0.9) translateZ(0);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
         .player-pill.active {
             display: flex;
+            transform: translateY(-50%) scale(1) translateZ(0);
+            opacity: 1;
         }
 
-        /* Expanded Player State */
+        /* Mobile-Optimized Expanded Player */
         .player-expanded {
-            width: 320px;
-            height: 480px;
-            border-radius: 24px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(40px);
+            width: calc(100vw - 24px);
+            max-width: 360px;
+            height: 500px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
             padding: 24px;
             display: none;
             flex-direction: column;
             color: white;
             overflow: hidden;
+            transform: scale(0.9) translateZ(0);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
         }
 
         .player-expanded.active {
             display: flex;
+            transform: scale(1) translateZ(0);
+            opacity: 1;
         }
 
-        /* Pill Content Layout */
+        /* Mobile Touch-Optimized Content */
         .pill-content {
             display: flex;
             align-items: center;
@@ -151,15 +191,16 @@
         .pill-artwork {
             width: 56px;
             height: 56px;
-            border-radius: 12px;
+            border-radius: 14px; /* Slightly larger radius */
             background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 24px;
             flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            transform: translateZ(0);
         }
 
         .pill-info {
@@ -178,33 +219,38 @@
         }
 
         .pill-artist {
-            font-size: 13px;
+            font-size: 14px; /* Slightly larger for mobile */
             color: rgba(255, 255, 255, 0.7);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
+        /* Mobile-Optimized Progress */
         .pill-progress {
             width: 100%;
-            height: 2px;
+            height: 4px; /* Thicker for mobile */
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 1px;
+            border-radius: 2px;
             margin-top: 8px;
             overflow: hidden;
+            position: relative;
         }
 
         .pill-progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #ff6b6b, #ee5a24);
             width: 35%;
-            transition: width 0.1s ease;
+            transition: width 0.2s ease;
+            border-radius: 2px;
+            transform: translateZ(0);
         }
 
+        /* Touch-Optimized Controls */
         .pill-controls {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px; /* Tighter spacing */
             flex-shrink: 0;
         }
 
@@ -212,34 +258,37 @@
             background: none;
             border: none;
             color: rgba(255, 255, 255, 0.8);
-            font-size: 20px;
+            font-size: 22px; /* Larger for touch */
             cursor: pointer;
-            padding: 8px;
+            padding: 12px; /* Larger touch area */
             border-radius: 50%;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 48px; /* Minimum 44px touch target */
+            height: 48px;
+            position: relative;
+            transform: translateZ(0);
         }
 
-        .pill-btn:hover {
+        .pill-btn:active {
+            transform: scale(0.9) translateZ(0);
             color: white;
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
         }
 
         .pill-play-btn {
             background: linear-gradient(135deg, #ff6b6b, #ee5a24);
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+            width: 52px; /* Slightly larger */
+            height: 52px;
         }
 
-        .pill-play-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+        .pill-play-btn:active {
+            transform: scale(0.95) translateZ(0);
+            box-shadow: 0 2px 12px rgba(255, 107, 107, 0.4);
         }
         .album-art {
             width: 200px;
@@ -441,7 +490,7 @@
 <body>
     <!-- Instructions -->
     <div class="instructions">
-        Drag orb around • Tap to play/pause • Long press for pill mode • Double tap for full player
+        Drag orb around • Tap to play/pause • Long press for pill mode • Double tap for full player • Tap background to close
     </div>
 
     <!-- Snap Zones -->
@@ -460,6 +509,8 @@
 
         <!-- Pill Player -->
         <div class="player-pill" id="playerPill">
+            <div class="tap-to-close" onclick="collapsePlayer()"></div>
+            <button class="close-btn" onclick="collapsePlayer()">×</button>
             <div class="pill-content">
                 <div class="pill-artwork">♪</div>
                 <div class="pill-info">
@@ -574,12 +625,19 @@
                 y: rect.top + rect.height / 2
             };
 
-            // Long press detection for pill mode
+            // Mobile-optimized anticipation (shorter duration)
+            playerOrb.classList.add('anticipating');
+
+            // Shorter long press for mobile (400ms instead of 500ms)
             longPressTimer = setTimeout(() => {
                 if (!isDragging) {
                     expandToPill();
+                    // Add haptic feedback if available
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
                 }
-            }, 500);
+            }, 400);
             
             e.preventDefault();
         }
@@ -628,16 +686,25 @@
         function endDrag(e) {
             clearTimeout(longPressTimer);
             hideSnapZones();
+            playerOrb.classList.remove('anticipating');
             
-            if (!isDragging && Date.now() - dragStartTime < 500) {
-                // Check for double tap
+            if (!isDragging && Date.now() - dragStartTime < 400) {
+                // Check for double tap (mobile-optimized timing)
                 const now = Date.now();
-                if (now - lastTapTime < 300) {
+                if (now - lastTapTime < 250) {
                     // Double tap - go to full expanded
                     expandPlayer();
+                    // Haptic feedback for double tap
+                    if (navigator.vibrate) {
+                        navigator.vibrate([30, 50, 30]);
+                    }
                 } else {
                     // Single tap - toggle play
                     togglePlay();
+                    // Light haptic for play/pause
+                    if (navigator.vibrate) {
+                        navigator.vibrate(25);
+                    }
                 }
                 lastTapTime = now;
             } else if (isDragging) {
@@ -702,16 +769,27 @@
         function expandToPill() {
             if (isPill || isExpanded) return;
             
+            // Mobile-optimized morphing (faster)
+            audioPlayer.classList.add('morphing');
+            
             isPill = true;
             playerOrb.style.display = 'none';
             playerPill.classList.add('active');
             
             // Update pill play button state
             pillPlayBtn.textContent = isPlaying ? '⏸' : '▶';
+            
+            // Shorter timeout for mobile
+            setTimeout(() => {
+                audioPlayer.classList.remove('morphing');
+            }, 400);
         }
 
         function expandPlayer() {
             if (isExpanded) return;
+            
+            // Mobile-optimized morphing
+            audioPlayer.classList.add('morphing');
             
             // Close pill if open
             if (isPill) {
@@ -727,9 +805,17 @@
             audioPlayer.style.left = '50%';
             audioPlayer.style.top = '50%';
             audioPlayer.style.transform = 'translate(-50%, -50%)';
+            
+            // Shorter timeout for mobile
+            setTimeout(() => {
+                audioPlayer.classList.remove('morphing');
+            }, 400);
         }
 
         function collapsePlayer() {
+            // Mobile-optimized collapse (faster)
+            audioPlayer.classList.add('morphing');
+            
             if (isExpanded) {
                 isExpanded = false;
                 playerExpanded.classList.remove('active');
@@ -740,7 +826,10 @@
                 playerPill.classList.remove('active');
             }
             
-            playerOrb.style.display = 'flex';
+            setTimeout(() => {
+                playerOrb.style.display = 'flex';
+                audioPlayer.classList.remove('morphing');
+            }, 150); // Faster for mobile
         }
 
         function togglePlay() {
@@ -787,19 +876,7 @@
         mainPlayBtn.addEventListener('click', togglePlay);
         pillPlayBtn.addEventListener('click', togglePlay);
 
-        // Close expanded player when clicking outside
-        playerExpanded.addEventListener('click', (e) => {
-            if (e.target === playerExpanded) {
-                collapsePlayer();
-            }
-        });
-
-        // Close pill when clicking outside
-        playerPill.addEventListener('click', (e) => {
-            if (e.target === playerPill) {
-                collapsePlayer();
-            }
-        });
+        // Remove the old click-outside listeners since we now have explicit close buttons
 
         // Progress bar interaction
         document.getElementById('progressBar').addEventListener('click', (e) => {
