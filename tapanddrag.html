@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Widget</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .widget {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border-radius: 50%;
+            cursor: grab;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .widget:active {
+            cursor: grabbing;
+        }
+
+        .widget.pill {
+            width: calc(100vw - 40px);
+            height: 60px;
+            border-radius: 30px;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 12px 48px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff6b6b);
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .widget::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff6b6b, #ee5a24);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .widget:hover::before {
+            opacity: 0.7;
+        }
+
+        .content {
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .widget.pill .content {
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .instructions {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 16px;
+            z-index: 999;
+        }
+
+        @media (max-width: 768px) {
+            .instructions {
+                top: 20px;
+                left: 20px;
+                right: 20px;
+                transform: none;
+                font-size: 14px;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        Drag the circle around • Tap to transform to pill • Tap again to return to circle
+    </div>
+    
+    <div class="widget" id="widget">
+        <div class="content">●</div>
+    </div>
+
+    <script>
+        const widget = document.getElementById('widget');
+        const content = widget.querySelector('.content');
+        let isPill = false;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let widgetStart = { x: 0, y: 0 };
+
+        // Mouse/touch event handlers
+        function getEventPos(e) {
+            if (e.touches) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function startDrag(e) {
+            if (isPill) return; // Don't drag when in pill mode
+            
+            isDragging = true;
+            const pos = getEventPos(e);
+            dragStart = pos;
+            
+            const rect = widget.getBoundingClientRect();
+            widgetStart = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+            
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging || isPill) return;
+            
+            const pos = getEventPos(e);
+            const deltaX = pos.x - dragStart.x;
+            const deltaY = pos.y - dragStart.y;
+            
+            const newX = widgetStart.x + deltaX;
+            const newY = widgetStart.y + deltaY;
+            
+            // Keep widget within viewport bounds
+            const maxX = window.innerWidth - 40;
+            const maxY = window.innerHeight - 40;
+            const minX = 40;
+            const minY = 40;
+            
+            const clampedX = Math.max(minX, Math.min(maxX, newX));
+            const clampedY = Math.max(minY, Math.min(maxY, newY));
+            
+            widget.style.left = clampedX + 'px';
+            widget.style.top = clampedY + 'px';
+            widget.style.transform = 'translate(-50%, -50%)';
+            
+            e.preventDefault();
+        }
+
+        function endDrag(e) {
+            if (!isDragging) {
+                // This was a tap/click, not a drag
+                toggleShape();
+            }
+            isDragging = false;
+        }
+
+        function toggleShape() {
+            isPill = !isPill;
+            
+            if (isPill) {
+                widget.classList.add('pill');
+                content.textContent = 'EXPANDED';
+            } else {
+                widget.classList.remove('pill');
+                content.textContent = '●';
+            }
+        }
+
+        // Mouse events
+        widget.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events
+        widget.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', endDrag);
+
+        // Prevent context menu on long press
+        widget.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (isPill) {
+                // Recalculate pill width on resize
+                widget.style.width = `calc(100vw - 40px)`;
+            }
+        });
+    </script>
+</body>
+</html>
