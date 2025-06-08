@@ -97,6 +97,29 @@
             text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
+        /* Pill Player State */
+        .player-pill {
+            width: calc(100vw - 40px);
+            height: 80px;
+            border-radius: 40px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+            padding: 12px 24px;
+            display: none;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .player-pill.active {
+            display: flex;
+        }
+
         /* Expanded Player State */
         .player-expanded {
             width: 320px;
@@ -117,7 +140,107 @@
             display: flex;
         }
 
-        /* Album Art */
+        /* Pill Content Layout */
+        .pill-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 16px;
+        }
+
+        .pill-artwork {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .pill-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pill-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pill-artist {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pill-progress {
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .pill-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+            width: 35%;
+            transition: width 0.1s ease;
+        }
+
+        .pill-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .pill-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .pill-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .pill-play-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+        }
+
+        .pill-play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+        }
         .album-art {
             width: 200px;
             height: 200px;
@@ -282,6 +405,30 @@
                 right: 20px !important;
             }
             
+            .player-pill {
+                width: calc(100vw - 20px);
+                left: 10px;
+                padding: 12px 20px;
+            }
+            
+            .pill-content {
+                gap: 12px;
+            }
+            
+            .pill-artwork {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+            
+            .pill-title {
+                font-size: 15px;
+            }
+            
+            .pill-artist {
+                font-size: 12px;
+            }
+            
             .instructions {
                 left: 20px;
                 right: 20px;
@@ -294,7 +441,7 @@
 <body>
     <!-- Instructions -->
     <div class="instructions">
-        Drag orb around • Tap to play/pause • Long press to expand • Drag to edge to dock
+        Drag orb around • Tap to play/pause • Long press for pill mode • Double tap for full player
     </div>
 
     <!-- Snap Zones -->
@@ -311,7 +458,24 @@
             <div class="play-icon">▶</div>
         </div>
 
-        <!-- Expanded Player -->
+        <!-- Pill Player -->
+        <div class="player-pill" id="playerPill">
+            <div class="pill-content">
+                <div class="pill-artwork">♪</div>
+                <div class="pill-info">
+                    <div class="pill-title">Ambient Dreams</div>
+                    <div class="pill-artist">Digital Soundscape</div>
+                    <div class="pill-progress">
+                        <div class="pill-progress-fill" id="pillProgressFill"></div>
+                    </div>
+                </div>
+                <div class="pill-controls">
+                    <button class="pill-btn">⏮</button>
+                    <button class="pill-btn pill-play-btn" id="pillPlayBtn">▶</button>
+                    <button class="pill-btn">⏭</button>
+                </div>
+            </div>
+        </div>
         <div class="player-expanded" id="playerExpanded">
             <div class="album-art"></div>
             
@@ -360,17 +524,23 @@
     <script>
         const audioPlayer = document.getElementById('audioPlayer');
         const playerOrb = document.getElementById('playerOrb');
+        const playerPill = document.getElementById('playerPill');
         const playerExpanded = document.getElementById('playerExpanded');
         const playIcon = playerOrb.querySelector('.play-icon');
         const mainPlayBtn = document.getElementById('mainPlayBtn');
+        const pillPlayBtn = document.getElementById('pillPlayBtn');
         const progressFill = document.getElementById('progressFill');
+        const pillProgressFill = document.getElementById('pillProgressFill');
         
         let isPlaying = false;
         let isExpanded = false;
+        let isPill = false;
         let isDragging = false;
         let isEdgeDocked = false;
         let longPressTimer = null;
+        let doubleTapTimer = null;
         let dragStartTime = 0;
+        let lastTapTime = 0;
         let dragStart = { x: 0, y: 0 };
         let playerStart = { x: 0, y: 0 };
 
@@ -391,7 +561,7 @@
         }
 
         function startDrag(e) {
-            if (isExpanded) return;
+            if (isExpanded || isPill) return;
             
             isDragging = false;
             dragStartTime = Date.now();
@@ -404,10 +574,10 @@
                 y: rect.top + rect.height / 2
             };
 
-            // Long press detection
+            // Long press detection for pill mode
             longPressTimer = setTimeout(() => {
                 if (!isDragging) {
-                    expandPlayer();
+                    expandToPill();
                 }
             }, 500);
             
@@ -415,7 +585,7 @@
         }
 
         function drag(e) {
-            if (isExpanded) return;
+            if (isExpanded || isPill) return;
             
             const pos = getEventPos(e);
             const deltaX = pos.x - dragStart.x;
@@ -460,8 +630,16 @@
             hideSnapZones();
             
             if (!isDragging && Date.now() - dragStartTime < 500) {
-                // Quick tap - toggle play
-                togglePlay();
+                // Check for double tap
+                const now = Date.now();
+                if (now - lastTapTime < 300) {
+                    // Double tap - go to full expanded
+                    expandPlayer();
+                } else {
+                    // Single tap - toggle play
+                    togglePlay();
+                }
+                lastTapTime = now;
             } else if (isDragging) {
                 // Snap to nearest corner if close enough
                 snapToNearestCorner();
@@ -521,8 +699,25 @@
             }
         }
 
+        function expandToPill() {
+            if (isPill || isExpanded) return;
+            
+            isPill = true;
+            playerOrb.style.display = 'none';
+            playerPill.classList.add('active');
+            
+            // Update pill play button state
+            pillPlayBtn.textContent = isPlaying ? '⏸' : '▶';
+        }
+
         function expandPlayer() {
             if (isExpanded) return;
+            
+            // Close pill if open
+            if (isPill) {
+                isPill = false;
+                playerPill.classList.remove('active');
+            }
             
             isExpanded = true;
             playerOrb.style.display = 'none';
@@ -535,9 +730,17 @@
         }
 
         function collapsePlayer() {
-            isExpanded = false;
+            if (isExpanded) {
+                isExpanded = false;
+                playerExpanded.classList.remove('active');
+            }
+            
+            if (isPill) {
+                isPill = false;
+                playerPill.classList.remove('active');
+            }
+            
             playerOrb.style.display = 'flex';
-            playerExpanded.classList.remove('active');
         }
 
         function togglePlay() {
@@ -546,11 +749,13 @@
             if (isPlaying) {
                 playIcon.textContent = '⏸';
                 mainPlayBtn.textContent = '⏸';
+                pillPlayBtn.textContent = '⏸';
                 playerOrb.classList.add('playing');
                 animateProgress();
             } else {
                 playIcon.textContent = '▶';
                 mainPlayBtn.textContent = '▶';
+                pillPlayBtn.textContent = '▶';
                 playerOrb.classList.remove('playing');
             }
         }
@@ -559,8 +764,12 @@
             if (!isPlaying) return;
             
             const currentWidth = parseInt(progressFill.style.width) || 35;
+            const pillCurrentWidth = parseInt(pillProgressFill.style.width) || 35;
+            
             if (currentWidth < 100) {
-                progressFill.style.width = (currentWidth + 0.5) + '%';
+                const newWidth = (currentWidth + 0.5) + '%';
+                progressFill.style.width = newWidth;
+                pillProgressFill.style.width = newWidth;
                 setTimeout(animateProgress, 100);
             }
         }
@@ -576,10 +785,18 @@
         document.addEventListener('touchend', endDrag);
 
         mainPlayBtn.addEventListener('click', togglePlay);
+        pillPlayBtn.addEventListener('click', togglePlay);
 
         // Close expanded player when clicking outside
         playerExpanded.addEventListener('click', (e) => {
             if (e.target === playerExpanded) {
+                collapsePlayer();
+            }
+        });
+
+        // Close pill when clicking outside
+        playerPill.addEventListener('click', (e) => {
+            if (e.target === playerPill) {
                 collapsePlayer();
             }
         });
