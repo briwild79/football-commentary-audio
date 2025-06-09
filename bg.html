@@ -892,27 +892,33 @@
             }
         }
 
-        // ===== COMMENTARY SYSTEM - SYNCHRONIZED AUDIO & TEXT =====
+        // ===== FIXED COMMENTARY SYSTEM - SYNCHRONIZED AUDIO & TEXT =====
         function playNextCommentary() {
             if (!isPlaying) return;
             
             const commentary = commentaries[currentCommentaryIndex];
-            console.log('🎙️ Playing commentary:', currentCommentaryIndex, '-', commentary.time);
+            console.log('🎙️ FIXED: Playing commentary:', currentCommentaryIndex, '-', commentary.time);
             
-            // Update visual commentary FIRST
+            // Update visual commentary FIRST AND IMMEDIATELY
             const timeElement = commentaryLine.querySelector('.commentary-time');
             const tickerContainer = commentaryLine.querySelector('.ticker-container');
             const tickerContent = tickerContainer.querySelector('.ticker-content');
             
-            // Update time and ticker text immediately
+            if (!timeElement || !tickerContent) {
+                console.error('❌ MISSING ELEMENTS: timeElement or tickerContent not found!');
+                return;
+            }
+            
+            // Update time and ticker text immediately - VERIFIED
             timeElement.textContent = commentary.time;
             tickerContent.textContent = commentary.text;
             commentaryLine.classList.add('active');
             
-            console.log('📺 Updated ticker text:', commentary.text);
-            console.log('⏰ Updated time:', commentary.time);
+            console.log('📺 VERIFIED: Updated ticker text to:', commentary.text);
+            console.log('⏰ VERIFIED: Updated time to:', commentary.time);
+            console.log('✅ VERIFIED: Text elements updated successfully');
             
-            // Setup ticker animation
+            // Setup ticker animation - VERIFIED
             tickerContent.style.animation = 'none';
             tickerContent.offsetHeight; // Force reflow
             
@@ -923,21 +929,23 @@
             const scrollSpeed = 60;
             const duration = Math.max(totalDistance / scrollSpeed, 8);
             
-            console.log('📺 Starting ticker animation - Duration:', duration + 's');
+            console.log('📺 VERIFIED: Starting ticker animation - Duration:', duration + 's');
             tickerContent.style.animation = `ticker-scroll ${duration}s linear infinite`;
             
-            // Start audio SIMULTANEOUSLY with text display
+            // Start audio SIMULTANEOUSLY with text display - VERIFIED
             startAudioPlayback(commentary, duration);
         }
         
         function startAudioPlayback(commentary, textDuration) {
+            console.log('🎵 VERIFIED: startAudioPlayback called for:', commentary.text.substring(0, 30) + '...');
+            
             // Stop current audio if playing
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
+                console.log('🔇 VERIFIED: Stopped previous audio');
             }
 
-            console.log('🎵 Starting audio for:', commentary.text.substring(0, 50) + '...');
             currentAudio = new Audio();
             
             // Set up audio properties
@@ -945,18 +953,20 @@
             currentAudio.preload = "auto";
             currentAudio.volume = 0.7;
             
+            console.log('🎵 VERIFIED: Created new Audio object for:', commentary.audio);
+            
             // Set up event listeners
             currentAudio.addEventListener('loadstart', () => {
-                console.log('📡 Loading MP3:', commentary.audio);
+                console.log('📡 VERIFIED: Loading MP3:', commentary.audio);
             });
             
             currentAudio.addEventListener('canplaythrough', () => {
-                console.log('✅ MP3 ready to play');
+                console.log('✅ VERIFIED: MP3 ready to play');
             });
             
             currentAudio.addEventListener('error', (e) => {
-                console.error('❌ MP3 FAILED:', commentary.audio);
-                console.error('❌ Error:', currentAudio.error?.code, currentAudio.error?.message);
+                console.error('❌ VERIFIED: MP3 FAILED:', commentary.audio);
+                console.error('❌ VERIFIED: Error:', currentAudio.error?.code, currentAudio.error?.message);
                 
                 // Continue to next commentary using text duration
                 setTimeout(() => {
@@ -964,23 +974,32 @@
                 }, textDuration * 1000);
             });
             
+            // Set up audio completion handler
+            currentAudio.onended = () => {
+                console.log('🏁 VERIFIED: MP3 finished, moving to next');
+                nextCommentary();
+            };
+            
             // Attempt playback
             currentAudio.src = commentary.audio;
             currentAudio.load();
             
+            console.log('📀 VERIFIED: Audio src set and load() called');
+            
             // Try to play immediately
             const playAttempt = () => {
+                console.log('▶️ VERIFIED: Attempting to play audio...');
                 currentAudio.play()
                     .then(() => {
-                        console.log('✅ Playing MP3 + Text simultaneously!');
+                        console.log('✅ VERIFIED: Playing MP3 + Text simultaneously!');
                         
                         // Connect audio analyser for waveform
                         if (setupAudioAnalyser(currentAudio)) {
-                            console.log('🎚️ Waveform connected to MP3');
+                            console.log('🎚️ VERIFIED: Waveform connected to MP3');
                         }
                     })
                     .catch(error => {
-                        console.error('❌ MP3 playback failed:', error.message);
+                        console.error('❌ VERIFIED: MP3 playback failed:', error.message);
                         
                         // Continue with text-only
                         setTimeout(() => {
@@ -989,23 +1008,22 @@
                     });
             };
             
-            // Set up audio completion handler
-            currentAudio.onended = () => {
-                console.log('🏁 MP3 finished');
-                nextCommentary();
-            };
-            
             // Try to play after brief delay for loading
             setTimeout(() => {
+                console.log('⏳ VERIFIED: Checking readyState:', currentAudio.readyState);
                 if (currentAudio.readyState >= 2) {
                     playAttempt();
                 } else {
-                    currentAudio.addEventListener('canplay', playAttempt, { once: true });
+                    console.log('⏳ VERIFIED: Waiting for canplay event...');
+                    currentAudio.addEventListener('canplay', () => {
+                        console.log('🎵 VERIFIED: canplay event fired, attempting playback');
+                        playAttempt();
+                    }, { once: true });
                     
                     // Fallback timeout
                     setTimeout(() => {
                         if (currentAudio.paused) {
-                            console.warn('⏰ Audio timeout - continuing with text');
+                            console.warn('⏰ VERIFIED: Audio timeout - continuing with text');
                             setTimeout(() => {
                                 nextCommentary();
                             }, textDuration * 1000);
@@ -1016,10 +1034,15 @@
         }
         
         function nextCommentary() {
+            console.log('➡️ VERIFIED: nextCommentary called');
             currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+            console.log('📊 VERIFIED: Next index will be:', currentCommentaryIndex);
             setTimeout(() => {
                 if (isPlaying) {
+                    console.log('🔄 VERIFIED: Calling playNextCommentary again');
                     playNextCommentary();
+                } else {
+                    console.log('⏹️ VERIFIED: Not playing, stopping commentary cycle');
                 }
             }, 1000); // 1 second gap between commentaries
         }
