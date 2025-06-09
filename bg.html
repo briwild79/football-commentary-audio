@@ -286,7 +286,15 @@
             opacity: 0.8;
         }
 
-        /* ===== WIDGET BAR LAYOUT ===== */
+        /* ===== MOBILE-FIRST RESPONSIVE DESIGN ===== */
+        
+        /* Mobile viewport meta tag handling */
+        @viewport {
+            width: device-width;
+            initial-scale: 1;
+        }
+
+        /* ===== WIDGET BAR LAYOUT - MOBILE OPTIMIZED ===== */
         .widget-bar {
             display: flex;
             align-items: center;
@@ -295,9 +303,11 @@
             gap: var(--space-md);
             position: relative;
             z-index: 2;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* ===== PLAY BUTTON ===== */
+        /* ===== PLAY BUTTON - RESPONSIVE ===== */
         .play-button {
             width: var(--button-size);
             height: var(--button-size);
@@ -309,7 +319,7 @@
             align-items: center;
             justify-content: center;
             transition: all var(--transition-normal);
-            flex-shrink: 0;
+            flex: 0 0 auto;
             position: relative;
         }
 
@@ -353,6 +363,229 @@
         @keyframes pulse-dot {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.2); }
+        }
+
+        /* ===== MATCH INFO - RESPONSIVE ===== */
+        .match-info {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-size: var(--font-size-medium);
+            color: var(--color-text-primary);
+            line-height: 1.33;
+            flex-shrink: 0;
+            justify-content: space-between;
+        }
+
+        .team-left {
+            font-weight: var(--font-weight-medium);
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--color-text-primary);
+            letter-spacing: -0.24px;
+            margin-right: var(--space-sm);
+            max-width: 35%;
+        }
+
+        .team-right {
+            font-weight: var(--font-weight-medium);
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--color-text-primary);
+            letter-spacing: -0.24px;
+            margin-left: var(--space-sm);
+            max-width: 35%;
+        }
+
+        .score {
+            font-size: var(--font-size-large);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-primary);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: normal;
+            text-align: center;
+            flex: 0 0 auto;
+            min-width: 50px;
+            padding: 0 var(--space-sm);
+        }
+
+        /* ===== COMMENTARY LINE - MOBILE RESPONSIVE ===== */
+        .commentary-line {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            min-height: 20px;
+            font-size: var(--font-size-body);
+            color: var(--color-text-secondary);
+            line-height: 1.38;
+            letter-spacing: -0.08px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .commentary-time {
+            color: var(--color-primary);
+            font-weight: var(--font-weight-medium);
+            flex: 0 0 auto;
+            font-variant-numeric: tabular-nums;
+            min-width: 30px;
+            display: block;
+            visibility: visible;
+        }
+
+        /* ===== TICKER CONTAINER - RESPONSIVE ===== */
+        .ticker-container {
+            flex: 1 1 auto;
+            position: relative;
+            overflow: hidden;
+            height: 20px;
+            background: transparent;
+            width: 100%;
+            min-width: 0;
+            max-width: none;
+        }
+
+        .ticker-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            white-space: nowrap;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            animation: ticker-scroll 15s linear infinite;
+            will-change: transform;
+            transform: translateZ(0);
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
+        }
+
+        /* ===== MOBILE BREAKPOINTS ===== */
+        
+        /* Small mobile devices */
+        @media screen and (max-width: 480px) {
+            .widget-bar {
+                padding: 8px 12px;
+                min-height: 60px;
+                gap: 8px;
+            }
+
+            .content-area {
+                max-width: calc(100vw - 100px);
+            }
+
+            .match-info {
+                font-size: 14px;
+            }
+
+            .team-left,
+            .team-right {
+                max-width: 30%;
+                margin: 0 4px;
+            }
+
+            .score {
+                font-size: 16px;
+                min-width: 40px;
+                padding: 0 4px;
+            }
+
+            .commentary-line {
+                font-size: 13px;
+                gap: 6px;
+            }
+
+            .commentary-time {
+                min-width: 25px;
+                font-size: 13px;
+            }
+
+            .ticker-content {
+                font-size: 13px;
+            }
+
+            /* Buttons smaller on small screens */
+            :root {
+                --button-size: 40px;
+            }
+        }
+
+        /* Medium mobile devices */
+        @media screen and (min-width: 481px) and (max-width: 768px) {
+            .widget-bar {
+                padding: 10px 14px;
+                min-height: 64px;
+                gap: 10px;
+            }
+
+            .content-area {
+                max-width: calc(100vw - 110px);
+            }
+
+            .match-info {
+                font-size: 15px;
+            }
+
+            .team-left,
+            .team-right {
+                max-width: 32%;
+            }
+
+            .score {
+                font-size: 18px;
+                min-width: 45px;
+            }
+
+            .commentary-line {
+                font-size: 14px;
+            }
+
+            .commentary-time {
+                min-width: 28px;
+                font-size: 14px;
+            }
+
+            .ticker-content {
+                font-size: 14px;
+            }
+
+            :root {
+                --button-size: 44px;
+            }
+        }
+
+        /* Tablets and larger */
+        @media screen and (min-width: 769px) {
+            .content-area {
+                max-width: calc(100vw - 120px);
+            }
+
+            .team-left,
+            .team-right {
+                max-width: 35%;
+            }
+        }
+
+        /* Landscape orientation adjustments */
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            .widget-bar {
+                min-height: 50px;
+                padding: 6px 12px;
+            }
+
+            :root {
+                --button-size: 36px;
+            }
         }
 
         /* ===== CONTENT AREA ===== */
