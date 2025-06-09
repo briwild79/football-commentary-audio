@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Commentary Widget with Real Audio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            color: #1d1d1f;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== COMMENTARY WIDGET ===== */
+        .commentary-widget {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        /* ===== SUN GLOW EFFECT ===== */
+        .sun-glow {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            width: 500px;
+            height: 120px;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .commentary-widget.playing .sun-glow {
+            opacity: 1;
+        }
+
+        .sun-orb {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            width: 140px;
+            height: 100px;
+            transform: translateX(-50%);
+            background: radial-gradient(ellipse 140px 100px at center 30%, 
+                rgba(255, 105, 0, 0.15) 0%,
+                rgba(255, 139, 0, 0.1) 20%,
+                rgba(255, 171, 0, 0.06) 40%,
+                rgba(255, 193, 7, 0.03) 60%,
+                rgba(255, 224, 130, 0.015) 80%,
+                rgba(255, 255, 255, 0.005) 95%,
+                transparent 100%);
+            border-radius: 50%;
+            animation: sun-pulse 2.5s ease-in-out infinite;
+        }
+
+        .sun-rays {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            width: 450px;
+            height: 120px;
+            transform: translateX(-50%);
+            background: radial-gradient(ellipse 450px 120px at center 25%,
+                rgba(255, 105, 0, 0.04) 0%,
+                rgba(255, 139, 0, 0.03) 15%,
+                rgba(255, 171, 0, 0.02) 30%,
+                rgba(255, 193, 7, 0.012) 45%,
+                rgba(255, 224, 130, 0.008) 60%,
+                rgba(255, 245, 200, 0.004) 75%,
+                rgba(255, 255, 255, 0.002) 90%,
+                transparent 100%);
+            animation: sun-rays-drift 3s ease-in-out infinite;
+        }
+
+        .sun-atmosphere {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            width: 500px;
+            height: 140px;
+            transform: translateX(-50%);
+            background: radial-gradient(ellipse 500px 140px at center 20%,
+                rgba(255, 105, 0, 0.02) 0%,
+                rgba(255, 139, 0, 0.015) 20%,
+                rgba(255, 171, 0, 0.01) 35%,
+                rgba(255, 193, 7, 0.006) 50%,
+                rgba(255, 224, 130, 0.003) 65%,
+                rgba(255, 245, 200, 0.0015) 80%,
+                rgba(255, 255, 255, 0.0008) 95%,
+                transparent 100%);
+            animation: sun-atmosphere-breathe 4s ease-in-out infinite;
+        }
+
+        /* Enhanced movement with subtle appearance */
+        @keyframes sun-pulse {
+            0%, 100% { 
+                transform: translateX(-50%) translateY(0px) scale(1) rotate(0deg);
+                opacity: 0.7;
+            }
+            25% { 
+                transform: translateX(-50%) translateY(-2px) scale(1.06) rotate(1deg);
+                opacity: 0.9;
+            }
+            50% { 
+                transform: translateX(-50%) translateY(-3px) scale(1.08) rotate(0deg);
+                opacity: 1;
+            }
+            75% { 
+                transform: translateX(-50%) translateY(-1px) scale(1.04) rotate(-1deg);
+                opacity: 0.85;
+            }
+        }
+
+        @keyframes sun-rays-drift {
+            0%, 100% { 
+                transform: translateX(-50%) translateY(0px) scaleY(1) scaleX(1) rotate(0deg);
+                opacity: 0.6;
+            }
+            20% { 
+                transform: translateX(-50%) translateY(3px) scaleY(1.03) scaleX(1.02) rotate(0.5deg);
+                opacity: 0.8;
+            }
+            40% { 
+                transform: translateX(-50%) translateY(6px) scaleY(1.06) scaleX(1.04) rotate(0deg);
+                opacity: 0.9;
+            }
+            60% { 
+                transform: translateX(-50%) translateY(9px) scaleY(1.08) scaleX(1.05) rotate(-0.5deg);
+                opacity: 0.85;
+            }
+            80% { 
+                transform: translateX(-50%) translateY(6px) scaleY(1.04) scaleX(1.03) rotate(0.3deg);
+                opacity: 0.75;
+            }
+        }
+
+        @keyframes sun-atmosphere-breathe {
+            0%, 100% { 
+                transform: translateX(-50%) translateY(0px) scale(1) rotate(0deg);
+                opacity: 0.5;
+            }
+            16% { 
+                transform: translateX(-50%) translateY(2px) scale(1.02) rotate(0.8deg);
+                opacity: 0.65;
+            }
+            33% { 
+                transform: translateX(-50%) translateY(4px) scale(1.04) rotate(0deg);
+                opacity: 0.75;
+            }
+            50% { 
+                transform: translateX(-50%) translateY(7px) scale(1.06) rotate(-0.8deg);
+                opacity: 0.8;
+            }
+            66% { 
+                transform: translateX(-50%) translateY(9px) scale(1.07) rotate(0.5deg);
+                opacity: 0.7;
+            }
+            83% { 
+                transform: translateX(-50%) translateY(6px) scale(1.03) rotate(-0.3deg);
+                opacity: 0.6;
+            }
+        }
+
+        /* Reactive intensity classes - more subtle appearance, more movement */
+        .sun-glow.intensity-low {
+            opacity: 0.4;
+        }
+
+        .sun-glow.intensity-medium {
+            opacity: 0.6;
+        }
+
+        .sun-glow.intensity-high {
+            opacity: 0.8;
+        }
+
+        .sun-glow.intensity-high .sun-orb {
+            animation-duration: 1.8s;
+            transform: translateX(-50%) scale(1.15);
+        }
+
+        .sun-glow.intensity-high .sun-rays {
+            animation-duration: 2.2s;
+            opacity: 0.9;
+        }
+
+        .sun-glow.intensity-high .sun-atmosphere {
+            animation-duration: 2.8s;
+            opacity: 0.8;
+        }
+
+        /* Enhanced Animated Progress Bar */
+        .progress-bar {
+            position: absolute;
+            top: 0px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 5;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #ff6900 0%, 
+                #ff8f00 25%,
+                #ffab00 50%,
+                #ff8f00 75%,
+                #ff6900 100%);
+            background-size: 200% 100%;
+            width: 91.1%; /* 82 minutes / 90 minutes = 91.1% */
+            transition: width 0.5s ease;
+            position: relative;
+            animation: progress-energy 2.5s ease-in-out infinite;
+        }
+
+        @keyframes progress-energy {
+            0%, 100% { 
+                background-position: 0% 50%;
+            }
+            50% { 
+                background-position: 100% 50%;
+            }
+        }
+
+        /* ===== MAIN WIDGET BAR ===== */
+        .widget-bar {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            min-height: 72px;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Play Button */
+        .play-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6900 0%, #ff6900 70%, #ff8f00 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #ff7a00 0%, #ff7a00 70%, #ff9f00 100%);
+        }
+
+        .play-button:focus {
+            outline: 2px solid #ff6900;
+            outline-offset: 2px;
+        }
+
+        .play-button svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .live-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #ff3b3b;
+            border-radius: 50%;
+            border: 2px solid white;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .play-button.playing .live-dot {
+            opacity: 1;
+            transform: scale(1);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* ===== CONTENT AREA ===== */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        /* Match Info - Typography: Teams 18px */
+        .match-info {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-size: 18px;
+            color: #1d1d1f;
+            line-height: 1.33;
+        }
+
+        .team-left {
+            font-weight: 590;
+            flex: 1;
+            min-width: 0;
+            max-width: 45%;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #1d1d1f;
+            letter-spacing: -0.24px;
+            margin-right: 12px;
+        }
+
+        .team-right {
+            font-weight: 590;
+            flex: 1;
+            min-width: 0;
+            max-width: 45%;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #1d1d1f;
+            letter-spacing: -0.24px;
+            margin-left: 12px;
+        }
+
+        /* Score - Typography: 22px (Most prominent) */
+        .score {
+            font-size: 22px;
+            font-weight: 600;
+            color: #ff6900;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: normal;
+            text-align: center;
+            flex-shrink: 0;
+            min-width: 60px;
+        }
+
+        /* Commentary Line - Typography: 16px (Accessible) */
+        .commentary-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 20px;
+            font-size: 16px;
+            color: #86868b;
+            line-height: 1.38;
+            letter-spacing: -0.08px;
+        }
+
+        .commentary-line.active {
+            color: #1d1d1f;
+            font-weight: 400;
+        }
+
+        .commentary-time {
+            color: #ff6900;
+            font-weight: 590;
+            flex-shrink: 0;
+            font-variant-numeric: tabular-nums;
+            min-width: 30px;
+        }
+
+        /* ===== TICKER SYSTEM ===== */
+        .ticker-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            height: 20px;
+            background: transparent;
+        }
+
+        .ticker-content {
+            position: absolute;
+            white-space: nowrap;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            animation: ticker-scroll 15s linear infinite;
+        }
+
+        @keyframes ticker-scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Ticker Fade Effects */
+        .ticker-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, white, transparent);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ticker-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, white);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .commentary-line:hover .ticker-content {
+            animation-play-state: paused;
+        }
+
+        /* ===== WAVEFORM BUTTON ===== */
+        .waveform-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .waveform-button:focus {
+            outline: 2px solid #ff6900;
+            outline-offset: 2px;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: linear-gradient(180deg, 
+                #ffab00 0%, 
+                #ff8f00 50%,
+                #ff6900 100%);
+            border-radius: 2px;
+            opacity: 0.7;
+            transition: all 0.1s ease;
+            height: 4px;
+        }
+
+        .waveform-button.playing .wave-bar {
+            opacity: 1;
+        }
+
+        /* ===== EXPANDED CONTENT ===== */
+        .expanded-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .commentary-widget.expanded .expanded-content {
+            max-height: 300px;
+        }
+
+        .expanded-inner {
+            padding: 16px;
+        }
+
+        /* Game List */
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .game-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .game-item:hover {
+            border-color: #ff6900;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .game-item.active {
+            border-color: #ff6900;
+            background: #fff5f0;
+        }
+
+        .game-badge {
+            width: 32px;
+            height: 32px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        /* Settings */
+        .settings-bar {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .setting-option {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .setting-option:hover {
+            border-color: #ff6900;
+            color: #ff6900;
+        }
+
+        /* ===== ACCESSIBILITY ===== */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="commentary-widget" role="region" aria-label="Live match commentary">
+        <!-- Enhanced Animated Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+            
+        <div class="widget-bar">
+            <!-- Sun Glow Effect -->
+            <div class="sun-glow" id="sunGlow">
+                <div class="sun-atmosphere"></div>
+                <div class="sun-rays"></div>
+                <div class="sun-orb"></div>
+            </div>
+
+            <!-- Play Button -->
+            <button class="play-button" id="playButton" aria-label="Play live commentary" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true" id="playIcon">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true" id="pauseIcon" style="display: none;">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                </svg>
+                <div class="live-dot" aria-hidden="true"></div>
+                <span class="sr-only" id="playState">Paused</span>
+            </button>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Match Info -->
+                <div class="match-info">
+                    <span class="team-left">Man United</span>
+                    <span class="score" aria-label="Score: 1 to 2">1 - 2</span>
+                    <span class="team-right">Arsenal</span>
+                </div>
+
+                <!-- Commentary Line -->
+                <div class="commentary-line" id="commentaryLine">
+                    <span class="commentary-time">82'</span>
+                    <div class="ticker-container">
+                        <div class="ticker-content">
+                            Press play for live commentary with audio
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waveform Button -->
+            <button class="waveform-button" id="expandButton" aria-label="More options" aria-expanded="false">
+                <div class="waveform" id="waveform">
+                    <!-- Bars generated by JavaScript -->
+                </div>
+            </button>
+        </div>
+
+        <!-- Expanded Content -->
+        <div class="expanded-content" id="expandedContent">
+            <div class="expanded-inner">
+                <!-- Game List -->
+                <div class="game-list">
+                    <div class="game-item active" tabindex="0">
+                        <div class="game-badge">MU</div>
+                        <div class="match-info" style="margin: 0;">
+                            <span class="teams">Man United vs Arsenal</span>
+                            <span class="score">1-2</span>
+                            <span class="time">82'</span>
+                        </div>
+                    </div>
+                    <div class="game-item" tabindex="0">
+                        <div class="game-badge">LI</div>
+                        <div class="match-info" style="margin: 0;">
+                            <span class="teams">Liverpool vs Chelsea</span>
+                            <span class="score">0-0</span>
+                            <span class="time">12'</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="settings-bar">
+                    <button class="setting-option">English</button>
+                    <button class="setting-option">Voice: Sarah</button>
+                    <button class="setting-option">Speed: 1x</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== ELEMENT REFERENCES =====
+        const widget = document.querySelector('.commentary-widget');
+        const playButton = document.getElementById('playButton');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playState = document.getElementById('playState');
+        const expandButton = document.getElementById('expandButton');
+        const commentaryLine = document.getElementById('commentaryLine');
+        const waveform = document.getElementById('waveform');
+        const progressFill = document.getElementById('progressFill');
+        const sunGlow = document.getElementById('sunGlow');
+
+        // ===== AUDIO SETUP =====
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let currentAudio = null;
+        let animationId = null;
+
+        // ===== STATE MANAGEMENT =====
+        let isPlaying = false;
+        let isExpanded = false;
+        let currentCommentaryIndex = 0;
+        let currentMinute = 82; // Start at 82nd minute - progress bar should show 82/90 = 91.1%
+        let progressInterval = null;
+
+        // ===== COMMENTARY DATA =====
+        const commentaries = [
+            { 
+                time: "82'", 
+                text: "What a save! Martinez dives to his left and keeps out a powerful header from Kane! The crowd erupts as the goalkeeper shows incredible reflexes."
+            },
+            { 
+                time: "83'", 
+                text: "Corner kick for Arsenal. Saka steps up to take it... The players are jostling for position in the box as the winger prepares to deliver."
+            },
+            { 
+                time: "84'", 
+                text: "GOOOAAL! Saliba rises highest and powers the header into the net! Arsenal lead 2-1! What a crucial goal at this stage of the match!"
+            },
+            { 
+                time: "85'", 
+                text: "Manchester United immediately on the attack. Bruno Fernandes with a through ball... The Portuguese midfielder is orchestrating the comeback."
+            },
+            { 
+                time: "86'", 
+                text: "Rashford breaks free but the flag is up! Offside by the narrowest of margins. The VAR check confirms the assistant referee's decision."
+            },
+            { 
+                time: "87'", 
+                text: "Yellow card for Rice after a late challenge on Casemiro. The referee had no choice but to book the Arsenal midfielder for that tackle."
+            },
+            { 
+                time: "88'", 
+                text: "Free kick in a dangerous position for United. This could be their chance to equalize with just minutes remaining in this encounter."
+            }
+        ];
+
+        // ===== WAVEFORM SETUP =====
+        function createWaveform() {
+            for (let i = 0; i < 5; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                waveform.appendChild(bar);
+            }
+        }
+
+        function animateWaveform() {
+            const bars = waveform.querySelectorAll('.wave-bar');
+            
+            function animate() {
+                if (isPlaying) {
+                    const time = Date.now() / 100;
+                    bars.forEach((bar, index) => {
+                        const height = 4 + Math.sin(time + index * 0.5) * 15 + Math.random() * 10;
+                        bar.style.height = `${Math.max(4, height)}px`;
+                    });
+                    requestAnimationFrame(animate);
+                } else {
+                    bars.forEach(bar => {
+                        bar.style.height = '4px';
+                    });
+                }
+            }
+            animate();
+        }
+
+        // ===== TEXT-TO-SPEECH SYSTEM =====
+        function speakCommentary(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.15; // Slightly faster for sports excitement
+                utterance.pitch = 1.1;  // Slightly higher for energy
+                utterance.volume = 0.9;
+                
+                // Try to find the best available voice
+                const voices = speechSynthesis.getVoices();
+                console.log('🎙️ Available voices:', voices.map(v => v.name));
+                
+                // Preference order for sports commentary
+                const preferredVoices = [
+                    'Google UK English Male',
+                    'Microsoft David - English (United States)',
+                    'Microsoft Mark - English (United States)', 
+                    'Alex', // Mac
+                    'Daniel', // Mac British
+                    'Google US English'
+                ];
+                
+                let selectedVoice = null;
+                for (const preferredName of preferredVoices) {
+                    selectedVoice = voices.find(voice => 
+                        voice.name.includes(preferredName) || 
+                        voice.name === preferredName
+                    );
+                    if (selectedVoice) break;
+                }
+                
+                // Fallback to any English male voice
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(voice => 
+                        voice.lang.startsWith('en') && 
+                        (voice.name.toLowerCase().includes('male') ||
+                         voice.name.toLowerCase().includes('david') ||
+                         voice.name.toLowerCase().includes('mark') ||
+                         voice.name.toLowerCase().includes('alex'))
+                    );
+                }
+                
+                // Final fallback to any English voice
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(voice => voice.lang.startsWith('en'));
+                }
+                
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                    console.log('🎙️ Using voice:', selectedVoice.name);
+                } else {
+                    console.log('🎙️ Using default voice');
+                }
+                
+                // Add some drama for sports moments
+                if (text.includes('GOAL') || text.includes('SAVE')) {
+                    utterance.rate = 1.25;
+                    utterance.pitch = 1.2;
+                }
+                
+                return new Promise((resolve) => {
+                    utterance.onend = () => {
+                        console.log('🎤 Speech finished');
+                        resolve();
+                    };
+                    
+                    utterance.onerror = (error) => {
+                        console.error('🎤 Speech error:', error);
+                        resolve(); // Still resolve to continue
+                    };
+                    
+                    speechSynthesis.speak(utterance);
+                    console.log('🎤 Speaking:', text.substring(0, 50) + '...');
+                });
+                
+            } else {
+                console.warn('🎤 Speech synthesis not supported');
+                return Promise.resolve();
+            }
+        }
+
+        // ===== SUN GLOW AUDIO REACTIVITY =====
+        function updateSunGlow() {
+            if (!isPlaying || !sunGlow) return;
+            
+            let intensity = 'low';
+            
+            if (analyser && dataArray) {
+                analyser.getByteFrequencyData(dataArray);
+                const sum = dataArray.reduce((a, b) => a + b, 0);
+                const average = sum / dataArray.length;
+                
+                if (average > 80) {
+                    intensity = 'high';
+                } else if (average > 40) {
+                    intensity = 'medium';
+                } else {
+                    intensity = 'low';
+                }
+            } else {
+                const time = Date.now() / 1000;
+                const synthetic = Math.sin(time * 0.5) * 0.5 + 0.5;
+                
+                if (synthetic > 0.7) {
+                    intensity = 'high';
+                } else if (synthetic > 0.4) {
+                    intensity = 'medium';
+                } else {
+                    intensity = 'low';
+                }
+                
+                const currentText = commentaryLine.querySelector('.commentary-text')?.textContent || '';
+                if (currentText.includes('GOAL') || currentText.includes('SAVE') || currentText.includes('What a')) {
+                    intensity = 'high';
+                }
+            }
+            
+            sunGlow.className = `sun-glow intensity-${intensity}`;
+        }
+
+        // ===== AUDIO-REACTIVE WAVEFORM =====
+        function animateWaveform() {
+            const bars = waveform.querySelectorAll('.wave-bar');
+            
+            if (bars.length === 0) {
+                console.error('❌ No waveform bars found! Recreating...');
+                createWaveform();
+                return;
+            }
+            
+            if (analyser && dataArray && isPlaying && currentAudio && !currentAudio.paused) {
+                analyser.getByteFrequencyData(dataArray);
+                
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                const averageVolume = sum / dataArray.length;
+                const volumeBoost = 1 + (averageVolume / 50);
+                
+                bars.forEach((bar, index) => {
+                    const dataIndex = Math.min(5 + index * 2, dataArray.length - 1);
+                    const audioValue = dataArray[dataIndex] || 0;
+                    
+                    const maxHeights = [28, 36, 44, 36, 28];
+                    const minHeight = 4;
+                    const maxHeight = maxHeights[index];
+                    
+                    const audioIntensity = (audioValue / 255) * volumeBoost;
+                    const baseVariation = [0.8, 1.0, 1.2, 1.0, 0.8][index] || 1.0;
+                    const dynamicHeight = minHeight + (audioIntensity * (maxHeight - minHeight) * baseVariation);
+                    
+                    const time = Date.now() / 200;
+                    const wave = audioIntensity > 0.1 ? Math.sin(time + index * 0.5) * 2 : 0;
+                    
+                    const totalHeight = Math.max(minHeight, Math.min(maxHeight, dynamicHeight + wave));
+                    
+                    bar.style.height = `${totalHeight}px`;
+                    bar.style.opacity = '1';
+                });
+            } else if (!isPlaying) {
+                // Idle breathing animation
+                const time = Date.now() / 300;
+                bars.forEach((bar, index) => {
+                    const minHeight = 4;
+                    const pulseAmount = 4;
+                    const pulse = Math.sin(time + index * 0.2) * pulseAmount;
+                    const height = Math.max(minHeight, minHeight + pulse);
+                    
+                    bar.style.height = `${height}px`;
+                    bar.style.opacity = '0.7';
+                });
+            } else {
+                // Fallback synthetic animation when playing but no audio data
+                const time = Date.now() / 150;
+                bars.forEach((bar, index) => {
+                    const baseHeight = 4;
+                    const waveHeight = 8 + Math.sin(time + index * 0.8) * 6 + Math.sin(time * 0.5 + index) * 4;
+                    const randomHeight = Math.random() * 8;
+                    const totalHeight = baseHeight + Math.max(0, waveHeight + randomHeight);
+                    
+                    const opacity = 0.7 + (Math.sin(time + index * 0.5) + 1) * 0.15;
+                    
+                    bar.style.height = `${Math.min(24, Math.max(4, totalHeight))}px`;
+                    bar.style.opacity = Math.min(1, Math.max(0.7, opacity));
+                });
+            }
+            
+            updateSunGlow();
+            
+            if (isPlaying) {
+                animationId = requestAnimationFrame(animateWaveform);
+            }
+        }
+
+        // ===== PROGRESS MANAGEMENT =====
+        function updateProgress() {
+            const totalMatchTime = 90;
+            const progress = (currentMinute / totalMatchTime) * 100;
+            progressFill.style.width = `${Math.min(progress, 100)}%`;
+            
+            if (currentMinute < 90) {
+                currentMinute += 0.1;
+            } else if (currentMinute < 94) {
+                currentMinute += 0.05;
+            }
+        }
+
+        // ===== COMMENTARY SYSTEM =====
+        function playNextCommentary() {
+            if (!isPlaying) return;
+            
+            const commentary = commentaries[currentCommentaryIndex];
+            
+            // Clear existing classes
+            commentaryLine.classList.remove('active');
+            
+            // Get existing elements
+            const tickerContainer = commentaryLine.querySelector('.ticker-container');
+            const tickerContent = tickerContainer.querySelector('.ticker-content');
+            
+            // Update content
+            commentaryLine.querySelector('.commentary-time').textContent = commentary.time;
+            tickerContent.textContent = commentary.text;
+            
+            // Restart animation
+            tickerContent.style.animation = 'none';
+            tickerContent.offsetHeight; // Force reflow
+            
+            // Calculate duration more accurately for complete scroll-off
+            const textLength = commentary.text.length;
+            const containerWidth = tickerContainer.offsetWidth || 300;
+            
+            // Estimate text width (approximate 8px per character)
+            const estimatedTextWidth = textLength * 8;
+            
+            // Total distance: container width + text width + extra margin
+            const totalDistance = containerWidth + estimatedTextWidth + 50; // Extra 50px margin
+            
+            // Speed: 60 pixels per second (slightly slower for smoother reading)
+            const scrollSpeed = 60;
+            const duration = totalDistance / scrollSpeed;
+            
+            // Ensure minimum duration for readability
+            const finalDuration = Math.max(duration, 15); // At least 15 seconds
+            
+            tickerContent.style.animation = `ticker-scroll ${finalDuration}s linear infinite`;
+            
+            // Add active state
+            commentaryLine.classList.add('active');
+            
+            // Move to next commentary
+            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+            
+            // Schedule next commentary - wait for full scroll completion + buffer
+            setTimeout(() => {
+                if (isPlaying) {
+                    playNextCommentary();
+                }
+            }, (finalDuration + 1) * 1000); // Just 1 second buffer instead of 2
+        }
+
+        // ===== PLAY/PAUSE FUNCTIONALITY =====
+        playButton.addEventListener('click', () => {
+            if (!audioContext && !isPlaying) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            isPlaying = !isPlaying;
+            
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                playButton.classList.add('playing');
+                playButton.setAttribute('aria-pressed', 'true');
+                playState.textContent = 'Playing';
+                expandButton.classList.add('playing');
+                widget.classList.add('playing');
+                
+                playNextCommentary();
+                animateWaveform();
+                progressInterval = setInterval(updateProgress, 1000);
+                
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                playButton.classList.remove('playing');
+                playButton.setAttribute('aria-pressed', 'false');
+                playState.textContent = 'Paused';
+                expandButton.classList.remove('playing');
+                widget.classList.remove('playing');
+                commentaryLine.classList.remove('active');
+                
+                if (progressInterval) clearInterval(progressInterval);
+                if (animationId) cancelAnimationFrame(animationId);
+                
+                // Reset ticker
+                const tickerContent = commentaryLine.querySelector('.ticker-content');
+                if (tickerContent) {
+                    tickerContent.style.animation = 'none';
+                    tickerContent.textContent = 'Press play for live commentary with audio';
+                }
+                
+                animateWaveform();
+            }
+        });
+
+        // ===== EXPAND/COLLAPSE FUNCTIONALITY =====
+        expandButton.addEventListener('click', () => {
+            isExpanded = !isExpanded;
+            widget.classList.toggle('expanded', isExpanded);
+            expandButton.setAttribute('aria-expanded', isExpanded);
+        });
+
+        // ===== GAME SELECTION =====
+        document.querySelectorAll('.game-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.game-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                const teamNames = item.querySelector('.teams').textContent.split(' vs ');
+                const score = item.querySelector('.score').textContent;
+                
+                if (teamNames.length === 2) {
+                    widget.querySelector('.team-left').textContent = teamNames[0];
+                    widget.querySelector('.team-right').textContent = teamNames[1];
+                }
+                widget.querySelector('.widget-bar .score').textContent = score;
+                
+                isExpanded = false;
+                widget.classList.remove('expanded');
+                expandButton.setAttribute('aria-expanded', 'false');
+            });
+            
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    item.click();
+                }
+            });
+        });
+
+        // ===== INITIALIZATION =====
+        console.log('🎙️ Commentary Widget Loaded!');
+        createWaveform();
+    </script>
+</body>
+</html>
