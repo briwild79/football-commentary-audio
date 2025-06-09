@@ -892,31 +892,27 @@
             }
         }
 
-        // ===== COMMENTARY SYSTEM - YOUR MP3 FILES ONLY =====
+        // ===== COMMENTARY SYSTEM - SYNCHRONIZED AUDIO & TEXT =====
         function playNextCommentary() {
             if (!isPlaying) return;
             
             const commentary = commentaries[currentCommentaryIndex];
+            console.log('🎙️ Playing commentary:', currentCommentaryIndex, '-', commentary.time);
             
-            // Update visual commentary
+            // Update visual commentary FIRST
             const timeElement = commentaryLine.querySelector('.commentary-time');
             const tickerContainer = commentaryLine.querySelector('.ticker-container');
             const tickerContent = tickerContainer.querySelector('.ticker-content');
             
-            // Update time and ticker text
+            // Update time and ticker text immediately
             timeElement.textContent = commentary.time;
             tickerContent.textContent = commentary.text;
+            commentaryLine.classList.add('active');
             
-            console.log('📺 Updated ticker:', commentary.text.substring(0, 50) + '...');
+            console.log('📺 Updated ticker text:', commentary.text);
+            console.log('⏰ Updated time:', commentary.time);
             
-            // Check if this is a goal moment - NO VISUAL EFFECTS
-            if (commentary.text.toLowerCase().includes('goal') || 
-                commentary.text.toLowerCase().includes('goooal')) {
-                // Goal detection for audio/logic only - no visual styling
-                console.log('⚽ Goal moment detected (no visual effects)');
-            }
-            
-            // Restart ticker animation with better timing
+            // Setup ticker animation
             tickerContent.style.animation = 'none';
             tickerContent.offsetHeight; // Force reflow
             
@@ -927,137 +923,105 @@
             const scrollSpeed = 60;
             const duration = Math.max(totalDistance / scrollSpeed, 8);
             
-            console.log('📺 Starting ticker animation:', {
-                textLength,
-                containerWidth,
-                estimatedTextWidth,
-                duration: duration + 's'
-            });
-            
+            console.log('📺 Starting ticker animation - Duration:', duration + 's');
             tickerContent.style.animation = `ticker-scroll ${duration}s linear infinite`;
-            commentaryLine.classList.add('active');
             
+            // Start audio SIMULTANEOUSLY with text display
+            startAudioPlayback(commentary, duration);
+        }
+        
+        function startAudioPlayback(commentary, textDuration) {
             // Stop current audio if playing
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
             }
 
-            // ONLY USE YOUR MP3 FILES - NO FALLBACKS
-            console.log('🎵 Loading YOUR MP3 file:', commentary.audio);
+            console.log('🎵 Starting audio for:', commentary.text.substring(0, 50) + '...');
             currentAudio = new Audio();
             
-            // Set up CORS and preload settings
+            // Set up audio properties
             currentAudio.crossOrigin = "anonymous";
             currentAudio.preload = "auto";
             currentAudio.volume = 0.7;
             
-            // Set up event listeners BEFORE setting src
+            // Set up event listeners
             currentAudio.addEventListener('loadstart', () => {
-                console.log('📡 Started loading your MP3 file...');
-            });
-            
-            currentAudio.addEventListener('loadedmetadata', () => {
-                console.log('📊 MP3 metadata loaded, duration:', currentAudio.duration);
+                console.log('📡 Loading MP3:', commentary.audio);
             });
             
             currentAudio.addEventListener('canplaythrough', () => {
-                console.log('✅ Your MP3 file is ready to play!');
-            });
-            
-            currentAudio.addEventListener('progress', () => {
-                if (currentAudio.buffered.length > 0) {
-                    const buffered = (currentAudio.buffered.end(0) / currentAudio.duration) * 100;
-                    console.log(`📥 MP3 Buffered: ${buffered.toFixed(1)}%`);
-                }
+                console.log('✅ MP3 ready to play');
             });
             
             currentAudio.addEventListener('error', (e) => {
-                console.error('❌ YOUR MP3 FILE FAILED TO LOAD');
-                console.error('❌ Error details:', {
-                    code: currentAudio.error?.code,
-                    message: currentAudio.error?.message,
-                    url: commentary.audio
-                });
-                console.error('❌ NO FALLBACK - ONLY YOUR MP3 FILES WILL BE USED');
+                console.error('❌ MP3 FAILED:', commentary.audio);
+                console.error('❌ Error:', currentAudio.error?.code, currentAudio.error?.message);
                 
-                // Continue to next commentary after delay (visual only)
+                // Continue to next commentary using text duration
                 setTimeout(() => {
-                    currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                    if (isPlaying) playNextCommentary();
-                }, duration * 1000);
+                    nextCommentary();
+                }, textDuration * 1000);
             });
             
-            currentAudio.addEventListener('stalled', () => {
-                console.warn('⚠️ MP3 loading stalled, network issues possible');
-            });
-            
-            // Set up playback
-            const attemptPlayback = () => {
-                return currentAudio.play()
-                    .then(() => {
-                        console.log('✅ Successfully playing YOUR MP3 file!');
-                        console.log('🔊 Duration:', currentAudio.duration, 'seconds');
-                        
-                        // Set up the audio analyser for waveform - ONLY for your MP3s
-                        if (setupAudioAnalyser(currentAudio)) {
-                            console.log('🎚️ Audio analyser connected - waveform responding to YOUR MP3!');
-                        } else {
-                            console.warn('⚠️ Audio analyser setup failed');
-                        }
-                        
-                        return true;
-                    })
-                    .catch(error => {
-                        console.error('❌ MP3 Playback failed:', error.name, error.message);
-                        console.error('❌ Your MP3 file could not be played');
-                        
-                        // Continue to next commentary (visual only)
-                        setTimeout(() => {
-                            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                            if (isPlaying) playNextCommentary();
-                        }, duration * 1000);
-                        
-                        return false;
-                    });
-            };
-            
-            // Set up completion handler
-            currentAudio.onended = () => {
-                console.log('🏁 Your MP3 file finished playing');
-                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                setTimeout(() => {
-                    if (isPlaying) playNextCommentary();
-                }, 1000);
-            };
-            
-            // Set the source and load
+            // Attempt playback
             currentAudio.src = commentary.audio;
             currentAudio.load();
             
-            // Try to play after a short delay
+            // Try to play immediately
+            const playAttempt = () => {
+                currentAudio.play()
+                    .then(() => {
+                        console.log('✅ Playing MP3 + Text simultaneously!');
+                        
+                        // Connect audio analyser for waveform
+                        if (setupAudioAnalyser(currentAudio)) {
+                            console.log('🎚️ Waveform connected to MP3');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ MP3 playback failed:', error.message);
+                        
+                        // Continue with text-only
+                        setTimeout(() => {
+                            nextCommentary();
+                        }, textDuration * 1000);
+                    });
+            };
+            
+            // Set up audio completion handler
+            currentAudio.onended = () => {
+                console.log('🏁 MP3 finished');
+                nextCommentary();
+            };
+            
+            // Try to play after brief delay for loading
             setTimeout(() => {
                 if (currentAudio.readyState >= 2) {
-                    attemptPlayback();
+                    playAttempt();
                 } else {
-                    console.log('⏳ Waiting for MP3 to be ready...');
-                    currentAudio.addEventListener('canplay', () => {
-                        console.log('🎵 MP3 ready, attempting playback...');
-                        attemptPlayback();
-                    }, { once: true });
+                    currentAudio.addEventListener('canplay', playAttempt, { once: true });
                     
-                    // Timeout - continue without audio if MP3 doesn't load
+                    // Fallback timeout
                     setTimeout(() => {
                         if (currentAudio.paused) {
-                            console.warn('⏰ MP3 loading timeout - continuing visual only');
+                            console.warn('⏰ Audio timeout - continuing with text');
                             setTimeout(() => {
-                                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                                if (isPlaying) playNextCommentary();
-                            }, duration * 1000);
+                                nextCommentary();
+                            }, textDuration * 1000);
                         }
-                    }, 5000);
+                    }, 3000);
                 }
-            }, 100);
+            }, 50);
+        }
+        
+        function nextCommentary() {
+            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+            setTimeout(() => {
+                if (isPlaying) {
+                    playNextCommentary();
+                }
+            }, 1000); // 1 second gap between commentaries
         }
 
         // ===== PLAY/PAUSE FUNCTIONALITY =====
