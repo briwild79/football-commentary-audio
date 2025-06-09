@@ -730,7 +730,7 @@
         let currentMinute = 82;
         let progressInterval = null;
 
-        // ===== COMMENTARY DATA WITH MP3 AUDIO =====
+        // ===== COMMENTARY DATA WITH YOUR ORIGINAL AUDIO FILES =====
         const commentaries = [
             { 
                 time: "82'", 
@@ -931,7 +931,7 @@
             }
         }
 
-        // ===== COMMENTARY SYSTEM WITH REAL AUDIO =====
+        // ===== COMMENTARY SYSTEM - YOUR MP3 FILES ONLY =====
         function playNextCommentary() {
             if (!isPlaying) return;
             
@@ -964,7 +964,7 @@
             const estimatedTextWidth = textLength * 8;
             const totalDistance = containerWidth + estimatedTextWidth + 50;
             const scrollSpeed = 60;
-            const duration = Math.max(totalDistance / scrollSpeed, 15);
+            const duration = Math.max(totalDistance / scrollSpeed, 8);
             
             tickerContent.style.animation = `ticker-scroll ${duration}s linear infinite`;
             commentaryLine.classList.add('active');
@@ -974,49 +974,122 @@
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
             }
+
+            // ONLY USE YOUR MP3 FILES - NO FALLBACKS
+            console.log('🎵 Loading YOUR MP3 file:', commentary.audio);
+            currentAudio = new Audio();
             
-            // Create and play new audio
-            console.log('🎵 Attempting to load:', commentary.audio);
-            currentAudio = new Audio(commentary.audio);
+            // Set up CORS and preload settings
+            currentAudio.crossOrigin = "anonymous";
+            currentAudio.preload = "auto";
             currentAudio.volume = 0.7;
             
-            // Add detailed error handling
-            currentAudio.addEventListener('error', (e) => {
-                console.error('❌ Audio error:', e);
-                console.error('❌ Failed URL:', commentary.audio);
-                
-                // Continue to next after delay
-                setTimeout(() => {
-                    currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                    playNextCommentary();
-                }, (duration + 1) * 1000);
+            // Set up event listeners BEFORE setting src
+            currentAudio.addEventListener('loadstart', () => {
+                console.log('📡 Started loading your MP3 file...');
+            });
+            
+            currentAudio.addEventListener('loadedmetadata', () => {
+                console.log('📊 MP3 metadata loaded, duration:', currentAudio.duration);
             });
             
             currentAudio.addEventListener('canplaythrough', () => {
-                console.log('✅ Audio ready:', commentary.text);
+                console.log('✅ Your MP3 file is ready to play!');
             });
             
-            currentAudio.play()
-                .then(() => {
-                    console.log('✅ Playing:', commentary.text);
-                    setupAudioAnalyser(currentAudio);
-                })
-                .catch(error => {
-                    console.error('❌ Playback failed:', error);
-                    
-                    // Continue to next after delay
-                    setTimeout(() => {
-                        currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                        playNextCommentary();
-                    }, (duration + 1) * 1000);
-                });
+            currentAudio.addEventListener('progress', () => {
+                if (currentAudio.buffered.length > 0) {
+                    const buffered = (currentAudio.buffered.end(0) / currentAudio.duration) * 100;
+                    console.log(`📥 MP3 Buffered: ${buffered.toFixed(1)}%`);
+                }
+            });
             
-            // When audio ends, play next
-            currentAudio.onended = () => {
-                console.log('🏁 Audio finished, playing next...');
-                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
-                playNextCommentary();
+            currentAudio.addEventListener('error', (e) => {
+                console.error('❌ YOUR MP3 FILE FAILED TO LOAD');
+                console.error('❌ Error details:', {
+                    code: currentAudio.error?.code,
+                    message: currentAudio.error?.message,
+                    url: commentary.audio
+                });
+                console.error('❌ NO FALLBACK - ONLY YOUR MP3 FILES WILL BE USED');
+                
+                // Continue to next commentary after delay (visual only)
+                setTimeout(() => {
+                    currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                    if (isPlaying) playNextCommentary();
+                }, duration * 1000);
+            });
+            
+            currentAudio.addEventListener('stalled', () => {
+                console.warn('⚠️ MP3 loading stalled, network issues possible');
+            });
+            
+            // Set up playback
+            const attemptPlayback = () => {
+                return currentAudio.play()
+                    .then(() => {
+                        console.log('✅ Successfully playing YOUR MP3 file!');
+                        console.log('🔊 Duration:', currentAudio.duration, 'seconds');
+                        
+                        // Set up the audio analyser for waveform - ONLY for your MP3s
+                        if (setupAudioAnalyser(currentAudio)) {
+                            console.log('🎚️ Audio analyser connected - waveform responding to YOUR MP3!');
+                        } else {
+                            console.warn('⚠️ Audio analyser setup failed');
+                        }
+                        
+                        return true;
+                    })
+                    .catch(error => {
+                        console.error('❌ MP3 Playback failed:', error.name, error.message);
+                        console.error('❌ Your MP3 file could not be played');
+                        
+                        // Continue to next commentary (visual only)
+                        setTimeout(() => {
+                            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                            if (isPlaying) playNextCommentary();
+                        }, duration * 1000);
+                        
+                        return false;
+                    });
             };
+            
+            // Set up completion handler
+            currentAudio.onended = () => {
+                console.log('🏁 Your MP3 file finished playing');
+                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                setTimeout(() => {
+                    if (isPlaying) playNextCommentary();
+                }, 1000);
+            };
+            
+            // Set the source and load
+            currentAudio.src = commentary.audio;
+            currentAudio.load();
+            
+            // Try to play after a short delay
+            setTimeout(() => {
+                if (currentAudio.readyState >= 2) {
+                    attemptPlayback();
+                } else {
+                    console.log('⏳ Waiting for MP3 to be ready...');
+                    currentAudio.addEventListener('canplay', () => {
+                        console.log('🎵 MP3 ready, attempting playback...');
+                        attemptPlayback();
+                    }, { once: true });
+                    
+                    // Timeout - continue without audio if MP3 doesn't load
+                    setTimeout(() => {
+                        if (currentAudio.paused) {
+                            console.warn('⏰ MP3 loading timeout - continuing visual only');
+                            setTimeout(() => {
+                                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                                if (isPlaying) playNextCommentary();
+                            }, duration * 1000);
+                        }
+                    }, 5000);
+                }
+            }, 100);
         }
 
         // ===== PLAY/PAUSE FUNCTIONALITY =====
@@ -1107,10 +1180,12 @@
 
         // ===== INITIALIZATION =====
         console.log('🎙️ Commentary Widget Loaded!');
+        console.log('🎵 AUDIO: ONLY YOUR MP3 FILES WILL BE USED');
         console.log('📍 Current URL protocol:', window.location.protocol);
+        
         if (window.location.protocol === 'file:') {
-            console.warn('⚠️ WARNING: Running from file:// - audio may not work!');
-            console.warn('💡 Please serve this file via HTTP for full functionality');
+            console.warn('⚠️ WARNING: Running from file:// - your MP3s may not work due to CORS!');
+            console.warn('💡 Host this file on a web server for your MP3s to play');
         }
         
         createWaveform();
