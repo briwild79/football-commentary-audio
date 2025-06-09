@@ -382,26 +382,12 @@
         .commentary-line.active {
             color: #1d1d1f;
             font-weight: 400;
+            /* NO background effects */
         }
 
-        /* Goal moment styling - subtle emphasis */
+        /* Goal moment styling - NO BACKGROUND EFFECTS */
         .commentary-line.goal-moment {
-            animation: goalGlow 3s ease-out;
-        }
-
-        @keyframes goalGlow {
-            0% { 
-                background: rgba(255, 105, 0, 0.1);
-                border-radius: 6px;
-                transform: scale(1.01);
-            }
-            50% { 
-                background: rgba(255, 105, 0, 0.05);
-            }
-            100% { 
-                background: transparent;
-                transform: scale(1);
-            }
+            /* Removed all background animations */
         }
 
         .commentary-time {
@@ -412,7 +398,7 @@
             min-width: 30px;
         }
 
-        /* ===== TICKER SYSTEM ===== */
+        /* Clean Ticker - No Fade Effects */
         .ticker-container {
             flex: 1;
             position: relative;
@@ -435,34 +421,9 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* Ticker Fade Effects */
-        .ticker-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 30px;
-            height: 100%;
-            background: linear-gradient(to right, white, transparent);
-            pointer-events: none;
-            z-index: 1;
-        }
 
-        .ticker-container::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 30px;
-            height: 100%;
-            background: linear-gradient(to right, transparent, white);
-            pointer-events: none;
-            z-index: 1;
-        }
 
-        .commentary-line:hover .ticker-content {
-            animation-play-state: paused;
-        }
+
 
         /* ===== WAVEFORM BUTTON ===== */
         .waveform-button {
@@ -938,24 +899,24 @@
             const commentary = commentaries[currentCommentaryIndex];
             
             // Update visual commentary
+            const timeElement = commentaryLine.querySelector('.commentary-time');
             const tickerContainer = commentaryLine.querySelector('.ticker-container');
             const tickerContent = tickerContainer.querySelector('.ticker-content');
             
-            commentaryLine.querySelector('.commentary-time').textContent = commentary.time;
+            // Update time and ticker text
+            timeElement.textContent = commentary.time;
             tickerContent.textContent = commentary.text;
             
-            // Check if this is a goal moment and add special styling
+            console.log('📺 Updated ticker:', commentary.text.substring(0, 50) + '...');
+            
+            // Check if this is a goal moment - NO VISUAL EFFECTS
             if (commentary.text.toLowerCase().includes('goal') || 
                 commentary.text.toLowerCase().includes('goooal')) {
-                commentaryLine.classList.add('goal-moment');
-                
-                // Remove the goal styling after animation completes
-                setTimeout(() => {
-                    commentaryLine.classList.remove('goal-moment');
-                }, 3000);
+                // Goal detection for audio/logic only - no visual styling
+                console.log('⚽ Goal moment detected (no visual effects)');
             }
             
-            // Restart ticker animation
+            // Restart ticker animation with better timing
             tickerContent.style.animation = 'none';
             tickerContent.offsetHeight; // Force reflow
             
@@ -965,6 +926,13 @@
             const totalDistance = containerWidth + estimatedTextWidth + 50;
             const scrollSpeed = 60;
             const duration = Math.max(totalDistance / scrollSpeed, 8);
+            
+            console.log('📺 Starting ticker animation:', {
+                textLength,
+                containerWidth,
+                estimatedTextWidth,
+                duration: duration + 's'
+            });
             
             tickerContent.style.animation = `ticker-scroll ${duration}s linear infinite`;
             commentaryLine.classList.add('active');
@@ -1131,11 +1099,12 @@
                     currentAudio.currentTime = 0;
                 }
                 
-                // Reset ticker
+                // Reset ticker to initial state
                 const tickerContent = commentaryLine.querySelector('.ticker-content');
                 if (tickerContent) {
                     tickerContent.style.animation = 'none';
                     tickerContent.textContent = 'Press play for live commentary with audio';
+                    console.log('📺 Ticker reset to initial state');
                 }
                 
                 // Reset waveform to idle state
