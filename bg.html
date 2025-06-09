@@ -710,37 +710,74 @@
         let currentMinute = 82; // Start at 82nd minute - progress bar should show 82/90 = 91.1%
         let progressInterval = null;
 
-        // ===== COMMENTARY DATA =====
+        // ===== COMMENTARY DATA WITH MP3 AUDIO =====
         const commentaries = [
             { 
                 time: "82'", 
-                text: "What a save! Martinez dives to his left and keeps out a powerful header from Kane! The crowd erupts as the goalkeeper shows incredible reflexes."
+                text: "What a save! Martinez dives to his left and keeps out a powerful header from Kane! The crowd erupts as the goalkeeper shows incredible reflexes.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_82.mp3"
             },
             { 
                 time: "83'", 
-                text: "Corner kick for Arsenal. Saka steps up to take it... The players are jostling for position in the box as the winger prepares to deliver."
+                text: "Corner kick for Arsenal. Saka steps up to take it... The players are jostling for position in the box as the winger prepares to deliver.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_83.mp3"
             },
             { 
                 time: "84'", 
-                text: "GOOOAAL! Saliba rises highest and powers the header into the net! Arsenal lead 2-1! What a crucial goal at this stage of the match!"
+                text: "GOOOAAL! Saliba rises highest and powers the header into the net! Arsenal lead 2-1! What a crucial goal at this stage of the match!",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_84.mp3"
             },
             { 
                 time: "85'", 
-                text: "Manchester United immediately on the attack. Bruno Fernandes with a through ball... The Portuguese midfielder is orchestrating the comeback."
+                text: "Manchester United immediately on the attack. Bruno Fernandes with a through ball... The Portuguese midfielder is orchestrating the comeback.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_85.mp3"
             },
             { 
                 time: "86'", 
-                text: "Rashford breaks free but the flag is up! Offside by the narrowest of margins. The VAR check confirms the assistant referee's decision."
+                text: "Rashford breaks free but the flag is up! Offside by the narrowest of margins. The VAR check confirms the assistant referee's decision.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_86.mp3"
             },
             { 
                 time: "87'", 
-                text: "Yellow card for Rice after a late challenge on Casemiro. The referee had no choice but to book the Arsenal midfielder for that tackle."
+                text: "Yellow card for Rice after a late challenge on Casemiro. The referee had no choice but to book the Arsenal midfielder for that tackle.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_87.mp3"
             },
             { 
                 time: "88'", 
-                text: "Free kick in a dangerous position for United. This could be their chance to equalize with just minutes remaining in this encounter."
+                text: "Free kick in a dangerous position for United. This could be their chance to equalize with just minutes remaining in this encounter.",
+                audio: "https://briwild79.github.io/football-commentary-audio/commentary_88.mp3"
             }
         ];
+
+        // ===== AUDIO ANALYSER SETUP =====
+        function setupAudioAnalyser(audio) {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                if (!analyser) {
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 128;
+                    analyser.smoothingTimeConstant = 0.3;
+                    analyser.connect(audioContext.destination);
+                    
+                    const bufferLength = analyser.frequencyBinCount;
+                    dataArray = new Uint8Array(bufferLength);
+                }
+                
+                if (!audio.audioSource) {
+                    const source = audioContext.createMediaElementSource(audio);
+                    source.connect(analyser);
+                    audio.audioSource = source;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Audio analyser setup failed:', error);
+                return false;
+            }
+        }
 
         // ===== WAVEFORM SETUP =====
         function createWaveform() {
@@ -756,15 +793,54 @@
             
             function animate() {
                 if (isPlaying) {
-                    const time = Date.now() / 100;
-                    bars.forEach((bar, index) => {
-                        const height = 4 + Math.sin(time + index * 0.5) * 15 + Math.random() * 10;
-                        bar.style.height = `${Math.max(4, height)}px`;
-                    });
+                    if (analyser && dataArray && currentAudio && !currentAudio.paused) {
+                        // Real audio-reactive waveform
+                        analyser.getByteFrequencyData(dataArray);
+                        
+                        let sum = 0;
+                        for (let i = 0; i < dataArray.length; i++) {
+                            sum += dataArray[i];
+                        }
+                        const averageVolume = sum / dataArray.length;
+                        const volumeBoost = 1 + (averageVolume / 50);
+                        
+                        bars.forEach((bar, index) => {
+                            const dataIndex = Math.min(5 + index * 2, dataArray.length - 1);
+                            const audioValue = dataArray[dataIndex] || 0;
+                            
+                            // Map to heights that fit within the button
+                            const maxHeights = [20, 25, 30, 25, 20]; // Conservative heights
+                            const minHeight = 4;
+                            const maxHeight = maxHeights[index];
+                            
+                            const audioIntensity = (audioValue / 255) * volumeBoost;
+                            const baseVariation = [0.8, 1.0, 1.2, 1.0, 0.8][index] || 1.0;
+                            const dynamicHeight = minHeight + (audioIntensity * (maxHeight - minHeight) * baseVariation);
+                            
+                            // Add subtle wave motion when audio is present
+                            const time = Date.now() / 200;
+                            const wave = audioIntensity > 0.1 ? Math.sin(time + index * 0.5) * 2 : 0;
+                            
+                            const totalHeight = Math.max(minHeight, Math.min(maxHeight, dynamicHeight + wave));
+                            
+                            bar.style.height = `${totalHeight}px`;
+                            bar.style.opacity = audioIntensity > 0.1 ? '0.9' : '0.6';
+                        });
+                    } else {
+                        // Fallback: synthetic animation when no audio or audio not playing
+                        const time = Date.now() / 100;
+                        bars.forEach((bar, index) => {
+                            const height = 4 + Math.sin(time + index * 0.5) * 15 + Math.random() * 10;
+                            bar.style.height = `${Math.max(4, height)}px`;
+                            bar.style.opacity = '0.6';
+                        });
+                    }
                     requestAnimationFrame(animate);
                 } else {
+                    // Reset to static state when not playing
                     bars.forEach(bar => {
                         bar.style.height = '4px';
+                        bar.style.opacity = '0.6';
                     });
                 }
             }
