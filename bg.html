@@ -965,10 +965,7 @@
             console.log('⏰ VERIFIED: Updated time to:', commentary.time);
             console.log('✅ VERIFIED: Text elements updated successfully');
             
-            // Setup ticker animation - VERIFIED
-            tickerContent.style.animation = 'none';
-            tickerContent.offsetHeight; // Force reflow
-            
+            // Calculate animation duration
             const textLength = commentary.text.length;
             const containerWidth = tickerContainer.offsetWidth || 300;
             const estimatedTextWidth = textLength * 8;
@@ -976,10 +973,12 @@
             const scrollSpeed = 60;
             const duration = Math.max(totalDistance / scrollSpeed, 8);
             
-            console.log('📺 VERIFIED: Starting ticker animation - Duration:', duration + 's');
-            tickerContent.style.animation = `ticker-scroll ${duration}s linear infinite`;
+            console.log('📺 VERIFIED: Calculated ticker duration:', duration + 's');
             
-            // Start audio SIMULTANEOUSLY with text display - VERIFIED
+            // DON'T start ticker animation yet - wait for audio to be ready
+            console.log('⏸️ VERIFIED: Holding ticker animation until audio is ready');
+            
+            // Start audio loading process
             startAudioPlayback(commentary, duration);
         }
         
@@ -1002,18 +1001,33 @@
             
             console.log('🎵 VERIFIED: Created new Audio object for:', commentary.audio);
             
+            // Track if ticker has started to avoid double-starting
+            let tickerStarted = false;
+            
+            const startTickerOnce = () => {
+                if (!tickerStarted) {
+                    tickerStarted = true;
+                    startTickerAnimation(textDuration);
+                }
+            };
+            
             // Set up event listeners
             currentAudio.addEventListener('loadstart', () => {
                 console.log('📡 VERIFIED: Loading MP3:', commentary.audio);
             });
             
             currentAudio.addEventListener('canplaythrough', () => {
-                console.log('✅ VERIFIED: MP3 ready to play');
+                console.log('✅ VERIFIED: MP3 ready - starting ticker + audio together');
+                startTickerOnce();
             });
             
             currentAudio.addEventListener('error', (e) => {
                 console.error('❌ VERIFIED: MP3 FAILED:', commentary.audio);
                 console.error('❌ VERIFIED: Error:', currentAudio.error?.code, currentAudio.error?.message);
+                
+                // Start ticker immediately since audio failed
+                console.log('📺 VERIFIED: Audio failed - starting ticker immediately');
+                startTickerOnce();
                 
                 // Continue to next commentary using text duration
                 setTimeout(() => {
@@ -1033,7 +1047,7 @@
             
             console.log('📀 VERIFIED: Audio src set and load() called');
             
-            // Try to play immediately
+            // Try to play when ready
             const playAttempt = () => {
                 console.log('▶️ VERIFIED: Attempting to play audio...');
                 currentAudio.play()
@@ -1048,12 +1062,24 @@
                     .catch(error => {
                         console.error('❌ VERIFIED: MP3 playback failed:', error.message);
                         
+                        // Start ticker since audio failed
+                        startTickerOnce();
+                        
                         // Continue with text-only
                         setTimeout(() => {
                             nextCommentary();
                         }, textDuration * 1000);
                     });
             };
+            
+            // Start ticker after short delay regardless of audio status
+            // This ensures user always sees movement quickly
+            setTimeout(() => {
+                if (!tickerStarted) {
+                    console.log('⚡ VERIFIED: Quick start - beginning ticker (audio still loading)');
+                    startTickerOnce();
+                }
+            }, 500); // Start ticker after 500ms regardless
             
             // Try to play after brief delay for loading
             setTimeout(() => {
@@ -1067,17 +1093,33 @@
                         playAttempt();
                     }, { once: true });
                     
-                    // Fallback timeout
+                    // Reduced timeout - don't wait too long
                     setTimeout(() => {
                         if (currentAudio.paused) {
-                            console.warn('⏰ VERIFIED: Audio timeout - continuing with text');
+                            console.warn('⏰ VERIFIED: Audio timeout after 1 second');
+                            // Ticker already started by the 500ms timer above
                             setTimeout(() => {
                                 nextCommentary();
                             }, textDuration * 1000);
                         }
-                    }, 3000);
+                    }, 1000); // Reduced from 2000ms to 1000ms
                 }
             }, 50);
+        }
+        
+        // New function to handle ticker animation separately
+        function startTickerAnimation(duration) {
+            const tickerContainer = commentaryLine.querySelector('.ticker-container');
+            const tickerContent = tickerContainer.querySelector('.ticker-content');
+            
+            console.log('🎬 VERIFIED: Starting ticker animation NOW - Duration:', duration + 's');
+            
+            // Reset and start animation
+            tickerContent.style.animation = 'none';
+            tickerContent.offsetHeight; // Force reflow
+            tickerContent.style.animation = `ticker-scroll ${duration}s linear infinite`;
+            
+            console.log('📺 VERIFIED: Ticker animation started in sync with audio');
         }
         
         function nextCommentary() {
