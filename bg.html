@@ -384,6 +384,26 @@
             font-weight: 400;
         }
 
+        /* Goal moment styling - subtle emphasis */
+        .commentary-line.goal-moment {
+            animation: goalGlow 3s ease-out;
+        }
+
+        @keyframes goalGlow {
+            0% { 
+                background: rgba(255, 105, 0, 0.1);
+                border-radius: 6px;
+                transform: scale(1.01);
+            }
+            50% { 
+                background: rgba(255, 105, 0, 0.05);
+            }
+            100% { 
+                background: transparent;
+                transform: scale(1);
+            }
+        }
+
         .commentary-time {
             color: #ff6900;
             font-weight: 590;
@@ -707,7 +727,7 @@
         let isPlaying = false;
         let isExpanded = false;
         let currentCommentaryIndex = 0;
-        let currentMinute = 82; // Start at 82nd minute - progress bar should show 82/90 = 91.1%
+        let currentMinute = 82;
         let progressInterval = null;
 
         // ===== COMMENTARY DATA WITH MP3 AUDIO =====
@@ -788,156 +808,13 @@
             }
         }
 
-        function animateWaveform() {
-            const bars = waveform.querySelectorAll('.wave-bar');
-            
-            function animate() {
-                if (isPlaying) {
-                    if (analyser && dataArray && currentAudio && !currentAudio.paused) {
-                        // Real audio-reactive waveform
-                        analyser.getByteFrequencyData(dataArray);
-                        
-                        let sum = 0;
-                        for (let i = 0; i < dataArray.length; i++) {
-                            sum += dataArray[i];
-                        }
-                        const averageVolume = sum / dataArray.length;
-                        const volumeBoost = 1 + (averageVolume / 50);
-                        
-                        bars.forEach((bar, index) => {
-                            const dataIndex = Math.min(5 + index * 2, dataArray.length - 1);
-                            const audioValue = dataArray[dataIndex] || 0;
-                            
-                            // Map to heights that fit within the button
-                            const maxHeights = [20, 25, 30, 25, 20]; // Conservative heights
-                            const minHeight = 4;
-                            const maxHeight = maxHeights[index];
-                            
-                            const audioIntensity = (audioValue / 255) * volumeBoost;
-                            const baseVariation = [0.8, 1.0, 1.2, 1.0, 0.8][index] || 1.0;
-                            const dynamicHeight = minHeight + (audioIntensity * (maxHeight - minHeight) * baseVariation);
-                            
-                            // Add subtle wave motion when audio is present
-                            const time = Date.now() / 200;
-                            const wave = audioIntensity > 0.1 ? Math.sin(time + index * 0.5) * 2 : 0;
-                            
-                            const totalHeight = Math.max(minHeight, Math.min(maxHeight, dynamicHeight + wave));
-                            
-                            bar.style.height = `${totalHeight}px`;
-                            bar.style.opacity = audioIntensity > 0.1 ? '0.9' : '0.6';
-                        });
-                    } else {
-                        // Fallback: synthetic animation when no audio or audio not playing
-                        const time = Date.now() / 100;
-                        bars.forEach((bar, index) => {
-                            const height = 4 + Math.sin(time + index * 0.5) * 15 + Math.random() * 10;
-                            bar.style.height = `${Math.max(4, height)}px`;
-                            bar.style.opacity = '0.6';
-                        });
-                    }
-                    requestAnimationFrame(animate);
-                } else {
-                    // Reset to static state when not playing
-                    bars.forEach(bar => {
-                        bar.style.height = '4px';
-                        bar.style.opacity = '0.6';
-                    });
-                }
-            }
-            animate();
-        }
-
-        // ===== TEXT-TO-SPEECH SYSTEM =====
-        function speakCommentary(text) {
-            if ('speechSynthesis' in window) {
-                // Cancel any ongoing speech
-                speechSynthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1.15; // Slightly faster for sports excitement
-                utterance.pitch = 1.1;  // Slightly higher for energy
-                utterance.volume = 0.9;
-                
-                // Try to find the best available voice
-                const voices = speechSynthesis.getVoices();
-                console.log('🎙️ Available voices:', voices.map(v => v.name));
-                
-                // Preference order for sports commentary
-                const preferredVoices = [
-                    'Google UK English Male',
-                    'Microsoft David - English (United States)',
-                    'Microsoft Mark - English (United States)', 
-                    'Alex', // Mac
-                    'Daniel', // Mac British
-                    'Google US English'
-                ];
-                
-                let selectedVoice = null;
-                for (const preferredName of preferredVoices) {
-                    selectedVoice = voices.find(voice => 
-                        voice.name.includes(preferredName) || 
-                        voice.name === preferredName
-                    );
-                    if (selectedVoice) break;
-                }
-                
-                // Fallback to any English male voice
-                if (!selectedVoice) {
-                    selectedVoice = voices.find(voice => 
-                        voice.lang.startsWith('en') && 
-                        (voice.name.toLowerCase().includes('male') ||
-                         voice.name.toLowerCase().includes('david') ||
-                         voice.name.toLowerCase().includes('mark') ||
-                         voice.name.toLowerCase().includes('alex'))
-                    );
-                }
-                
-                // Final fallback to any English voice
-                if (!selectedVoice) {
-                    selectedVoice = voices.find(voice => voice.lang.startsWith('en'));
-                }
-                
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                    console.log('🎙️ Using voice:', selectedVoice.name);
-                } else {
-                    console.log('🎙️ Using default voice');
-                }
-                
-                // Add some drama for sports moments
-                if (text.includes('GOAL') || text.includes('SAVE')) {
-                    utterance.rate = 1.25;
-                    utterance.pitch = 1.2;
-                }
-                
-                return new Promise((resolve) => {
-                    utterance.onend = () => {
-                        console.log('🎤 Speech finished');
-                        resolve();
-                    };
-                    
-                    utterance.onerror = (error) => {
-                        console.error('🎤 Speech error:', error);
-                        resolve(); // Still resolve to continue
-                    };
-                    
-                    speechSynthesis.speak(utterance);
-                    console.log('🎤 Speaking:', text.substring(0, 50) + '...');
-                });
-                
-            } else {
-                console.warn('🎤 Speech synthesis not supported');
-                return Promise.resolve();
-            }
-        }
-
         // ===== SUN GLOW AUDIO REACTIVITY =====
         function updateSunGlow() {
             if (!isPlaying || !sunGlow) return;
             
             let intensity = 'low';
             
-            if (analyser && dataArray) {
+            if (analyser && dataArray && currentAudio && !currentAudio.paused) {
                 analyser.getByteFrequencyData(dataArray);
                 const sum = dataArray.reduce((a, b) => a + b, 0);
                 const average = sum / dataArray.length;
@@ -950,6 +827,7 @@
                     intensity = 'low';
                 }
             } else {
+                // Fallback for when audio isn't available
                 const time = Date.now() / 1000;
                 const synthetic = Math.sin(time * 0.5) * 0.5 + 0.5;
                 
@@ -961,7 +839,8 @@
                     intensity = 'low';
                 }
                 
-                const currentText = commentaryLine.querySelector('.commentary-text')?.textContent || '';
+                // Boost for exciting moments
+                const currentText = commentaryLine.querySelector('.ticker-content')?.textContent || '';
                 if (currentText.includes('GOAL') || currentText.includes('SAVE') || currentText.includes('What a')) {
                     intensity = 'high';
                 }
@@ -973,12 +852,6 @@
         // ===== AUDIO-REACTIVE WAVEFORM =====
         function animateWaveform() {
             const bars = waveform.querySelectorAll('.wave-bar');
-            
-            if (bars.length === 0) {
-                console.error('❌ No waveform bars found! Recreating...');
-                createWaveform();
-                return;
-            }
             
             if (analyser && dataArray && isPlaying && currentAudio && !currentAudio.paused) {
                 analyser.getByteFrequencyData(dataArray);
@@ -1058,58 +931,92 @@
             }
         }
 
-        // ===== COMMENTARY SYSTEM =====
+        // ===== COMMENTARY SYSTEM WITH REAL AUDIO =====
         function playNextCommentary() {
             if (!isPlaying) return;
             
             const commentary = commentaries[currentCommentaryIndex];
             
-            // Clear existing classes
-            commentaryLine.classList.remove('active');
-            
-            // Get existing elements
+            // Update visual commentary
             const tickerContainer = commentaryLine.querySelector('.ticker-container');
             const tickerContent = tickerContainer.querySelector('.ticker-content');
             
-            // Update content
             commentaryLine.querySelector('.commentary-time').textContent = commentary.time;
             tickerContent.textContent = commentary.text;
             
-            // Restart animation
+            // Check if this is a goal moment and add special styling
+            if (commentary.text.toLowerCase().includes('goal') || 
+                commentary.text.toLowerCase().includes('goooal')) {
+                commentaryLine.classList.add('goal-moment');
+                
+                // Remove the goal styling after animation completes
+                setTimeout(() => {
+                    commentaryLine.classList.remove('goal-moment');
+                }, 3000);
+            }
+            
+            // Restart ticker animation
             tickerContent.style.animation = 'none';
             tickerContent.offsetHeight; // Force reflow
             
-            // Calculate duration more accurately for complete scroll-off
             const textLength = commentary.text.length;
             const containerWidth = tickerContainer.offsetWidth || 300;
-            
-            // Estimate text width (approximate 8px per character)
             const estimatedTextWidth = textLength * 8;
-            
-            // Total distance: container width + text width + extra margin
-            const totalDistance = containerWidth + estimatedTextWidth + 50; // Extra 50px margin
-            
-            // Speed: 60 pixels per second (slightly slower for smoother reading)
+            const totalDistance = containerWidth + estimatedTextWidth + 50;
             const scrollSpeed = 60;
-            const duration = totalDistance / scrollSpeed;
+            const duration = Math.max(totalDistance / scrollSpeed, 15);
             
-            // Ensure minimum duration for readability
-            const finalDuration = Math.max(duration, 15); // At least 15 seconds
-            
-            tickerContent.style.animation = `ticker-scroll ${finalDuration}s linear infinite`;
-            
-            // Add active state
+            tickerContent.style.animation = `ticker-scroll ${duration}s linear infinite`;
             commentaryLine.classList.add('active');
             
-            // Move to next commentary
-            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+            // Stop current audio if playing
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
             
-            // Schedule next commentary - wait for full scroll completion + buffer
-            setTimeout(() => {
-                if (isPlaying) {
+            // Create and play new audio
+            console.log('🎵 Attempting to load:', commentary.audio);
+            currentAudio = new Audio(commentary.audio);
+            currentAudio.volume = 0.7;
+            
+            // Add detailed error handling
+            currentAudio.addEventListener('error', (e) => {
+                console.error('❌ Audio error:', e);
+                console.error('❌ Failed URL:', commentary.audio);
+                
+                // Continue to next after delay
+                setTimeout(() => {
+                    currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
                     playNextCommentary();
-                }
-            }, (finalDuration + 1) * 1000); // Just 1 second buffer instead of 2
+                }, (duration + 1) * 1000);
+            });
+            
+            currentAudio.addEventListener('canplaythrough', () => {
+                console.log('✅ Audio ready:', commentary.text);
+            });
+            
+            currentAudio.play()
+                .then(() => {
+                    console.log('✅ Playing:', commentary.text);
+                    setupAudioAnalyser(currentAudio);
+                })
+                .catch(error => {
+                    console.error('❌ Playback failed:', error);
+                    
+                    // Continue to next after delay
+                    setTimeout(() => {
+                        currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                        playNextCommentary();
+                    }, (duration + 1) * 1000);
+                });
+            
+            // When audio ends, play next
+            currentAudio.onended = () => {
+                console.log('🏁 Audio finished, playing next...');
+                currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+                playNextCommentary();
+            };
         }
 
         // ===== PLAY/PAUSE FUNCTIONALITY =====
@@ -1146,6 +1053,11 @@
                 if (progressInterval) clearInterval(progressInterval);
                 if (animationId) cancelAnimationFrame(animationId);
                 
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
+                
                 // Reset ticker
                 const tickerContent = commentaryLine.querySelector('.ticker-content');
                 if (tickerContent) {
@@ -1153,6 +1065,7 @@
                     tickerContent.textContent = 'Press play for live commentary with audio';
                 }
                 
+                // Reset waveform to idle state
                 animateWaveform();
             }
         });
@@ -1194,7 +1107,16 @@
 
         // ===== INITIALIZATION =====
         console.log('🎙️ Commentary Widget Loaded!');
+        console.log('📍 Current URL protocol:', window.location.protocol);
+        if (window.location.protocol === 'file:') {
+            console.warn('⚠️ WARNING: Running from file:// - audio may not work!');
+            console.warn('💡 Please serve this file via HTTP for full functionality');
+        }
+        
         createWaveform();
+        
+        // Start idle animation immediately
+        animateWaveform();
     </script>
 </body>
 </html>
