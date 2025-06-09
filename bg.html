@@ -470,9 +470,9 @@
             color: inherit;
         }
 
-        /* ===== MOBILE BREAKPOINTS ===== */
+        /* ===== MOBILE BREAKPOINTS - LAYOUT ONLY (NO FONT CHANGES) ===== */
         
-        /* Small mobile devices */
+        /* Small mobile devices - LAYOUT ONLY */
         @media screen and (max-width: 480px) {
             .widget-bar {
                 padding: 8px 12px;
@@ -484,10 +484,6 @@
                 max-width: calc(100vw - 100px);
             }
 
-            .match-info {
-                font-size: 14px;
-            }
-
             .team-left,
             .team-right {
                 max-width: 30%;
@@ -495,23 +491,16 @@
             }
 
             .score {
-                font-size: 16px;
                 min-width: 40px;
                 padding: 0 4px;
             }
 
             .commentary-line {
-                font-size: 13px;
                 gap: 6px;
             }
 
             .commentary-time {
                 min-width: 25px;
-                font-size: 13px;
-            }
-
-            .ticker-content {
-                font-size: 13px;
             }
 
             /* Buttons smaller on small screens */
@@ -520,7 +509,7 @@
             }
         }
 
-        /* Medium mobile devices */
+        /* Medium mobile devices - LAYOUT ONLY */
         @media screen and (min-width: 481px) and (max-width: 768px) {
             .widget-bar {
                 padding: 10px 14px;
@@ -532,31 +521,17 @@
                 max-width: calc(100vw - 110px);
             }
 
-            .match-info {
-                font-size: 15px;
-            }
-
             .team-left,
             .team-right {
                 max-width: 32%;
             }
 
             .score {
-                font-size: 18px;
                 min-width: 45px;
-            }
-
-            .commentary-line {
-                font-size: 14px;
             }
 
             .commentary-time {
                 min-width: 28px;
-                font-size: 14px;
-            }
-
-            .ticker-content {
-                font-size: 14px;
             }
 
             :root {
@@ -564,7 +539,7 @@
             }
         }
 
-        /* Tablets and larger */
+        /* Tablets and larger - LAYOUT ONLY */
         @media screen and (min-width: 769px) {
             .content-area {
                 max-width: calc(100vw - 120px);
@@ -576,7 +551,7 @@
             }
         }
 
-        /* Landscape orientation adjustments */
+        /* Landscape orientation adjustments - LAYOUT ONLY */
         @media screen and (orientation: landscape) and (max-height: 500px) {
             .widget-bar {
                 min-height: 50px;
@@ -1413,8 +1388,8 @@
                 if (tickerContent) {
                     tickerContent.style.animation = 'none';
                     tickerContent.textContent = 'Press play for live commentary with audio';
-                    console.log('📺 Ticker reset to initial state');
                 }
+                commentaryLine.classList.remove('active');
                 
                 // Reset waveform to idle state
                 animateWaveform();
