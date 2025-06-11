@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Live Commentary Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Roboto', system-ui, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            color: #1d1d1f;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Support for Dynamic Type */
+            font-size: clamp(14px, 4vw, 18px);
+        }
+
+        /* ===== LOADING SKELETON ===== */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .loading-state .team-left,
+        .loading-state .team-right {
+            width: 120px;
+            height: 20px;
+        }
+
+        .loading-state .score {
+            width: 60px;
+            height: 24px;
+        }
+
+        .loading-state .commentary-time {
+            width: 30px;
+            height: 16px;
+        }
+
+        .loading-state .ticker-content {
+            width: 200px;
+            height: 16px;
+        }
+
+        /* ===== COMMENTARY WIDGET ===== */
+        .commentary-widget {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+            /* iOS Safe Area Support */
+            padding-bottom: env(safe-area-inset-bottom);
+            /* Android Navigation Bar Support */
+            padding-bottom: max(env(safe-area-inset-bottom), 12px);
+        }
+
+        /* High Contrast Mode Support */
+        @media (prefers-contrast: high) {
+            .commentary-widget {
+                border-top: 2px solid #000;
+                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        /* ===== ENHANCED PROGRESS BAR ===== */
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e0e0e0;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #ff6900 0%, 
+                #ff8f00 25%,
+                #ffab00 50%,
+                #ff8f00 75%,
+                #ff6900 100%);
+            background-size: 200% 100%;
+            width: 91.1%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            animation: progress-energy 2.5s ease-in-out infinite;
+            will-change: transform, width;
+            transform: translateZ(0);
+        }
+
+        @keyframes progress-energy {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* ===== MAIN WIDGET BAR ===== */
+        .widget-bar {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            min-height: 80px;
+            gap: 16px;
+            /* Touch improvements */
+            touch-action: manipulation;
+        }
+
+        /* Enhanced Play Button - Material FAB Style */
+        .play-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #ff6900;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(255, 105, 0, 0.3);
+            /* Ripple effect preparation */
+            overflow: hidden;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(255, 105, 0, 0.4);
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-button:focus {
+            outline: 3px solid #ff6900;
+            outline-offset: 3px;
+        }
+
+        /* Ripple Effect */
+        .play-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .play-button.ripple::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .play-button svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+            z-index: 1;
+            position: relative;
+        }
+
+        .live-dot {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 14px;
+            height: 14px;
+            background: #ff3b3b;
+            border-radius: 50%;
+            border: 3px solid white;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .play-button.playing .live-dot {
+            opacity: 1;
+            transform: scale(1);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* ===== CONTENT AREA ===== */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        /* Enhanced Match Info - Better Typography */
+        .match-info {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-size: clamp(16px, 4vw, 18px);
+            color: #1d1d1f;
+            line-height: 1.33;
+            font-weight: 590;
+        }
+
+        .team-left, .team-right {
+            flex: 1;
+            min-width: 0;
+            max-width: 42%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #1d1d1f;
+            letter-spacing: -0.24px;
+            /* Support for Dynamic Type */
+            font-size: inherit;
+        }
+
+        .team-left {
+            text-align: left;
+            margin-right: 16px;
+        }
+
+        .team-right {
+            text-align: right;
+            margin-left: 16px;
+        }
+
+        /* Enhanced Score with Animation */
+        .score {
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: 700;
+            color: #ff6900;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: normal;
+            text-align: center;
+            flex-shrink: 0;
+            min-width: 70px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        /* Goal Animation */
+        .score.goal-animation {
+            animation: goal-celebration 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes goal-celebration {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.3) rotate(5deg); color: #ff3b3b; }
+            40% { transform: scale(1.1) rotate(-3deg); }
+            60% { transform: scale(1.2) rotate(2deg); }
+            80% { transform: scale(1.05) rotate(-1deg); }
+            100% { transform: scale(1) rotate(0deg); color: #ff6900; }
+        }
+
+        .score-digit {
+            display: inline-block;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .score-digit.changing {
+            animation: digit-flip 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes digit-flip {
+            0% { transform: rotateY(0deg) scale(1); }
+            50% { transform: rotateY(90deg) scale(1.2); }
+            100% { transform: rotateY(0deg) scale(1); }
+        }
+
+        /* Enhanced Commentary Line */
+        .commentary-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 24px;
+            font-size: clamp(14px, 3.5vw, 16px);
+            color: #86868b;
+            line-height: 1.4;
+            letter-spacing: -0.08px;
+        }
+
+        .commentary-line.active {
+            color: #1d1d1f;
+            font-weight: 400;
+        }
+
+        .commentary-time {
+            color: #ff6900;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-variant-numeric: tabular-nums;
+            min-width: 35px;
+            font-size: inherit;
+        }
+
+        /* ===== ENHANCED TICKER SYSTEM ===== */
+        .ticker-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            height: 24px;
+            background: transparent;
+        }
+
+        .ticker-content {
+            position: absolute;
+            white-space: nowrap;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        .ticker-content.scrolling {
+            animation: ticker-scroll 15s linear infinite;
+        }
+
+        @keyframes ticker-scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Enhanced Ticker Fade Effects */
+        .ticker-container::before,
+        .ticker-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 40px;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .ticker-container::before {
+            left: 0;
+            background: linear-gradient(to right, white, transparent);
+        }
+
+        .ticker-container::after {
+            right: 0;
+            background: linear-gradient(to right, transparent, white);
+        }
+
+        .commentary-line:hover .ticker-content {
+            animation-play-state: paused;
+        }
+
+        /* ===== ENHANCED WAVEFORM BUTTON ===== */
+        .waveform-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waveform-button:hover {
+            background: rgba(255, 105, 0, 0.08);
+        }
+
+        .waveform-button:focus {
+            outline: 3px solid #ff6900;
+            outline-offset: 3px;
+        }
+
+        /* Ripple effect for waveform button */
+        .waveform-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 105, 0, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .waveform-button.ripple::before {
+            width: 80px;
+            height: 80px;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            position: relative;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: #ff6900;
+            border-radius: 2px;
+            opacity: 0.6;
+            transition: all 0.1s ease;
+            height: 6px;
+            will-change: height;
+            transform: translateZ(0);
+        }
+
+        .waveform-button.playing .wave-bar {
+            opacity: 0.9;
+        }
+
+        /* ===== ENHANCED EXPANDED CONTENT ===== */
+        .expanded-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .commentary-widget.expanded .expanded-content {
+            max-height: 400px;
+        }
+
+        .expanded-inner {
+            padding: 20px 16px;
+        }
+
+        /* Enhanced Game List */
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .game-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-item::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 105, 0, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .game-item.ripple::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .game-item:hover {
+            border-color: #ff6900;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .game-item.active {
+            border-color: #ff6900;
+            background: #fff5f0;
+            box-shadow: 0 4px 12px rgba(255, 105, 0, 0.15);
+        }
+
+        .game-badge {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 16px;
+            flex-shrink: 0;
+            color: #666;
+        }
+
+        .game-item.active .game-badge {
+            background: linear-gradient(135deg, #ff6900, #ff8f00);
+            color: white;
+        }
+
+        /* Enhanced Settings */
+        .settings-bar {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .setting-option {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .setting-option::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 105, 0, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .setting-option.ripple::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .setting-option:hover {
+            border-color: #ff6900;
+            color: #ff6900;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ===== SWIPE GESTURE INDICATOR ===== */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 40px;
+            background: #ff6900;
+            border-radius: 2px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .swipe-indicator.left {
+            left: 8px;
+        }
+
+        .swipe-indicator.right {
+            right: 8px;
+        }
+
+        .swipe-indicator.show {
+            opacity: 0.6;
+        }
+
+        /* ===== PULL TO REFRESH ===== */
+        .pull-refresh {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ff6900;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .pull-refresh.show {
+            opacity: 1;
+            top: -40px;
+        }
+
+        .refresh-icon {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff6900;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== OFFLINE INDICATOR ===== */
+        .offline-indicator {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff3b3b;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-100%);
+            transition: all 0.3s ease;
+        }
+
+        .offline-indicator.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Focus management */
+        .focus-trap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ===== RESPONSIVE BREAKPOINTS ===== */
+        @media (min-width: 768px) {
+            .commentary-widget {
+                max-width: 600px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-radius: 16px 16px 0 0;
+                border-left: 1px solid #e0e0e0;
+                border-right: 1px solid #e0e0e0;
+            }
+
+            .widget-bar {
+                padding: 20px 24px;
+                min-height: 88px;
+            }
+
+            .game-list {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .commentary-widget {
+                position: relative;
+                bottom: auto;
+                margin: 20px auto;
+                border-radius: 16px;
+                border: 1px solid #e0e0e0;
+            }
+        }
+
+        /* ===== REDUCED MOTION SUPPORT ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .ticker-content {
+                animation: none !important;
+                position: static;
+                transform: none !important;
+            }
+            
+            .ticker-container {
+                overflow: visible;
+                text-align: left;
+            }
+            
+            .ticker-container::before,
+            .ticker-container::after {
+                display: none;
+            }
+            
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ===== DARK MODE SUPPORT ===== */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1c1c1e;
+                color: #f2f2f7;
+            }
+
+            .commentary-widget {
+                background: #2c2c2e;
+                border-top-color: #38383a;
+            }
+
+            .expanded-content {
+                background: #1c1c1e;
+                border-top-color: #38383a;
+            }
+
+            .game-item {
+                background: #3a3a3c;
+                border-color: #48484a;
+            }
+
+            .game-item.active {
+                background: #2d1810;
+            }
+
+            .setting-option {
+                background: #3a3a3c;
+                border-color: #48484a;
+                color: #f2f2f7;
+            }
+
+            .team-left, .team-right {
+                color: #f2f2f7;
+            }
+
+            .ticker-container::before {
+                background: linear-gradient(to right, #2c2c2e, transparent);
+            }
+
+            .ticker-container::after {
+                background: linear-gradient(to right, transparent, #2c2c2e);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Focus trap for accessibility -->
+    <div class="focus-trap" tabindex="0"></div>
+
+    <div class="commentary-widget loading-state" role="region" aria-label="Live match commentary" aria-live="polite">
+        <!-- Offline Indicator -->
+        <div class="offline-indicator" id="offlineIndicator">
+            <span>Offline Mode</span>
+        </div>
+
+        <!-- Pull to Refresh -->
+        <div class="pull-refresh" id="pullRefresh">
+            <div class="refresh-icon"></div>
+            <span>Pull to refresh</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Swipe Indicators -->
+        <div class="swipe-indicator left" id="swipeLeft"></div>
+        <div class="swipe-indicator right" id="swipeRight"></div>
+            
+        <div class="widget-bar">
+            <!-- Enhanced Play Button -->
+            <button class="play-button" id="playButton" aria-label="Play live commentary" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true" id="playIcon">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true" id="pauseIcon" style="display: none;">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                </svg>
+                <div class="live-dot" aria-hidden="true"></div>
+                <span class="sr-only" id="playState">Paused</span>
+            </button>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Match Info -->
+                <div class="match-info">
+                    <span class="team-left skeleton">Man United</span>
+                    <span class="score skeleton" aria-label="Score: 1 to 2">1 - 2</span>
+                    <span class="team-right skeleton">Arsenal</span>
+                </div>
+
+                <!-- Commentary Line -->
+                <div class="commentary-line" id="commentaryLine">
+                    <span class="commentary-time skeleton">82'</span>
+                    <div class="ticker-container">
+                        <div class="ticker-content skeleton">
+                            Press play for live commentary with audio
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Waveform Button -->
+            <button class="waveform-button" id="expandButton" aria-label="More options" aria-expanded="false">
+                <div class="waveform" id="waveform">
+                    <!-- Bars generated by JavaScript -->
+                </div>
+            </button>
+        </div>
+
+        <!-- Enhanced Expanded Content -->
+        <div class="expanded-content" id="expandedContent">
+            <div class="expanded-inner">
+                <!-- Game List -->
+                <div class="game-list">
+                    <div class="game-item active" tabindex="0" role="button" aria-label="Switch to Manchester United vs Arsenal match">
+                        <div class="game-badge">MU</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Man United vs Arsenal</div>
+                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #86868b;">
+                                <span class="score" style="color: #ff6900; font-weight: 600;">1-2</span>
+                                <span>82'</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-item" tabindex="0" role="button" aria-label="Switch to Liverpool vs Chelsea match">
+                        <div class="game-badge">LI</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Liverpool vs Chelsea</div>
+                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #86868b;">
+                                <span class="score" style="color: #ff6900; font-weight: 600;">0-0</span>
+                                <span>12'</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-item" tabindex="0" role="button" aria-label="Switch to Barcelona vs Real Madrid match">
+                        <div class="game-badge">BA</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Barcelona vs Real Madrid</div>
+                            <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #86868b;">
+                                <span class="score" style="color: #ff6900; font-weight: 600;">2-1</span>
+                                <span>HT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Settings -->
+                <div class="settings-bar">
+                    <button class="setting-option" aria-label="Change language">🌐 English</button>
+                    <button class="setting-option" aria-label="Change voice">🎤 Voice: Sarah</button>
+                    <button class="setting-option" aria-label="Change playback speed">⚡ Speed: 1x</button>
+                    <button class="setting-option" aria-label="Audio settings">🔊 Audio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== ENHANCED ELEMENT REFERENCES =====
+        const widget = document.querySelector('.commentary-widget');
+        const playButton = document.getElementById('playButton');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playState = document.getElementById('playState');
+        const expandButton = document.getElementById('expandButton');
+        const commentaryLine = document.getElementById('commentaryLine');
+        const waveform = document.getElementById('waveform');
+        const progressFill = document.getElementById('progressFill');
+        const offlineIndicator = document.getElementById('offlineIndicator');
+        const pullRefresh = document.getElementById('pullRefresh');
+        const swipeLeft = document.getElementById('swipeLeft');
+        const swipeRight = document.getElementById('swipeRight');
+
+        // ===== ENHANCED STATE MANAGEMENT =====
+        let isPlaying = false;
+        let isExpanded = false;
+        let currentCommentaryIndex = 0;
+        let currentMinute = 82;
+        let progressInterval = null;
+        let isLoading = true;
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let games = [];
+        let currentGameIndex = 0;
+
+        // ===== HAPTIC FEEDBACK =====
+        function triggerHaptic(type = 'impact') {
+            if ('vibrate' in navigator) {
+                switch(type) {
+                    case 'light':
+                        navigator.vibrate(10);
+                        break;
+                    case 'medium':
+                        navigator.vibrate(20);
+                        break;
+                    case 'heavy':
+                        navigator.vibrate([30, 10, 30]);
+                        break;
+                    case 'success':
+                        navigator.vibrate([100, 30, 100]);
+                        break;
+                    default:
+                        navigator.vibrate(15);
+                }
+            }
+        }
+
+        // ===== RIPPLE EFFECT =====
+        function addRippleEffect(element) {
+            element.addEventListener('click', function(e) {
+                this.classList.add('ripple');
+                setTimeout(() => this.classList.remove('ripple'), 300);
+                triggerHaptic('light');
+            });
+        }
+
+        // ===== ENHANCED COMMENTARY DATA =====
+        const commentaries = [
+            { 
+                time: "82'", 
+                text: "What a save! Martinez dives to his left and keeps out a powerful header from Kane! The crowd erupts as the goalkeeper shows incredible reflexes."
+            },
+            { 
+                time: "83'", 
+                text: "Corner kick for Arsenal. Saka steps up to take it... The players are jostling for position in the box as the winger prepares to deliver."
+            },
+            { 
+                time: "84'", 
+                text: "GOOOAAL! Saliba rises highest and powers the header into the net! Arsenal lead 3-1! What a crucial goal at this stage of the match!",
+                scoreChange: "1 - 3",
+                isGoal: true
+            },
+            { 
+                time: "85'", 
+                text: "Manchester United immediately on the attack. Bruno Fernandes with a through ball... The Portuguese midfielder is orchestrating the comeback."
+            },
+            { 
+                time: "86'", 
+                text: "Rashford breaks free but the flag is up! Offside by the narrowest of margins. The VAR check confirms the assistant referee's decision."
+            },
+            { 
+                time: "87'", 
+                text: "Yellow card for Rice after a late challenge on Casemiro. The referee had no choice but to book the Arsenal midfielder for that tackle."
+            },
+            { 
+                time: "88'", 
+                text: "Free kick in a dangerous position for United. This could be their chance to get back into the game with just minutes remaining."
+            }
+        ];
+
+        // ===== GAMES DATA =====
+        const gamesData = [
+            {
+                id: 1,
+                teams: ['Man United', 'Arsenal'],
+                score: '1-2',
+                time: "82'",
+                badge: 'MU',
+                status: 'live'
+            },
+            {
+                id: 2,
+                teams: ['Liverpool', 'Chelsea'],
+                score: '0-0',
+                time: "12'",
+                badge: 'LI',
+                status: 'live'
+            },
+            {
+                id: 3,
+                teams: ['Barcelona', 'Real Madrid'],
+                score: '2-1',
+                time: 'HT',
+                badge: 'BA',
+                status: 'halftime'
+            }
+        ];
+
+        // ===== ENHANCED TEAM NAME ABBREVIATIONS =====
+        function getSmartTeamName(teamName) {
+            const abbreviations = {
+                'Manchester United': 'Man United',
+                'Manchester City': 'Man City',
+                'Tottenham Hotspur': 'Tottenham',
+                'West Ham United': 'West Ham',
+                'Newcastle United': 'Newcastle',
+                'Sheffield United': 'Sheffield Utd',
+                'Sheffield Wednesday': 'Sheffield Wed',
+                'Brighton & Hove Albion': 'Brighton',
+                'Wolverhampton Wanderers': 'Wolves',
+                'Leicester City': 'Leicester',
+                'Crystal Palace': 'Crystal Palace',
+                'Nottingham Forest': "Nott'm Forest",
+                'Real Madrid': 'Real Madrid',
+                'Barcelona': 'Barcelona',
+                'Atletico Madrid': 'Atletico',
+                'Bayern Munich': 'Bayern',
+                'Borussia Dortmund': 'Dortmund',
+                'Paris Saint-Germain': 'PSG',
+                'Internazionale': 'Inter Milan',
+                'AC Milan': 'AC Milan'
+            };
+            
+            return abbreviations[teamName] || teamName;
+        }
+
+        // ===== ENHANCED WAVEFORM SETUP =====
+        function createWaveform() {
+            waveform.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                waveform.appendChild(bar);
+            }
+        }
+
+        function animateWaveform() {
+            const bars = waveform.querySelectorAll('.wave-bar');
+            
+            function animate() {
+                if (isPlaying) {
+                    const time = Date.now() / 100;
+                    bars.forEach((bar, index) => {
+                        const baseHeight = 6;
+                        const variation = Math.sin(time * 0.8 + index * 0.5) * 12;
+                        const randomness = Math.random() * 8;
+                        const height = baseHeight + variation + randomness;
+                        bar.style.height = `${Math.max(4, Math.min(24, height))}px`;
+                    });
+                    requestAnimationFrame(animate);
+                } else {
+                    bars.forEach(bar => {
+                        bar.style.height = '6px';
+                    });
+                }
+            }
+            animate();
+        }
+
+        // ===== ENHANCED PROGRESS MANAGEMENT =====
+        function updateProgress() {
+            if (currentMinute < 90) {
+                currentMinute += 0.1;
+            } else if (currentMinute < 94) {
+                currentMinute += 0.05;
+            }
+            
+            const progress = (currentMinute / 94) * 100;
+            progressFill.style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        // ===== ENHANCED GOAL ANIMATION =====
+        function animateGoalScore(scoreElement, newScore) {
+            console.log('🎯 Goal animation triggered!', newScore);
+            
+            // Trigger haptic feedback for goal
+            triggerHaptic('success');
+            
+            // Update the score
+            scoreElement.textContent = newScore;
+            
+            // Add goal animation class
+            scoreElement.classList.add('goal-animation');
+            
+            // Remove animation class after completion
+            setTimeout(() => {
+                scoreElement.classList.remove('goal-animation');
+            }, 1200);
+
+            // Announce to screen readers
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'assertive');
+            announcement.setAttribute('aria-atomic', 'true');
+            announcement.className = 'sr-only';
+            announcement.textContent = `Goal! Score updated to ${newScore}`;
+            document.body.appendChild(announcement);
+            
+            setTimeout(() => {
+                document.body.removeChild(announcement);
+            }, 1000);
+        }
+
+        // ===== ENHANCED COMMENTARY SYSTEM =====
+        function playNextCommentary() {
+            if (!isPlaying) return;
+            
+            const commentary = commentaries[currentCommentaryIndex];
+            
+            // Clear existing classes
+            commentaryLine.classList.remove('active');
+            
+            // Get existing elements
+            const timeElement = commentaryLine.querySelector('.commentary-time');
+            const tickerContainer = commentaryLine.querySelector('.ticker-container');
+            const tickerContent = tickerContainer.querySelector('.ticker-content');
+            
+            // Update content
+            timeElement.textContent = commentary.time;
+            tickerContent.textContent = commentary.text;
+            
+            // Update score if this commentary has a score change
+            if (commentary.scoreChange) {
+                console.log('🎯 Goal detected! Updating score to:', commentary.scoreChange);
+                const scoreElement = document.querySelector('.widget-bar .score');
+                if (scoreElement) {
+                    animateGoalScore(scoreElement, commentary.scoreChange);
+                }
+            }
+            
+            // Reset and restart ticker animation
+            tickerContent.classList.remove('scrolling');
+            tickerContent.offsetHeight; // Force reflow
+            
+            // Calculate dynamic duration for consistent reading speed
+            const textLength = commentary.text.length;
+            const baseSpeed = 50;
+            const containerWidth = tickerContainer.offsetWidth;
+            const duration = Math.max(12, (textLength * 8 + containerWidth * 2) / baseSpeed);
+            
+            // Apply scrolling with custom duration
+            tickerContent.style.animationDuration = `${duration}s`;
+            tickerContent.classList.add('scrolling');
+            
+            // Add active state
+            commentaryLine.classList.add('active');
+            
+            // Move to next commentary
+            currentCommentaryIndex = (currentCommentaryIndex + 1) % commentaries.length;
+            
+            // Schedule next commentary
+            setTimeout(() => {
+                if (isPlaying) {
+                    playNextCommentary();
+                }
+            }, (duration + 2) * 1000);
+        }
+
+        // ===== ENHANCED PLAY/PAUSE FUNCTIONALITY =====
+        playButton.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            
+            if (isPlaying) {
+                // Start playing
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                playButton.classList.add('playing');
+                playButton.setAttribute('aria-pressed', 'true');
+                playButton.setAttribute('aria-label', 'Pause live commentary');
+                playState.textContent = 'Playing';
+                expandButton.classList.add('playing');
+                
+                playNextCommentary();
+                animateWaveform();
+                progressInterval = setInterval(updateProgress, 1000);
+                
+                // Announce to screen readers
+                announceToScreenReader('Live commentary started');
+                
+            } else {
+                // Stop playing
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                playButton.classList.remove('playing');
+                playButton.setAttribute('aria-pressed', 'false');
+                playButton.setAttribute('aria-label', 'Play live commentary');
+                playState.textContent = 'Paused';
+                expandButton.classList.remove('playing');
+                commentaryLine.classList.remove('active');
+                
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+                
+                // Reset ticker
+                const tickerContent = commentaryLine.querySelector('.ticker-content');
+                if (tickerContent) {
+                    tickerContent.classList.remove('scrolling');
+                    tickerContent.textContent = 'Press play for live commentary with audio';
+                }
+                
+                animateWaveform();
+                
+                // Announce to screen readers
+                announceToScreenReader('Live commentary paused');
+            }
+        });
+
+        // ===== ENHANCED EXPAND/COLLAPSE FUNCTIONALITY =====
+        expandButton.addEventListener('click', () => {
+            isExpanded = !isExpanded;
+            widget.classList.toggle('expanded', isExpanded);
+            expandButton.setAttribute('aria-expanded', isExpanded);
+            
+            if (isExpanded) {
+                // Focus management for accessibility
+                const firstGameItem = document.querySelector('.game-item');
+                if (firstGameItem) {
+                    setTimeout(() => firstGameItem.focus(), 300);
+                }
+                announceToScreenReader('Options panel opened');
+            } else {
+                announceToScreenReader('Options panel closed');
+            }
+        });
+
+        // ===== ENHANCED GAME SELECTION =====
+        function setupGameSelection() {
+            document.querySelectorAll('.game-item').forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    selectGame(index);
+                });
+                
+                // Enhanced keyboard support
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectGame(index);
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const nextItem = item.nextElementSibling;
+                        if (nextItem) nextItem.focus();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const prevItem = item.previousElementSibling;
+                        if (prevItem) prevItem.focus();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        expandButton.click();
+                        expandButton.focus();
+                    }
+                });
+            });
+        }
+
+        function selectGame(index) {
+            // Remove active state from all items
+            document.querySelectorAll('.game-item').forEach(i => i.classList.remove('active'));
+            
+            // Add active to selected item
+            const selectedItem = document.querySelectorAll('.game-item')[index];
+            selectedItem.classList.add('active');
+            
+            // Update current game index
+            currentGameIndex = index;
+            
+            // Update main display
+            const gameData = gamesData[index];
+            if (gameData) {
+                const leftTeam = getSmartTeamName(gameData.teams[0]);
+                const rightTeam = getSmartTeamName(gameData.teams[1]);
+                
+                widget.querySelector('.team-left').textContent = leftTeam;
+                widget.querySelector('.team-right').textContent = rightTeam;
+                
+                const formattedScore = gameData.score.replace('-', ' - ');
+                widget.querySelector('.widget-bar .score').textContent = formattedScore;
+                
+                // Update time
+                widget.querySelector('.commentary-time').textContent = gameData.time;
+            }
+            
+            // Collapse expanded view
+            isExpanded = false;
+            widget.classList.remove('expanded');
+            expandButton.setAttribute('aria-expanded', 'false');
+            
+            // Announce change
+            announceToScreenReader(`Switched to ${gameData.teams[0]} vs ${gameData.teams[1]}`);
+            
+            triggerHaptic('medium');
+        }
+
+        // ===== SWIPE GESTURE SUPPORT =====
+        function setupSwipeGestures() {
+            let startX = 0;
+            let startY = 0;
+            let isScrolling = false;
+
+            widget.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isScrolling = false;
+            }, { passive: true });
+
+            widget.addEventListener('touchmove', (e) => {
+                if (isScrolling) return;
+
+                const currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
+                const diffX = startX - currentX;
+                const diffY = startY - currentY;
+
+                // Determine if this is a horizontal swipe
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+                    // Show swipe indicators
+                    if (diffX > 0 && currentGameIndex < gamesData.length - 1) {
+                        swipeRight.classList.add('show');
+                    } else if (diffX < 0 && currentGameIndex > 0) {
+                        swipeLeft.classList.add('show');
+                    }
+                } else if (Math.abs(diffY) > 10) {
+                    isScrolling = true;
+                }
+            }, { passive: true });
+
+            widget.addEventListener('touchend', (e) => {
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                const diffX = startX - endX;
+                const diffY = startY - endY;
+
+                // Hide swipe indicators
+                swipeLeft.classList.remove('show');
+                swipeRight.classList.remove('show');
+
+                // Only process horizontal swipes
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                    if (diffX > 0 && currentGameIndex < gamesData.length - 1) {
+                        // Swipe left - next game
+                        selectGame(currentGameIndex + 1);
+                    } else if (diffX < 0 && currentGameIndex > 0) {
+                        // Swipe right - previous game
+                        selectGame(currentGameIndex - 1);
+                    }
+                }
+            }, { passive: true });
+        }
+
+        // ===== PULL TO REFRESH =====
+        function setupPullToRefresh() {
+            let startY = 0;
+            let isPulling = false;
+
+            widget.addEventListener('touchstart', (e) => {
+                if (widget.scrollTop === 0) {
+                    startY = e.touches[0].clientY;
+                }
+            }, { passive: true });
+
+            widget.addEventListener('touchmove', (e) => {
+                if (widget.scrollTop === 0) {
+                    const currentY = e.touches[0].clientY;
+                    const pullDistance = currentY - startY;
+
+                    if (pullDistance > 50 && !isPulling) {
+                        isPulling = true;
+                        pullRefresh.classList.add('show');
+                        triggerHaptic('light');
+                    }
+                }
+            }, { passive: true });
+
+            widget.addEventListener('touchend', () => {
+                if (isPulling) {
+                    refreshData();
+                    setTimeout(() => {
+                        pullRefresh.classList.remove('show');
+                        isPulling = false;
+                    }, 1000);
+                }
+            }, { passive: true });
+        }
+
+        // ===== OFFLINE/ONLINE DETECTION =====
+        function setupOfflineDetection() {
+            function updateOnlineStatus() {
+                if (navigator.onLine) {
+                    offlineIndicator.classList.remove('show');
+                } else {
+                    offlineIndicator.classList.add('show');
+                }
+            }
+
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+        }
+
+        // ===== REFRESH DATA =====
+        function refreshData() {
+            console.log('🔄 Refreshing data...');
+            triggerHaptic('medium');
+            
+            // Simulate data refresh
+            setTimeout(() => {
+                announceToScreenReader('Data refreshed');
+            }, 1000);
+        }
+
+        // ===== SCREEN READER ANNOUNCEMENTS =====
+        function announceToScreenReader(message) {
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.setAttribute('aria-atomic', 'true');
+            announcement.className = 'sr-only';
+            announcement.textContent = message;
+            document.body.appendChild(announcement);
+            
+            setTimeout(() => {
+                if (document.body.contains(announcement)) {
+                    document.body.removeChild(announcement);
+                }
+            }, 1000);
+        }
+
+        // ===== LOADING STATE MANAGEMENT =====
+        function removeLoadingState() {
+            setTimeout(() => {
+                widget.classList.remove('loading-state');
+                isLoading = false;
+                
+                // Remove skeleton classes
+                document.querySelectorAll('.skeleton').forEach(el => {
+                    el.classList.remove('skeleton');
+                });
+                
+                announceToScreenReader('Live commentary widget loaded');
+            }, 1500);
+        }
+
+        // ===== SETTINGS FUNCTIONALITY =====
+        function setupSettings() {
+            document.querySelectorAll('.setting-option').forEach(option => {
+                addRippleEffect(option);
+                
+                option.addEventListener('click', () => {
+                    const setting = option.textContent.trim();
+                    announceToScreenReader(`${setting} selected`);
+                    console.log('Setting selected:', setting);
+                });
+            });
+        }
+
+        // ===== ENHANCED INITIALIZATION =====
+        function init() {
+            console.log('🎙️ Enhanced Commentary Widget Loading...');
+            
+            // Create waveform
+            createWaveform();
+            
+            // Add ripple effects
+            addRippleEffect(playButton);
+            addRippleEffect(expandButton);
+            document.querySelectorAll('.game-item').forEach(addRippleEffect);
+            
+            // Setup all functionality
+            setupGameSelection();
+            setupSwipeGestures();
+            setupPullToRefresh();
+            setupOfflineDetection();
+            setupSettings();
+            
+            // Remove loading state
+            removeLoadingState();
+            
+            console.log('✅ Enhanced Commentary Widget Loaded!');
+        }
+
+        // ===== START THE APPLICATION =====
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', (e) => {
+            // Space bar to play/pause
+            if (e.code === 'Space' && !isExpanded && e.target === document.body) {
+                e.preventDefault();
+                playButton.click();
+            }
+            
+            // Arrow keys for game navigation when expanded
+            if (isExpanded) {
+                if (e.key === 'ArrowLeft' && currentGameIndex > 0) {
+                    e.preventDefault();
+                    selectGame(currentGameIndex - 1);
+                } else if (e.key === 'ArrowRight' && currentGameIndex < gamesData.length - 1) {
+                    e.preventDefault();
+                    selectGame(currentGameIndex + 1);
+                }
+            }
+            
+            // Escape to close expanded view
+            if (e.key === 'Escape' && isExpanded) {
+                expandButton.click();
+            }
+        });
+
+        // ===== PERFORMANCE MONITORING =====
+        if ('performance' in window) {
+            window.addEventListener('load', () => {
+                const loadTime = performance.now();
+                console.log(`⚡ Widget loaded in ${loadTime.toFixed(2)}ms`);
+            });
+        }
+    </script>
+</body>
+</html>
