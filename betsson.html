@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Gaming App Wireframe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.5;
+        }
+        
+        /* Header - Fixed positioning for mobile */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-bottom: 1px solid #000000;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+            height: 60px;
+        }
+        
+        /* Burger Button - Increased touch target */
+        .burger-btn {
+            background: none;
+            border: 1px solid #000000;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+            border-radius: 0;
+            flex-shrink: 0;
+        }
+        
+        .burger-line {
+            width: 18px;
+            height: 2px;
+            background: #000000;
+            transition: all 0.2s ease;
+        }
+        
+        .burger-btn.active .burger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .burger-btn.active .burger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .burger-btn.active .burger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Search - Proper flex behavior */
+        .header-search {
+            display: flex;
+            align-items: center;
+            border: 1px solid #000000;
+            flex: 1;
+            height: 44px;
+            min-width: 0;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: transparent;
+            min-width: 0;
+        }
+        
+        .search-input::placeholder {
+            color: #666666;
+        }
+        
+        .search-btn {
+            padding: 12px;
+            background: transparent;
+            border: none;
+            border-left: 1px solid #000000;
+            cursor: pointer;
+            font-size: 16px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        /* Profile Icon */
+        .profile-container {
+            flex-shrink: 0;
+        }
+        
+        .profile-btn {
+            background: none;
+            border: 1px solid #000000;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Profile Menu */
+        .profile-menu {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: #ffffff;
+            border-left: 1px solid #000000;
+            transition: transform 0.3s ease;
+            z-index: 300;
+            overflow-y: auto;
+        }
+        
+        .profile-menu.active {
+            transform: translateX(-280px);
+        }
+        
+        .profile-header {
+            border-bottom: 1px solid #000000;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .profile-items {
+            list-style: none;
+        }
+        
+        .profile-menu-item {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .profile-menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-menu-item a {
+            display: block;
+            padding: 20px;
+            text-decoration: none;
+            color: #000000;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .profile-menu-item a:active {
+            background: #f0f0f0;
+        }
+        
+        /* Logo */
+        .logo {
+            font-weight: 600;
+            font-size: 16px;
+            flex-shrink: 0;
+            padding-left: 8px;
+        }
+        
+        /* Menu Overlay */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 200;
+        }
+        
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Side Menu */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 280px;
+            height: 100%;
+            background: #ffffff;
+            border-right: 1px solid #000000;
+            transition: transform 0.3s ease;
+            z-index: 300;
+            overflow-y: auto;
+        }
+        
+        .side-menu.active {
+            transform: translateX(320px);
+        }
+        
+        .menu-header {
+            border-bottom: 1px solid #000000;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .menu-items {
+            list-style: none;
+        }
+        
+        .menu-item {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item a {
+            display: block;
+            padding: 20px;
+            text-decoration: none;
+            color: #000000;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .menu-item a:active {
+            background: #f0f0f0;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 24px 16px;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .content-section {
+            margin-bottom: 32px;
+        }
+        
+        .content-section h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .content-box {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: #fafafa;
+        }
+        
+        .content-box h2 {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .content-box p {
+            font-size: 14px;
+            color: #666666;
+        }
+        
+        /* Footer */
+        .footer {
+            border-top: 1px solid #e0e0e0;
+            background: #f8f8f8;
+            padding: 32px 16px 24px;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .footer-column h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #000000;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            text-decoration: none;
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .footer-links a:active {
+            color: #000000;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+        }
+        
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .side-menu {
+                width: 320px;
+                left: -320px;
+            }
+            
+            .side-menu.active {
+                transform: translateX(320px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="burger-btn" onclick="toggleMenu()" aria-label="Open menu">
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+        </button>
+        
+        <div class="header-search">
+            <input type="text" class="search-input" placeholder="Search games, promotions..." aria-label="Search">
+            <button class="search-btn" onclick="performSearch()" aria-label="Search">
+                <span>⌕</span>
+            </button>
+        </div>
+        
+        <div class="profile-container">
+            <button class="profile-btn" onclick="toggleProfile()" aria-label="Account menu">
+                <span>👤</span>
+            </button>
+        </div>
+        
+        <div class="logo">LOGO</div>
+    </header>
+    
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" onclick="closeAllMenus()"></div>
+    
+    <!-- Side Menu -->
+    <nav class="side-menu">
+        <div class="menu-header">Menu</div>
+        <ul class="menu-items">
+            <li class="menu-item"><a href="#" onclick="navigateTo('home')">Home</a></li>
+            <li class="menu-item"><a href="#" onclick="navigateTo('sports')">Sports</a></li>
+            <li class="menu-item"><a href="#" onclick="navigateTo('casino')">Casino</a></li>
+            <li class="menu-item"><a href="#" onclick="navigateTo('live-casino')">Live Casino</a></li>
+            <li class="menu-item"><a href="#" onclick="navigateTo('poker')">Poker</a></li>
+            <li class="menu-item"><a href="#" onclick="navigateTo('promotions')">Promotions</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Profile Menu -->
+    <nav class="profile-menu">
+        <div class="profile-header">Account</div>
+        <ul class="profile-items">
+            <li class="profile-menu-item"><a onclick="showLogin()">Login</a></li>
+            <li class="profile-menu-item"><a onclick="showSignup()">Sign Up</a></li>
+            <li class="profile-menu-item"><a onclick="showForgotPassword()">Forgot Password?</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-section">
+            <h1>Welcome to Gaming Site</h1>
+            
+            <div class="content-box">
+                <h2>Featured Games</h2>
+                <p>Discover our most popular games and latest releases.</p>
+            </div>
+            
+            <div class="content-box">
+                <h2>Live Sports</h2>
+                <p>Bet on live sporting events with real-time odds.</p>
+            </div>
+            
+            <div class="content-box">
+                <h2>Current Promotions</h2>
+                <p>Take advantage of our latest bonuses and special offers.</p>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h3>Responsible Gaming</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Information (on Res. Gam.)</a></li>
+                    <li><a href="#">Self-Assessment</a></li>
+                    <li><a href="#">Responsible Gambling</a></li>
+                    <li><a href="#">Help Centre</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Legal & Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Game Rules</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms and Conditions</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2025 Gaming Site. Licensed and regulated. 18+ only.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Menu functionality
+        function toggleMenu() {
+            const burgerBtn = document.querySelector('.burger-btn');
+            const menuOverlay = document.querySelector('.menu-overlay');
+            const sideMenu = document.querySelector('.side-menu');
+            const profileMenu = document.querySelector('.profile-menu');
+            
+            // Close profile menu if open
+            profileMenu.classList.remove('active');
+            
+            burgerBtn.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+            sideMenu.classList.toggle('active');
+        }
+        
+        function closeAllMenus() {
+            const burgerBtn = document.querySelector('.burger-btn');
+            const menuOverlay = document.querySelector('.menu-overlay');
+            const sideMenu = document.querySelector('.side-menu');
+            const profileMenu = document.querySelector('.profile-menu');
+            
+            burgerBtn.classList.remove('active');
+            menuOverlay.classList.remove('active');
+            sideMenu.classList.remove('active');
+            profileMenu.classList.remove('active');
+        }
+        
+        // Profile functionality
+        function toggleProfile() {
+            const menuOverlay = document.querySelector('.menu-overlay');
+            const profileMenu = document.querySelector('.profile-menu');
+            const sideMenu = document.querySelector('.side-menu');
+            const burgerBtn = document.querySelector('.burger-btn');
+            
+            // Close burger menu if open
+            sideMenu.classList.remove('active');
+            burgerBtn.classList.remove('active');
+            
+            menuOverlay.classList.toggle('active');
+            profileMenu.classList.toggle('active');
+        }
+        
+        function showLogin() {
+            alert('Login modal would open here');
+            closeAllMenus();
+        }
+        
+        function showSignup() {
+            alert('Sign up modal would open here');
+            closeAllMenus();
+        }
+        
+        function showForgotPassword() {
+            alert('Forgot password flow would start here');
+            closeAllMenus();
+        }
+        
+        // Search functionality
+        function performSearch() {
+            const searchInput = document.querySelector('.search-input');
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                alert('Searching for: ' + searchTerm);
+            }
+        }
+        
+        // Navigation functionality
+        function navigateTo(section) {
+            alert('Navigating to: ' + section);
+            closeAllMenus();
+        }
+        
+        // Close dropdowns when clicking outside - no longer needed for dropdowns
+        // All menus now use overlay system
+        
+        // Handle search on Enter key
+        document.querySelector('.search-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // Prevent menu close when clicking inside menus
+        document.querySelector('.side-menu').addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+        
+        document.querySelector('.profile-menu').addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    </script>
+</body>
+</html>
