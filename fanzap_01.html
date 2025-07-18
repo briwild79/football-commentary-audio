@@ -19,6 +19,8 @@
             overflow-x: hidden;
             padding-bottom: 80px;
             position: relative;
+            margin: 0;
+            padding-top: 0;
         }
 
         /* Mobile Header */
@@ -30,7 +32,7 @@
             justify-content: space-between;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 200;
             border-bottom: 1px solid #333;
         }
 
@@ -46,6 +48,8 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+            position: relative;
+            z-index: 210;
         }
 
         .header-icon {
@@ -60,6 +64,7 @@
             font-size: 1.2rem;
             transition: all 0.2s;
             position: relative;
+            color: #fff;
         }
 
         .header-icon:active {
@@ -93,6 +98,8 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #444;
+            position: relative;
+            z-index: 150;
         }
 
         .level-info {
@@ -176,6 +183,8 @@
             margin: 1rem;
             border-radius: 16px;
             border: 1px solid #333;
+            position: relative;
+            z-index: 1;
         }
 
         .smart-title {
@@ -197,6 +206,8 @@
             gap: 1rem;
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
+            z-index: 1;
         }
 
         .smart-suggestion:active {
@@ -841,6 +852,7 @@
         .content-section {
             display: none;
             min-height: calc(100vh - 160px);
+            padding-top: 0.5rem;
         }
 
         .content-section.active {
@@ -1795,18 +1807,195 @@
         <div class="reaction-btn" onclick="sendReaction('👏')">👏</div>
     </div>
 
-    <!-- Audio Preview Modal -->
-    <div id="audio-preview" class="audio-preview">
-        <div class="preview-content">
-            <div class="preview-avatar" id="preview-avatar"></div>
-            <h3 id="preview-name">Commentator Name</h3>
-            <p id="preview-info">Style and club info</p>
-            <div style="margin: 1rem 0; font-style: italic; color: #ccc;" id="preview-sample">
-                "Sample commentary goes here..."
+    <!-- Commentator Profile Page -->
+    <div id="commentator-profile" class="content-section">
+        <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; position: fixed; top: 0; left: 0; right: 0; z-index: 250;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="header-icon" onclick="goBackFromProfile()">←</div>
+                <div class="logo" id="profile-commentator-name">Commentator</div>
             </div>
-            <div class="preview-controls">
-                <button class="preview-btn" onclick="joinFromPreview()">Join Live</button>
-                <button class="preview-btn secondary" onclick="closePreview()">Close</button>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="header-icon" onclick="showToast('Share profile', 'info')">📤</div>
+                <div class="header-icon" onclick="showToast('More options', 'info')">⋯</div>
+            </div>
+        </div>
+
+        <div style="padding: 1.5rem; margin-top: 80px;">
+            <!-- Profile Header -->
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div id="profile-avatar" class="commentator-avatar" style="width: 100px; height: 100px; margin: 0 auto 1rem; position: relative;">
+                    <div class="live-indicator" id="profile-live-indicator" style="display: none;"></div>
+                </div>
+                <h2 id="profile-name">BigDave_MUFC</h2>
+                <div id="profile-info" style="color: #999; margin: 0.5rem 0;">🛡️ Man United • 🤣 Funny</div>
+                <div id="profile-bio" style="color: #ccc; margin: 1rem 0; font-style: italic;">
+                    "Been supporting United through thick and thin for 25 years. Here to bring you the passion and pain of being a Red Devil!"
+                </div>
+                
+                <!-- Stats -->
+                <div style="display: flex; justify-content: center; gap: 2rem; margin: 1.5rem 0;">
+                    <div style="text-align: center;">
+                        <div id="profile-followers" style="font-weight: bold; color: #00ff88; font-size: 1.2rem;">2.3K</div>
+                        <div style="font-size: 0.8rem; color: #999;">Followers</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div id="profile-matches" style="font-weight: bold; color: #00ff88; font-size: 1.2rem;">156</div>
+                        <div style="font-size: 0.8rem; color: #999;">Matches</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div id="profile-rating" style="font-weight: bold; color: #00ff88; font-size: 1.2rem;">4.8</div>
+                        <div style="font-size: 0.8rem; color: #999;">Rating</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem; margin: 1.5rem 0;">
+                    <button id="profile-follow-btn" class="follow-btn" style="flex: 1;" onclick="toggleFollowFromProfile()">Follow</button>
+                    <button class="follow-btn" style="flex: 1; background: #333; color: #fff;" onclick="showTipModal()">💰 Tip</button>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                    <button class="quick-tip" onclick="quickTipProfile(1)">£1</button>
+                    <button class="quick-tip" onclick="quickTipProfile(2)">£2</button>
+                    <button class="quick-tip" onclick="quickTipProfile(5)">£5</button>
+                    <button class="quick-tip" onclick="quickTipProfile(10)">£10</button>
+                </div>
+            </div>
+
+            <!-- Current Status -->
+            <div id="profile-status" class="smart-home" style="margin-bottom: 1.5rem;">
+                <div class="smart-title">
+                    <span>🔴</span>
+                    <span>Currently Live</span>
+                </div>
+                
+                <div class="smart-suggestion" onclick="joinFromProfile()">
+                    <div class="suggestion-icon" style="background: linear-gradient(45deg, #667eea, #764ba2);">⚽</div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-title">Man United vs Arsenal</div>
+                        <div class="suggestion-subtitle">2.3K listeners • Live 67'</div>
+                    </div>
+                    <button class="join-btn">Join Live</button>
+                </div>
+            </div>
+
+            <!-- Recent Matches -->
+            <div class="smart-home" style="margin-bottom: 1.5rem;">
+                <div class="smart-title">
+                    <span>🎙️</span>
+                    <span>Recent Commentary</span>
+                </div>
+                
+                <div class="smart-suggestion" onclick="playReplay('mufc-chelsea')">
+                    <div class="suggestion-icon" style="background: linear-gradient(45deg, #ff7675, #fd79a8);">📼</div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-title">Man United vs Chelsea</div>
+                        <div class="suggestion-subtitle">Yesterday • 1.8K listened • ⭐ 4.9</div>
+                    </div>
+                    <div style="color: #00ff88;">▶️</div>
+                </div>
+
+                <div class="smart-suggestion" onclick="playReplay('mufc-liverpool')">
+                    <div class="suggestion-icon" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24);">📼</div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-title">Man United vs Liverpool</div>
+                        <div class="suggestion-subtitle">3 days ago • 3.1K listened • ⭐ 4.7</div>
+                    </div>
+                    <div style="color: #00ff88;">▶️</div>
+                </div>
+
+                <div class="smart-suggestion" onclick="playReplay('mufc-city')">
+                    <div class="suggestion-icon" style="background: linear-gradient(45deg, #00b894, #55a3ff);">📼</div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-title">Man United vs Man City</div>
+                        <div class="suggestion-subtitle">1 week ago • 4.2K listened • ⭐ 4.8</div>
+                    </div>
+                    <div style="color: #00ff88;">▶️</div>
+                </div>
+            </div>
+
+            <!-- Sample Commentary -->
+            <div class="smart-home" style="margin-bottom: 1.5rem;">
+                <div class="smart-title">
+                    <span>🎧</span>
+                    <span>Sample Commentary</span>
+                </div>
+                
+                <div style="background: #333; border-radius: 12px; padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(45deg, #00ff88, #00ccff); display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="playSample()">
+                            <span id="sample-play-btn">▶️</span>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">Rashford's Winner vs Arsenal</div>
+                            <div style="font-size: 0.8rem; color: #999;">Most replayed moment • 45 sec</div>
+                        </div>
+                    </div>
+                    <div id="profile-sample" style="font-style: italic; color: #ccc; line-height: 1.4;">
+                        "GET IN THERE! Rashford you absolute beauty! That's what we call a proper United goal! The speed, the finish, the celebration - this is why we love this game!"
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="smart-home" style="margin-bottom: 1.5rem;">
+                <div class="smart-title">
+                    <span>🏆</span>
+                    <span>Achievements</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔥</div>
+                        <div style="font-size: 0.8rem;">100 Match Streak</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⭐</div>
+                        <div style="font-size: 0.8rem;">Top Rated</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">💰</div>
+                        <div style="font-size: 0.8rem;">Big Earner</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">👥</div>
+                        <div style="font-size: 0.8rem;">Community Hero</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎯</div>
+                        <div style="font-size: 0.8rem;">Goal Predictor</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity: 0.3;">👑</div>
+                        <div style="font-size: 0.8rem; opacity: 0.3;">Legend</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="smart-home">
+                <div class="smart-title">
+                    <span>📅</span>
+                    <span>Upcoming Commentary</span>
+                </div>
+                
+                <div class="smart-suggestion" onclick="setReminder('mufc-everton')">
+                    <div class="suggestion-icon" style="background: linear-gradient(45deg, #74b9ff, #0984e3);">⏰</div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-title">Man United vs Everton</div>
+                        <div class="suggestion-subtitle">Tomorrow 15:00 • Set reminder</div>
+                    </div>
+                    <div style="color: #999;">🔔</div>
+                </div>
+
+                <div class="smart-suggestion" onclick="setReminder('mufc-wolves')">
+                    <div class="suggestion-icon" style="background: linear-gradient(45deg, #ffeaa7, #fdcb6e);">⏰</div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-title">Man United vs Wolves</div>
+                        <div class="suggestion-subtitle">Next week • Premier League</div>
+                    </div>
+                    <div style="color: #999;">🔔</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1817,6 +2006,346 @@
     <script>
         let currentCommentator = null;
         let isListening = false;
+        let isMuted = false;
+        let chatMessages = [];
+        let liveStats = {
+            tipsReceived: 47,
+            chatMessages: 156,
+            listeners: 2300
+        };
+
+        function joinRoom(commentator) {
+            // Hide main navigation and headers
+            document.querySelector('.mobile-header').style.display = 'none';
+            document.querySelector('.user-status').style.display = 'none';
+            document.querySelector('.bottom-nav').style.display = 'none';
+            
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show live commentary room
+            document.getElementById('live-commentary').classList.add('active');
+            
+            // Update room with commentator data
+            const commentatorData = {
+                'BigDave_MUFC': {
+                    name: 'BigDave_MUFC',
+                    info: '🛡️ Man United • 🤣 Funny',
+                    match: 'MAN UNITED vs ARSENAL',
+                    time: 'LIVE 67\' • Old Trafford',
+                    avatar: 'linear-gradient(45deg, #667eea, #764ba2)',
+                    listeners: 2300
+                },
+                'RedRiot': {
+                    name: 'RedRiot',
+                    info: '🔴 Liverpool • 🔥 Hype',
+                    match: 'LIVERPOOL vs CHELSEA',
+                    time: 'LIVE 23\' • Anfield',
+                    avatar: 'linear-gradient(45deg, #ff7675, #fd79a8)',
+                    listeners: 5700
+                },
+                'TacticalTim': {
+                    name: 'TacticalTim',
+                    info: '🌐 Neutral • 🧠 Tactical',
+                    match: 'MAN CITY vs TOTTENHAM',
+                    time: 'LIVE 89\' • Etihad Stadium',
+                    avatar: 'linear-gradient(45deg, #00b894, #55a3ff)',
+                    listeners: 1900
+                },
+                'MadridMania': {
+                    name: 'MadridMania',
+                    info: '⚪ Real Madrid • 🔥 Hype',
+                    match: 'REAL MADRID vs BARCELONA',
+                    time: 'LIVE 55\' • Santiago Bernabéu',
+                    avatar: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
+                    listeners: 12400
+                },
+                'BluesMood': {
+                    name: 'BluesMood',
+                    info: '🔵 Chelsea • 🤣 Funny',
+                    match: 'CHELSEA vs WEST HAM',
+                    time: 'LIVE 34\' • Stamford Bridge',
+                    avatar: 'linear-gradient(45deg, #74b9ff, #0984e3)',
+                    listeners: 1200
+                }
+            };
+            
+            const data = commentatorData[commentator] || commentatorData['BigDave_MUFC'];
+            
+            // Update UI elements
+            document.getElementById('live-commentator-name').textContent = data.name;
+            document.getElementById('live-commentator-full-name').textContent = data.name;
+            document.getElementById('live-commentator-info').textContent = data.info;
+            document.getElementById('live-match-title').textContent = data.match;
+            document.getElementById('live-match-time').textContent = data.time;
+            document.getElementById('live-listener-count').textContent = `🎧 ${(data.listeners/1000).toFixed(1)}K listening`;
+            document.getElementById('live-commentator-avatar').style.background = data.avatar;
+            
+            // Initialize chat
+            initializeChat();
+            
+            // Start live updates
+            startLiveUpdates();
+            
+            currentCommentator = commentator;
+            isListening = true;
+            showToast(`Joined ${commentator}'s live commentary!`, 'success');
+        }
+
+        function leaveLiveRoom() {
+            // Show main navigation and headers
+            document.querySelector('.mobile-header').style.display = 'flex';
+            document.querySelector('.user-status').style.display = 'flex';
+            document.querySelector('.bottom-nav').style.display = 'flex';
+            
+            // Hide live commentary
+            document.getElementById('live-commentary').classList.remove('active');
+            
+            // Return to live tab
+            document.getElementById('live-content').classList.add('active');
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[0].classList.add('active');
+            
+            // Stop live updates
+            stopLiveUpdates();
+            
+            showToast('Left commentary room', 'info');
+        }
+
+        function initializeChat() {
+            const chatContainer = document.getElementById('chat-container');
+            chatMessages = [
+                { user: 'Emma_Arsenal', message: 'Come on Arsenal! 🔴⚪', time: '2 min ago', isTip: false },
+                { user: 'MancRed', message: 'Tipped £2 💰', time: '3 min ago', isTip: true },
+                { user: 'FootballFan92', message: 'Great commentary Dave!', time: '5 min ago', isTip: false },
+                { user: 'OldTraffordGirl', message: 'Rashford is on fire! 🔥', time: '7 min ago', isTip: false },
+                { user: 'GunnerForLife', message: 'Tipped £5 - Keep it up! 💰', time: '8 min ago', isTip: true },
+                { user: 'RedDevil1999', message: 'GGMU! ⚽', time: '10 min ago', isTip: false }
+            ];
+            
+            updateChatDisplay();
+        }
+
+        function updateChatDisplay() {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.innerHTML = chatMessages.map(msg => `
+                <div style="margin-bottom: 0.75rem; ${msg.isTip ? 'background: rgba(0, 255, 136, 0.1); padding: 0.5rem; border-radius: 8px; border-left: 3px solid #00ff88;' : ''}">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="font-weight: 600; color: ${msg.isTip ? '#00ff88' : '#fff'}; font-size: 0.875rem;">${msg.user}</span>
+                        <span style="font-size: 0.75rem; color: #999;">${msg.time}</span>
+                    </div>
+                    <div style="color: ${msg.isTip ? '#00ff88' : '#ccc'}; font-size: 0.9rem;">${msg.message}</div>
+                </div>
+            `).join('');
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                chatMessages.unshift({
+                    user: 'You',
+                    message: message,
+                    time: 'now',
+                    isTip: false
+                });
+                
+                // Keep only last 20 messages
+                if (chatMessages.length > 20) {
+                    chatMessages = chatMessages.slice(0, 20);
+                }
+                
+                updateChatDisplay();
+                input.value = '';
+                
+                liveStats.chatMessages++;
+                document.getElementById('chat-messages').textContent = liveStats.chatMessages;
+                
+                showToast('Message sent!', 'success');
+            }
+        }
+
+        function sendReactionLive(emoji) {
+            chatMessages.unshift({
+                user: 'You',
+                message: emoji,
+                time: 'now',
+                isTip: false
+            });
+            
+            updateChatDisplay();
+            showToast(`Reaction sent: ${emoji}`, 'success');
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        }
+
+        function quickTipLive(amount) {
+            liveStats.tipsReceived += amount;
+            document.getElementById('tips-received').textContent = `£${liveStats.tipsReceived}`;
+            
+            chatMessages.unshift({
+                user: 'You',
+                message: `Tipped £${amount} 💰`,
+                time: 'now',
+                isTip: true
+            });
+            
+            updateChatDisplay();
+            showToast(`Tipped £${amount}! 💰`, 'success');
+            
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 50, 50]);
+            }
+        }
+
+        function showCustomTip() {
+            document.getElementById('custom-tip-modal').style.display = 'flex';
+            document.getElementById('custom-tip-amount').focus();
+        }
+
+        function closeCustomTip() {
+            document.getElementById('custom-tip-modal').style.display = 'none';
+            document.getElementById('custom-tip-amount').value = '';
+            document.getElementById('tip-message').value = '';
+        }
+
+        function sendCustomTip() {
+            const amount = parseFloat(document.getElementById('custom-tip-amount').value);
+            const message = document.getElementById('tip-message').value.trim();
+            
+            if (amount && amount > 0) {
+                liveStats.tipsReceived += amount;
+                document.getElementById('tips-received').textContent = `£${liveStats.tipsReceived}`;
+                
+                const tipMessage = message ? 
+                    `Tipped £${amount} - "${message}" 💰` : 
+                    `Tipped £${amount} 💰`;
+                
+                chatMessages.unshift({
+                    user: 'You',
+                    message: tipMessage,
+                    time: 'now',
+                    isTip: true
+                });
+                
+                updateChatDisplay();
+                closeCustomTip();
+                showToast(`Tipped £${amount}! 💰`, 'success');
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+            } else {
+                showToast('Please enter a valid amount', 'info');
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteBtn = event.target;
+            muteBtn.textContent = isMuted ? '🔇' : '🔊';
+            showToast(isMuted ? 'Muted' : 'Unmuted', 'info');
+        }
+
+        function followFromLive() {
+            const btn = event.target;
+            if (btn.textContent === 'Follow') {
+                btn.textContent = 'Following';
+                btn.style.background = '#666';
+                showToast(`Now following ${currentCommentator}!`, 'success');
+            } else {
+                btn.textContent = 'Follow';
+                btn.style.background = 'linear-gradient(45deg, #00ff88, #00ccff)';
+                showToast(`Unfollowed ${currentCommentator}`, 'info');
+            }
+        }
+
+        let liveUpdateInterval;
+        const commentaryTexts = [
+            "What a save by De Gea! Absolutely brilliant reflexes there!",
+            "Rashford with the pace! He's through on goal!",
+            "Arsenal pressing high here, looking dangerous",
+            "The crowd is electric at Old Trafford tonight!",
+            "That's a yellow card! Referee making his mark",
+            "Corner kick coming up... this could be crucial",
+            "The atmosphere is absolutely buzzing right now",
+            "United looking for that killer pass in the final third"
+        ];
+
+        function startLiveUpdates() {
+            let textIndex = 0;
+            
+            liveUpdateInterval = setInterval(() => {
+                // Update commentary text
+                document.getElementById('live-commentary-text').textContent = `"${commentaryTexts[textIndex]}"`;
+                textIndex = (textIndex + 1) % commentaryTexts.length;
+                
+                // Randomly add new chat messages
+                if (Math.random() > 0.7) {
+                    const randomUsers = ['FootieFan', 'RedDevil', 'Gunner4Life', 'United_Till_Die', 'Arsenal_Legend'];
+                    const randomMessages = ['Great commentary!', 'Come on United!', 'COYG!', '⚽🔥', 'Love this energy!'];
+                    
+                    chatMessages.unshift({
+                        user: randomUsers[Math.floor(Math.random() * randomUsers.length)],
+                        message: randomMessages[Math.floor(Math.random() * randomMessages.length)],
+                        time: 'now',
+                        isTip: Math.random() > 0.8
+                    });
+                    
+                    if (chatMessages.length > 20) {
+                        chatMessages = chatMessages.slice(0, 20);
+                    }
+                    
+                    updateChatDisplay();
+                    liveStats.chatMessages++;
+                    document.getElementById('chat-messages').textContent = liveStats.chatMessages;
+                }
+                
+                // Update listener count slightly
+                liveStats.listeners += Math.floor(Math.random() * 10) - 5;
+                document.getElementById('live-listener-count').textContent = `🎧 ${(liveStats.listeners/1000).toFixed(1)}K listening`;
+                
+            }, 4000);
+        }
+
+        function stopLiveUpdates() {
+            if (liveUpdateInterval) {
+                clearInterval(liveUpdateInterval);
+            }
+        }
+
+        // Add enter key support for chat
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const chatInput = document.getElementById('chat-input');
+                if (chatInput) {
+                    chatInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            sendMessage();
+                        }
+                    });
+                }
+                
+                const customTipInput = document.getElementById('custom-tip-amount');
+                if (customTipInput) {
+                    customTipInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            sendCustomTip();
+                        }
+                    });
+                }
+            }, 100);
+        });
 
         function showTab(tab) {
             // Prevent default link behavior
@@ -1932,109 +2461,225 @@
         }
 
         function showCommentatorPreview(name) {
-            const modal = document.getElementById('audio-preview');
-            const avatar = document.getElementById('preview-avatar');
-            const nameEl = document.getElementById('preview-name');
-            const infoEl = document.getElementById('preview-info');
-            const sampleEl = document.getElementById('preview-sample');
+            // Hide main header when showing profile
+            document.querySelector('.mobile-header').style.display = 'none';
+            document.querySelector('.user-status').style.display = 'none';
             
-            // Sample data
+            // Hide all other content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show commentator profile
+            const profileSection = document.getElementById('commentator-profile');
+            profileSection.classList.add('active');
+            
+            // Update profile with commentator data
             const commentators = {
                 'BigDave_MUFC': {
                     style: 'linear-gradient(45deg, #667eea, #764ba2)',
                     info: '🛡️ Man United • 🤣 Funny',
-                    sample: '"GET IN THERE! Rashford you absolute beauty! That\'s what we call a proper United goal!"'
+                    sample: '"GET IN THERE! Rashford you absolute beauty! That\'s what we call a proper United goal!"',
+                    bio: 'Been supporting United through thick and thin for 25 years. Here to bring you the passion and pain of being a Red Devil!',
+                    followers: '2.3K',
+                    matches: '156',
+                    rating: '4.8',
+                    isLive: true,
+                    currentMatch: 'Man United vs Arsenal'
                 },
                 'RedRiot': {
                     style: 'linear-gradient(45deg, #ff7675, #fd79a8)',
                     info: '🔴 Liverpool • 🔥 Hype',
-                    sample: '"YESSS! WHAT A HIT! The Kop is going absolutely mental! This is why we love this game!"'
+                    sample: '"YESSS! WHAT A HIT! The Kop is going absolutely mental! This is why we love this game!"',
+                    bio: 'Scouse through and through! Here to capture the electric atmosphere of Anfield and share it with Reds everywhere.',
+                    followers: '5.7K',
+                    matches: '203',
+                    rating: '4.9',
+                    isLive: true,
+                    currentMatch: 'Liverpool vs Chelsea'
                 },
                 'TacticalTim': {
                     style: 'linear-gradient(45deg, #00b894, #55a3ff)',
                     info: '🌐 Neutral • 🧠 Tactical',
-                    sample: '"Brilliant positional play there. Notice how the midfielder dropped deep to create that overload..."'
+                    sample: '"Brilliant positional play there. Notice how the midfielder dropped deep to create that overload..."',
+                    bio: 'Former semi-pro player turned analyst. I break down the beautiful game with tactical insights you won\'t hear elsewhere.',
+                    followers: '1.9K',
+                    matches: '89',
+                    rating: '4.7',
+                    isLive: false,
+                    currentMatch: null
                 },
                 'SkySarah': {
                     style: 'linear-gradient(45deg, #a8e6cf, #88d8a3)',
                     info: '⚽ Multi-Club • 😎 Neutral',
-                    sample: '"Clean finish! The keeper had no chance with that placement. Textbook striker\'s goal."'
-                },
-                'BluesMood': {
-                    style: 'linear-gradient(45deg, #74b9ff, #0984e3)',
-                    info: '🔵 Chelsea • 🤣 Funny',
-                    sample: '"MASON MOUNT! The boy from Cobham does it again! Frank would be proud of that one!"'
-                },
-                'SpursSuper': {
-                    style: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
-                    info: '⚪ Tottenham • 🔥 Hype',
-                    sample: '"COME ON YOU SPURS! Kane with the magic! This is why we never give up hope!"'
+                    sample: '"Clean finish! The keeper had no chance with that placement. Textbook striker\'s goal."',
+                    bio: 'Football is for everyone! I cover matches from all leagues with fair, balanced commentary and a focus on the beautiful game.',
+                    followers: '891',
+                    matches: '67',
+                    rating: '4.6',
+                    isLive: true,
+                    currentMatch: 'Newcastle vs Brighton'
                 },
                 'MadridMania': {
                     style: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
                     info: '⚪ Real Madrid • 🔥 Hype',
-                    sample: '"¡GOOOOOL! ¡HALA MADRID! Benzema with pure class! The Bernabéu is electric!"'
+                    sample: '"¡GOOOOOL! ¡HALA MADRID! Benzema with pure class! The Bernabéu is electric!"',
+                    bio: '¡Hala Madrid! Bringing you the passion of the Bernabéu with every match. 14 Champions League titles and counting!',
+                    followers: '8.9K',
+                    matches: '178',
+                    rating: '4.9',
+                    isLive: true,
+                    currentMatch: 'Real Madrid vs Barcelona'
                 },
                 'PremierPaul': {
                     style: 'linear-gradient(45deg, #6c5ce7, #a29bfe)',
                     info: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England • 🧠 Tactical',
-                    sample: '"Notice the false 9 dropping deep here. Creates a numerical advantage in midfield..."'
+                    sample: '"Notice the false 9 dropping deep here. Creates a numerical advantage in midfield..."',
+                    bio: 'UEFA A License coach providing tactical insights from grassroots to Premier League. Here to educate and entertain.',
+                    followers: '3.4K',
+                    matches: '145',
+                    rating: '4.7',
+                    isLive: false,
+                    currentMatch: null
                 },
-                'GeordieGiant': {
-                    style: 'linear-gradient(45deg, #fd79a8, #e84393)',
-                    info: '⚫ Newcastle • 🤣 Funny',
-                    sample: '"Howay the lads! That\'s why we love this club! Pure passion and Geordie grit!"'
-                },
-                'BayernBeast': {
-                    style: 'linear-gradient(45deg, #ff6b6b, #ee5a24)',
-                    info: '🔴 Bayern • 🔥 Hype',
-                    sample: '"MÜLLER! DAS IST FANTASTISCH! Bayern München showing why they\'re the kings!"'
-                },
-                'WomensFootieFan': {
-                    style: 'linear-gradient(45deg, #fd79a8, #e84393)',
-                    info: '⚽ Women\'s Football • 🤣 Funny',
-                    sample: '"What a strike! The women\'s game just keeps getting better and better!"'
-                },
-                'LaLigaLegend': {
-                    style: 'linear-gradient(45deg, #ffd700, #ffed4e)',
-                    info: '🇪🇸 La Liga • 🧠 Tactical',
-                    sample: '"Increíble! The technique, the vision... this is why La Liga is the most technical league!"'
-                },
-                'SerieASuper': {
-                    style: 'linear-gradient(45deg, #00b894, #55a3ff)',
-                    info: '🇮🇹 Serie A • 😎 Neutral',
-                    sample: '"Bellissimo! Classic Italian football - tactical brilliance meets individual flair!"'
-                },
-                'ChampionsChatter': {
-                    style: 'linear-gradient(45deg, #667eea, #764ba2)',
-                    info: '🏆 Champions League • 🔥 Hype',
-                    sample: '"CHAMPIONS LEAGUE MAGIC! These are the nights that legends are made!"'
-                },
-                'ScottishScreamer': {
+                'BluesMood': {
                     style: 'linear-gradient(45deg, #74b9ff, #0984e3)',
-                    info: '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scottish • 🤣 Funny',
-                    sample: '"GET INTAE THEM! That\'s proper Scottish football! None of that fancy southern nonsense!"'
+                    info: '🔵 Chelsea • 🤣 Funny',
+                    sample: '"MASON MOUNT! The boy from Cobham does it again! Frank would be proud of that one!"',
+                    bio: 'Born and raised in West London. Through the highs and lows, I\'ll always be Blue. Comedy and passion in equal measure!',
+                    followers: '1.2K',
+                    matches: '78',
+                    rating: '4.5',
+                    isLive: false,
+                    currentMatch: null
+                },
+                'SpursSuper': {
+                    style: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
+                    info: '⚪ Tottenham • 🔥 Hype',
+                    sample: '"COME ON YOU SPURS! Kane with the magic! This is why we never give up hope!"',
+                    bio: 'To Dare Is To Do! Lifelong Spurs fan bringing the energy and optimism that keeps us going. COYS!',
+                    followers: '987',
+                    matches: '92',
+                    rating: '4.4',
+                    isLive: false,
+                    currentMatch: null
                 }
             };
             
-            const data = commentators[name] || commentators['BigDave_MUFC'];
+            const data = commentators[name] || {
+                style: 'linear-gradient(45deg, #667eea, #764ba2)',
+                info: '🎙️ Football Commentator • 🔥 Passionate',
+                sample: '"What a moment! This is why we love the beautiful game!"',
+                bio: 'Passionate football fan bringing you live commentary with energy and insight.',
+                followers: '1.2K',
+                matches: '45',
+                rating: '4.5',
+                isLive: false,
+                currentMatch: null
+            };
             
+            // Update profile elements
+            document.getElementById('profile-commentator-name').textContent = name;
+            document.getElementById('profile-name').textContent = name;
+            document.getElementById('profile-info').textContent = data.info;
+            document.getElementById('profile-bio').textContent = `"${data.bio}"`;
+            document.getElementById('profile-followers').textContent = data.followers;
+            document.getElementById('profile-matches').textContent = data.matches;
+            document.getElementById('profile-rating').textContent = data.rating;
+            document.getElementById('profile-sample').textContent = data.sample;
+            
+            const avatar = document.getElementById('profile-avatar');
             avatar.style.background = data.style;
-            nameEl.textContent = name;
-            infoEl.textContent = data.info;
-            sampleEl.textContent = data.sample;
             
-            modal.style.display = 'flex';
+            const liveIndicator = document.getElementById('profile-live-indicator');
+            const statusSection = document.getElementById('profile-status');
+            
+            if (data.isLive) {
+                liveIndicator.style.display = 'block';
+                statusSection.style.display = 'block';
+                statusSection.querySelector('.suggestion-title').textContent = data.currentMatch;
+            } else {
+                liveIndicator.style.display = 'none';
+                statusSection.style.display = 'none';
+            }
+            
+            // Store current commentator
             currentCommentator = name;
+            
+            showToast(`Viewing ${name}'s profile`, 'info');
         }
 
-        function closePreview() {
-            document.getElementById('audio-preview').style.display = 'none';
+        function goBackFromProfile() {
+            // Show main header again
+            document.querySelector('.mobile-header').style.display = 'flex';
+            document.querySelector('.user-status').style.display = 'flex';
+            
+            // Hide profile
+            document.getElementById('commentator-profile').classList.remove('active');
+            
+            // Determine which tab to go back to (default to discover)
+            let targetTab = 'discover-content';
+            let navIndex = 2; // Discover tab index
+            
+            // You could enhance this to remember where the user came from
+            
+            // Show target content
+            document.getElementById(targetTab).classList.add('active');
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
+            
+            showToast('Back to discovery', 'info');
         }
 
-        function joinFromPreview() {
-            closePreview();
-            showToast(`Joined ${currentCommentator}'s room!`, 'success');
+        function toggleFollowFromProfile() {
+            const btn = document.getElementById('profile-follow-btn');
+            if (btn.classList.contains('following')) {
+                btn.classList.remove('following');
+                btn.textContent = 'Follow';
+                showToast(`Unfollowed ${currentCommentator}`, 'info');
+            } else {
+                btn.classList.add('following');
+                btn.textContent = 'Following';
+                showToast(`Now following ${currentCommentator}! 🎉`, 'success');
+            }
+        }
+
+        function quickTipProfile(amount) {
+            showToast(`Tipped ${currentCommentator} £${amount}! 💰`, 'success');
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        function joinFromProfile() {
+            showToast(`Joining ${currentCommentator}'s live commentary!`, 'success');
+        }
+
+        function playReplay(matchId) {
+            showToast('Playing commentary replay...', 'success');
+        }
+
+        function playSample() {
+            const btn = document.getElementById('sample-play-btn');
+            btn.textContent = '⏸️';
+            showToast('Playing sample commentary...', 'success');
+            
+            setTimeout(() => {
+                btn.textContent = '▶️';
+                showToast('Sample finished', 'info');
+            }, 3000);
+        }
+
+        function setReminder(matchId) {
+            showToast('Reminder set! 🔔', 'success');
+        }
+
+        function showTipModal() {
+            showToast('Custom tip amount coming soon!', 'info');
         }
 
         function joinFriends(room) {
@@ -2134,7 +2779,7 @@
             showToast('Welcome back to FanZap! 🎉', 'success');
             
             // Test that all content sections exist
-            const sections = ['live-content', 'upcoming-content', 'discover-content', 'crew-content', 'profile-content'];
+            const sections = ['live-content', 'upcoming-content', 'discover-content', 'crew-content', 'profile-content', 'commentator-profile', 'live-commentary'];
             sections.forEach(id => {
                 const element = document.getElementById(id);
                 if (!element) {
