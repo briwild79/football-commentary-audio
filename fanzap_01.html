@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FanZap - Enhanced Mobile Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .header-icon:active {
+            transform: scale(0.9);
+        }
+
+        .profile-icon {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* User Status Bar */
+        .user-status {
+            background: linear-gradient(90deg, #2a2a2a, #333);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .level-badge {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .streak-info {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        /* Viral Alert Banner */
+        .viral-banner {
+            background: linear-gradient(90deg, #ff4757, #ff6b6b);
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: viralPulse 2s infinite;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .viral-banner::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff4757, #ff6b6b, #ff4757);
+            border-radius: 14px;
+            z-index: -1;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes viralPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        .viral-text {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .viral-btn {
+            background: #fff;
+            color: #ff4757;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            min-width: 70px;
+            transition: all 0.2s;
+        }
+
+        .viral-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Smart Home Feed */
+        .smart-home {
+            padding: 1rem;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            margin: 1rem;
+            border-radius: 16px;
+            border: 1px solid #333;
+        }
+
+        .smart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .smart-suggestion {
+            background: #333;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .smart-suggestion:active {
+            transform: scale(0.98);
+            background: #404040;
+        }
+
+        .suggestion-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .suggestion-text {
+            flex: 1;
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .suggestion-subtitle {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* Section Headers */
+        .section-header {
+            padding: 0 1rem;
+            margin: 1.5rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .see-all {
+            color: #00ff88;
+            font-size: 0.875rem;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Live Carousel */
+        .live-carousel {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 0 1rem 1rem;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .live-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .live-room {
+            min-width: 160px;
+            background: linear-gradient(135deg, #2a2a2a 0%, #333 100%);
+            border-radius: 16px;
+            padding: 1rem;
+            position: relative;
+            scroll-snap-align: start;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .live-room:active {
+            transform: scale(0.95);
+            border-color: #00ff88;
+        }
+
+        .live-room.playing {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .live-dot {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 8px;
+            height: 8px;
+            background: #ff4757;
+            border-radius: 50%;
+            animation: livePulse 1.5s infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        .room-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .room-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .live-room.playing .room-avatar::after {
+            opacity: 1;
+        }
+
+        .room-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .room-match {
+            font-size: 0.75rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+
+        .room-listeners {
+            font-size: 0.75rem;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .room-badge {
+            background: #ff4757;
+            color: #fff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .audio-waves {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .live-room.playing .audio-waves {
+            opacity: 1;
+        }
+
+        .wave {
+            width: 2px;
+            background: #00ff88;
+            border-radius: 1px;
+            animation: wave 0.8s infinite ease-in-out;
+        }
+
+        .wave:nth-child(1) { height: 6px; animation-delay: 0s; }
+        .wave:nth-child(2) { height: 10px; animation-delay: 0.1s; }
+        .wave:nth-child(3) { height: 4px; animation-delay: 0.2s; }
+        .wave:nth-child(4) { height: 8px; animation-delay: 0.3s; }
+
+        @keyframes wave {
+            0%, 40%, 100% { transform: scaleY(0.4); }
+            20% { transform: scaleY(1); }
+        }
+
+        /* Quick Filters */
+        .quick-filters {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding: 0 1rem 1rem;
+            scroll-snap-type: x mandatory;
+        }
+
+        .quick-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            scroll-snap-align: start;
+            transition: all 0.2s;
+            min-width: fit-content;
+            cursor: pointer;
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .filter-chip:active {
+            transform: scale(0.95);
+        }
+
+        /* Friends Section */
+        .friends-section {
+            background: #1a1a1a;
+            margin: 1.5rem 1rem;
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+
+        .friend-activity {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #333;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .friend-activity:active {
+            transform: scale(0.98);
+            background: #404040;
+        }
+
+        .friend-activity:last-child {
+            margin-bottom: 0;
+        }
+
+        .friend-avatars {
+            display: flex;
+            margin-left: 0;
+        }
+
+        .friend-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #a8e6cf, #88d8a3);
+            border: 2px solid #333;
+            margin-left: -8px;
+        }
+
+        .friend-avatar:first-child {
+            margin-left: 0;
+        }
+
+        .friend-info {
+            flex: 1;
+        }
+
+        .friend-names {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .friend-location {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .join-btn {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .join-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Match Cards */
+        .matches-container {
+            padding: 0 1rem;
+        }
+
+        .match-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .match-card:active {
+            transform: scale(0.98);
+            border-color: #00ff88;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .match-card:hover .swipe-indicator {
+            opacity: 1;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .teams {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .team-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .vs-text {
+            font-size: 0.875rem;
+            color: #999;
+            margin: 0 0.5rem;
+        }
+
+        .team-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .match-time {
+            background: linear-gradient(45deg, #ff4757, #ff6b6b);
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .match-time.upcoming {
+            background: #333;
+            color: #ccc;
+        }
+
+        .match-time.finished {
+            background: #666;
+            color: #fff;
+        }
+
+        .match-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .commentator-count {
+            background: #00ff88;
+            color: #000;
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .commentator-count.upcoming {
+            background: #333;
+            color: #ccc;
+        }
+
+        .match-badges {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .trending-badge {
+            background: #ff4757;
+            color: #fff;
+        }
+
+        .active-badge {
+            background: #333;
+            color: #fff;
+        }
+
+        .premium-badge {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+        }
+
+        .match-preview {
+            background: #333;
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 4px solid #00ff88;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .commentator-name {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .quick-tip {
+            background: #444;
+            border: none;
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 50px;
+        }
+
+        .quick-tip:active {
+            transform: scale(0.95);
+            background: #00ff88;
+            color: #000;
+        }
+
+        .bookmark-btn {
+            background: #444;
+            border: none;
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bookmark-btn:active {
+            background: #ffd700;
+            color: #000;
+        }
+
+        /* Commentator Grid */
+        .commentator-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+
+        .commentator-card {
+            background: #2a2a2a;
+            border-radius: 16px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .commentator-card:active {
+            transform: scale(0.95);
+            border-color: #00ff88;
+        }
+
+        .commentator-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffeaa7, #fab1a0);
+            margin: 0 auto 0.75rem;
+            position: relative;
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #ff4757;
+            border: 2px solid #2a2a2a;
+            border-radius: 50%;
+            animation: livePulse 1.5s infinite;
+        }
+
+        .commentator-name-card {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .commentator-info {
+            font-size: 0.75rem;
+            color: #999;
+            margin-bottom: 0.75rem;
+        }
+
+        .commentator-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .follow-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border: none;
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .follow-btn:active {
+            transform: scale(0.95);
+        }
+
+        .follow-btn.following {
+            background: #666;
+            color: #fff;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+            display: flex;
+            padding: 0.75rem 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            text-decoration: none;
+            color: #999;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: #00ff88;
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 0.25rem;
+            right: 1rem;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            min-height: calc(100vh - 160px);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Loading and Animation States */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #333;
+            border-top: 2px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #00ff88;
+            color: #000;
+        }
+
+        /* Live Reactions */
+        .live-reactions {
+            position: fixed;
+            bottom: 100px;
+            right: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 99;
+        }
+
+        .reaction-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #333;
+            color: #fff;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reaction-btn:active {
+            transform: scale(1.2);
+            background: #00ff88;
+        }
+
+        /* Audio Preview Modal */
+        .audio-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .preview-content {
+            background: #2a2a2a;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 300px;
+            margin: 1rem;
+        }
+
+        .preview-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin: 0 auto 1rem;
+        }
+
+        .preview-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .preview-btn {
+            background: #00ff88;
+            border: none;
+            color: #000;
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .preview-btn.secondary {
+            background: #666;
+            color: #fff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 375px) {
+            .live-room {
+                min-width: 140px;
+            }
+            
+            .commentator-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .teams {
+                font-size: 0.875rem;
+            }
+
+            .team-name {
+                display: none;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .commentator-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .matches-container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 0 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="logo">⚡ FanZap</div>
+        <div class="header-actions">
+            <div class="header-icon" onclick="showToast('Search coming soon!', 'info')">
+                🔍
+                <div class="smart-suggestion" onclick="showToast('Opening trending commentators...', 'success')">
+                <div class="suggestion-icon" style="background: linear-gradient(45deg, #ff4757, #ff6b6b);">🔥</div>
+                <div class="suggestion-text">
+                    <div class="suggestion-title">Trending this week</div>
+                    <div class="suggestion-subtitle">5 commentators everyone's talking about</div>
+                </div>
+            </div>
+        </div>
+            <div class="header-icon" onclick="showToast('3 new notifications!', 'info')">
+                🔔
+                <div class="notification-badge">3</div>
+            </div>
+            <div class="profile-icon header-icon" onclick="showToast('Profile settings', 'info')"></div>
+        </div>
+    </header>
+
+    <!-- User Status Bar -->
+    <div class="user-status">
+        <div class="level-info">
+            <div class="level-badge">Level 12</div>
+            <span style="font-size: 0.875rem;">Super Fan</span>
+        </div>
+        <div class="streak-info">
+            🔥 7 day streak
+        </div>
+    </div>
+
+    <!-- Viral Alert -->
+    <div class="viral-banner" onclick="joinViralMoment()">
+        <div style="font-size: 1.2rem;">🚨</div>
+        <div class="viral-text">
+            <strong>INCREDIBLE GOAL!</strong> 15K fans went absolutely mental with RedRiot!
+        </div>
+        <button class="viral-btn">Join Chaos</button>
+    </div>
+
+    <!-- Smart Home Feed -->
+    <div class="smart-home">
+        <div class="smart-title">
+            <span>🎯</span>
+            <span>Your Football Day</span>
+        </div>
+        
+        <div class="smart-suggestion" onclick="showToast('Opening BigDave_MUFC...', 'success')">
+            <div class="suggestion-icon">🛡️</div>
+            <div class="suggestion-text">
+                <div class="suggestion-title">Your usual Saturday commentator is live</div>
+                <div class="suggestion-subtitle">BigDave_MUFC • Man United vs Arsenal</div>
+            </div>
+        </div>
+
+        <div class="smart-suggestion" onclick="showToast('Setting reminder...', 'success')">
+            <div class="suggestion-icon" style="background: linear-gradient(45deg, #ff7675, #fd79a8);">⏰</div>
+            <div class="suggestion-text">
+                <div class="suggestion-title">El Clásico in 2 hours</div>
+                <div class="suggestion-subtitle">3 Spanish commentators scheduled</div>
+            </div>
+        </div>
+
+        <div class="smart-suggestion" onclick="showToast('Opening crew chat...', 'success')">
+            <div class="suggestion-icon" style="background: linear-gradient(45deg, #74b9ff, #0984e3);">👥</div>
+            <div class="suggestion-text">
+                <div class="suggestion-title">Your crew is gathering</div>
+                <div class="suggestion-subtitle">Jamie, Alex +3 others in Chelsea room</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Tab Content -->
+    <div id="live-content" class="content-section active">
+        <!-- Live Commentary Carousel -->
+        <div class="section-header">
+            <div class="section-title">
+                <span>🔴</span>
+                <span>Live Now</span>
+            </div>
+            <a href="#" class="see-all" onclick="showToast('Showing all live streams', 'info')">See all</a>
+        </div>
+        
+        <div class="live-carousel">
+            <div class="live-room" onclick="joinRoom('BigDave_MUFC')">
+                <div class="live-dot"></div>
+                <div class="room-avatar"></div>
+                <div class="room-name">BigDave_MUFC</div>
+                <div class="room-match">MUN vs ARS</div>
+                <div class="room-listeners">🎧 2.3K</div>
+                <div class="audio-waves">
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                </div>
+            </div>
+
+            <div class="live-room playing" onclick="joinRoom('RedRiot')">
+                <div class="live-dot"></div>
+                <div class="room-avatar" style="background: linear-gradient(45deg, #ff7675, #fd79a8);"></div>
+                <div class="room-name">RedRiot</div>
+                <div class="room-match">LIV vs CHE</div>
+                <div class="room-listeners">🎧 5.7K</div>
+                <div class="room-badge">🔥 Trending</div>
+                <div class="audio-waves">
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                </div>
+            </div>
+
+            <div class="live-room" onclick="joinRoom('TacticalTim')">
+                <div class="live-dot"></div>
+                <div class="room-avatar" style="background: linear-gradient(45deg, #00b894, #55a3ff);"></div>
+                <div class="room-name">TacticalTim</div>
+                <div class="room-match">MCI vs TOT</div>
+                <div class="room-listeners">🎧 1.9K</div>
+            </div>
+
+            <div class="live-room" onclick="joinRoom('SkySarah')">
+                <div class="live-dot"></div>
+                <div class="room-avatar" style="background: linear-gradient(45deg, #a8e6cf, #88d8a3);"></div>
+                <div class="room-name">SkySarah</div>
+                <div class="room-match">NEW vs BRI</div>
+                <div class="room-listeners">🎧 891</div>
+            </div>
+
+            <div class="live-room" onclick="joinRoom('MadridMania')">
+                <div class="live-dot"></div>
+                <div class="room-avatar" style="background: linear-gradient(45deg, #ffeaa7, #fdcb6e);"></div>
+                <div class="room-name">MadridMania</div>
+                <div class="room-match">RMA vs FCB</div>
+                <div class="room-listeners">🎧 12.4K</div>
+                <div class="room-badge">⚡ El Clásico</div>
+            </div>
+
+            <div class="live-room" onclick="joinRoom('BayernBeast')">
+                <div class="live-dot"></div>
+                <div class="room-avatar" style="background: linear-gradient(45deg, #fd79a8, #e84393);"></div>
+                <div class="room-name">BayernBeast</div>
+                <div class="room-match">BAY vs DOR</div>
+                <div class="room-listeners">🎧 3.2K</div>
+            </div>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="quick-filters">
+            <button class="filter-chip active" onclick="filterContent('all')">All</button>
+            <button class="filter-chip" onclick="filterContent('trending')">🔥 Trending</button>
+            <button class="filter-chip" onclick="filterContent('premier')">Premier League</button>
+            <button class="filter-chip" onclick="filterContent('champions')">Champions League</button>
+            <button class="filter-chip" onclick="filterContent('laliga')">La Liga</button>
+            <button class="filter-chip" onclick="filterContent('active')">💬 Most Active</button>
+            <button class="filter-chip" onclick="filterContent('premium')">👑 Premium</button>
+        </div>
+
+        <!-- Friends Section -->
+        <div class="friends-section">
+            <div class="section-title" style="margin-bottom: 1rem;">
+                <span>👥</span>
+                <span>Your Crew (8 online)</span>
+            </div>
+            
+            <div class="friend-activity" onclick="joinFriends('chelsea')">
+                <div class="friend-avatars">
+                    <div class="friend-avatar"></div>
+                    <div class="friend-avatar" style="background: linear-gradient(45deg, #ffeaa7, #fdcb6e);"></div>
+                    <div class="friend-avatar" style="background: linear-gradient(45deg, #ff7675, #fd79a8);"></div>
+                </div>
+                <div class="friend-info">
+                    <div class="friend-names">Jamie, Marcus +4 others</div>
+                    <div class="friend-location">Chelsea fan room with BluesMood</div>
+                </div>
+                <button class="join-btn">Join</button>
+            </div>
+
+            <div class="friend-activity" onclick="joinFriends('tactical')">
+                <div class="friend-avatars">
+                    <div class="friend-avatar" style="background: linear-gradient(45deg, #74b9ff, #0984e3);"></div>
+                    <div class="friend-avatar" style="background: linear-gradient(45deg, #fd79a8, #e84393);"></div>
+                </div>
+                <div class="friend-info">
+                    <div class="friend-names">Alex, Sophie</div>
+                    <div class="friend-location">with TacticalTim (City vs Spurs)</div>
+                </div>
+                <button class="join-btn">Join</button>
+            </div>
+
+            <div class="friend-activity" onclick="joinFriends('arsenal')">
+                <div class="friend-avatars">
+                    <div class="friend-avatar" style="background: linear-gradient(45deg, #a8e6cf, #88d8a3);"></div>
+                </div>
+                <div class="friend-info">
+                    <div class="friend-names">Emma</div>
+                    <div class="friend-location">just joined Arsenal commentary</div>
+                </div>
+                <button class="join-btn">Join</button>
+            </div>
+        </div>
+
+        <!-- Live Matches -->
+        <div class="section-header">
+            <div class="section-title">
+                <span>⚽</span>
+                <span>Live Matches</span>
+            </div>
+        </div>
+
+        <div class="matches-container">
+            <div class="match-card" data-match="mufc-arsenal" onclick="openMatch('mufc-arsenal')">
+                <div class="swipe-indicator">→ swipe to join</div>
+                <div class="match-header">
+                    <div class="teams">
+                        <div class="team-logo"></div>
+                        <div class="team-name">MAN UTD</div>
+                        <span class="vs-text">vs</span>
+                        <div class="team-name">ARSENAL</div>
+                        <div class="team-logo" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24);"></div>
+                    </div>
+                    <div class="match-time">LIVE 67'</div>
+                </div>
+                
+                <div class="match-info">
+                    <div class="commentator-count">5 live</div>
+                    <div class="match-badges">
+                        <div class="badge trending-badge">🔥 Trending</div>
+                    </div>
+                </div>
+                
+                <div class="match-preview">
+                    <span class="commentator-name">BigDave_MUFC:</span> "Rashford is absolutely on fire today! The pace, the movement - this is the player we know and love!"
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(1)">£1</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(2)">£2</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(5)">£5</button>
+                    <button class="bookmark-btn" onclick="event.stopPropagation(); bookmark('mufc-arsenal')">🔖</button>
+                </div>
+            </div>
+
+            <div class="match-card" data-match="liverpool-chelsea" onclick="openMatch('liverpool-chelsea')">
+                <div class="swipe-indicator">→ swipe to join</div>
+                <div class="match-header">
+                    <div class="teams">
+                        <div class="team-logo" style="background: linear-gradient(45deg, #ff7675, #fd79a8);"></div>
+                        <div class="team-name">LIVERPOOL</div>
+                        <span class="vs-text">vs</span>
+                        <div class="team-name">CHELSEA</div>
+                        <div class="team-logo" style="background: linear-gradient(45deg, #74b9ff, #0984e3);"></div>
+                    </div>
+                    <div class="match-time">LIVE 23'</div>
+                </div>
+                
+                <div class="match-info">
+                    <div class="commentator-count">3 live</div>
+                    <div class="match-badges">
+                        <div class="badge active-badge">💬 Most Active</div>
+                    </div>
+                </div>
+                
+                <div class="match-preview">
+                    <span class="commentator-name">RedRiot:</span> "WHAT A SAVE! Mendy just pulled off an absolute worldie to deny Salah!"
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(1)">£1</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(2)">£2</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(5)">£5</button>
+                    <button class="bookmark-btn" onclick="event.stopPropagation(); bookmark('liverpool-chelsea')">🔖</button>
+                </div>
+            </div>
+
+            <div class="match-card" data-match="city-spurs" onclick="openMatch('city-spurs')">
+                <div class="swipe-indicator">→ swipe to join</div>
+                <div class="match-header">
+                    <div class="teams">
+                        <div class="team-logo" style="background: linear-gradient(45deg, #00b894, #55a3ff);"></div>
+                        <div class="team-name">MAN CITY</div>
+                        <span class="vs-text">vs</span>
+                        <div class="team-name">TOTTENHAM</div>
+                        <div class="team-logo" style="background: linear-gradient(45deg, #ffeaa7, #fdcb6e);"></div>
+                    </div>
+                    <div class="match-time">LIVE 89'</div>
+                </div>
+                
+                <div class="match-info">
+                    <div class="commentator-count">2 live</div>
+                    <div class="match-badges">
+                        <div class="badge premium-badge">👑 Premium</div>
+                    </div>
+                </div>
+                
+                <div class="match-preview">
+                    <span class="commentator-name">TacticalTim:</span> "Brilliant tactical chess match. Pep's substitutions have completely changed the dynamic."
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(1)">£1</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(2)">£2</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(5)">£5</button>
+                    <button class="bookmark-btn" onclick="event.stopPropagation(); bookmark('city-spurs')">🔖</button>
+                </div>
+            </div>
+
+            <div class="match-card" data-match="el-clasico" onclick="openMatch('el-clasico')">
+                <div class="swipe-indicator">→ swipe to join</div>
+                <div class="match-header">
+                    <div class="teams">
+                        <div class="team-logo" style="background: linear-gradient(45deg, #ffeaa7, #fdcb6e);"></div>
+                        <div class="team-name">REAL MADRID</div>
+                        <span class="vs-text">vs</span>
+                        <div class="team-name">BARCELONA</div>
+                        <div class="team-logo" style="background: linear-gradient(45deg, #fd79a8, #e84393);"></div>
+                    </div>
+                    <div class="match-time">LIVE 55'</div>
+                </div>
+                
+                <div class="match-info">
+                    <div class="commentator-count">12 live</div>
+                    <div class="match-badges">
+                        <div class="badge trending-badge">🔥 El Clásico</div>
+                        <div class="badge premium-badge">👑 Premium</div>
+                    </div>
+                </div>
+                
+                <div class="match-preview">
+                    <span class="commentator-name">MadridMania:</span> "¡GOOOOOL! Benzema with an absolute screamer! The Bernabéu is going mental!"
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(1)">£1</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(2)">£2</button>
+                    <button class="quick-tip" onclick="event.stopPropagation(); quickTip(5)">£5</button>
+                    <button class="bookmark-btn" onclick="event.stopPropagation(); bookmark('el-clasico')">🔖</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Tab Content -->
+    <div id="upcoming-content" class="content-section">
+        <div class="section-header">
+            <div class="section-title">
+                <span>⏰</span>
+                <span>Upcoming Matches</span>
+            </div>
+        </div>
+        
+        <div class="matches-container">
+            <div class="match-card" onclick="openMatch('newcastle-brighton')">
+                <div class="match-header">
+                    <div class="teams">
+                        <div class="team-logo" style="background: linear-gradient(45deg, #a8e6cf, #88d8a3);"></div>
+                        <div class="team-name">NEWCASTLE</div>
+                        <span class="vs-text">vs</span>
+                        <div class="team-name">BRIGHTON</div>
+                        <div class="team-logo" style="background: linear-gradient(45deg, #74b9ff, #0984e3);"></div>
+                    </div>
+                    <div class="match-time upcoming">15:00</div>
+                </div>
+                
+                <div class="match-info">
+                    <div class="commentator-count upcoming">3 scheduled</div>
+                </div>
+                
+                <div class="match-preview">
+                    <span class="commentator-name">GeordieGiant:</span> "Can't wait for this one! Brighton always give us a proper game. Howay the lads!"
+                </div>
+            </div>
+
+            <div class="match-card" onclick="openMatch('westham-villa')">
+                <div class="match-header">
+                    <div class="teams">
+                        <div class="team-logo" style="background: linear-gradient(45deg, #fd79a8, #e84393);"></div>
+                        <div class="team-name">WEST HAM</div>
+                        <span class="vs-text">vs</span>
+                        <div class="team-name">ASTON VILLA</div>
+                        <div class="team-logo" style="background: linear-gradient(45deg, #6c5ce7, #a29bfe);"></div>
+                    </div>
+                    <div class="match-time upcoming">17:30</div>
+                </div>
+                
+                <div class="match-info">
+                    <div class="commentator-count upcoming">1 scheduled</div>
+                </div>
+                
+                <div class="match-preview">
+                    <span class="commentator-name">HammerTime:</span> "Massive game for us today. European dreams still alive! Come on you Irons!"
+                </div>
+            </div>
+
+            <div class="match-card" onclick="openMatch('bayern-dortmund')">
+                <div class="match-header">
+                    <div class="teams">
+                        <div class="team-logo" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24);"></div>
+                        <div class="team-name">BAYERN</div>
+                        <span class="vs-text">vs</span>
+                        <div class="team-name">DORTMUND</div>
+                        <div class="team-logo" style="background: linear-gradient(45deg, #ffd700, #ffed4e);"></div>
+                    </div>
+                    <div class="match-time upcoming">19:45</div>
+                </div>
+                
+                <div class="match-info">
+                    <div class="commentator-count upcoming">4 scheduled</div>
+                    <div class="match-badges">
+                        <div class="badge" style="background: #666; color: #fff;">🇩🇪 Bundesliga</div>
+                    </div>
+                </div>
+                
+                <div class="match-preview">
+                    <span class="commentator-name">BayernBeast:</span> "Der Klassiker! This is going to be absolutely mental. Both teams need the points!"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discover Tab Content -->
+    <div id="discover-content" class="content-section">
+        <div class="section-header">
+            <div class="section-title">
+                <span>🎙️</span>
+                <span>Discover Commentators</span>
+            </div>
+        </div>
+
+        <div class="quick-filters">
+            <button class="filter-chip active" onclick="filterCommentators('all')">All</button>
+            <button class="filter-chip" onclick="filterCommentators('funny')">🤣 Funny</button>
+            <button class="filter-chip" onclick="filterCommentators('tactical')">🧠 Tactical</button>
+            <button class="filter-chip" onclick="filterCommentators('hype')">🔥 Hype</button>
+            <button class="filter-chip" onclick="filterCommentators('neutral')">😎 Neutral</button>
+            <button class="filter-chip" onclick="filterCommentators('rated')">⭐ Top Rated</button>
+            <button class="filter-chip" onclick="filterCommentators('new')">🆕 New</button>
+        </div>
+
+        <div class="commentator-grid">
+            <div class="commentator-card" onclick="showCommentatorPreview('BigDave_MUFC')">
+                <div class="commentator-avatar">
+                    <div class="live-indicator"></div>
+                </div>
+                <div class="commentator-name-card">BigDave_MUFC</div>
+                <div class="commentator-info">🛡️ Man United • 🤣 Funny</div>
+                <div class="commentator-stats">
+                    <span>2.3K followers</span>
+                    <span>⭐ 4.8</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('BigDave_MUFC')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('RedRiot')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #ff7675, #fd79a8);">
+                    <div class="live-indicator"></div>
+                </div>
+                <div class="commentator-name-card">RedRiot</div>
+                <div class="commentator-info">🔴 Liverpool • 🔥 Hype</div>
+                <div class="commentator-stats">
+                    <span>5.7K followers</span>
+                    <span>⭐ 4.9</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('RedRiot')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('TacticalTim')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #00b894, #55a3ff);"></div>
+                <div class="commentator-name-card">TacticalTim</div>
+                <div class="commentator-info">🌐 Neutral • 🧠 Tactical</div>
+                <div class="commentator-stats">
+                    <span>1.9K followers</span>
+                    <span>⭐ 4.7</span>
+                </div>
+                <button class="follow-btn following" onclick="event.stopPropagation(); followCommentator('TacticalTim')">Following</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('SkySarah')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #a8e6cf, #88d8a3);">
+                    <div class="live-indicator"></div>
+                </div>
+                <div class="commentator-name-card">SkySarah</div>
+                <div class="commentator-info">⚽ Multi-Club • 😎 Neutral</div>
+                <div class="commentator-stats">
+                    <span>891 followers</span>
+                    <span>⭐ 4.6</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('SkySarah')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('BluesMood')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #74b9ff, #0984e3);"></div>
+                <div class="commentator-name-card">BluesMood</div>
+                <div class="commentator-info">🔵 Chelsea • 🤣 Funny</div>
+                <div class="commentator-stats">
+                    <span>1.2K followers</span>
+                    <span>⭐ 4.5</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('BluesMood')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('SpursSuper')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #ffeaa7, #fdcb6e);"></div>
+                <div class="commentator-name-card">SpursSuper</div>
+                <div class="commentator-info">⚪ Tottenham • 🔥 Hype</div>
+                <div class="commentator-stats">
+                    <span>987 followers</span>
+                    <span>⭐ 4.4</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('SpursSuper')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('MadridMania')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #ffeaa7, #fdcb6e);">
+                    <div class="live-indicator"></div>
+                </div>
+                <div class="commentator-name-card">MadridMania</div>
+                <div class="commentator-info">⚪ Real Madrid • 🔥 Hype</div>
+                <div class="commentator-stats">
+                    <span>8.9K followers</span>
+                    <span>⭐ 4.9</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('MadridMania')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('PremierPaul')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #6c5ce7, #a29bfe);"></div>
+                <div class="commentator-name-card">PremierPaul</div>
+                <div class="commentator-info">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England • 🧠 Tactical</div>
+                <div class="commentator-stats">
+                    <span>3.4K followers</span>
+                    <span>⭐ 4.7</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('PremierPaul')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('GeordieGiant')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #fd79a8, #e84393);"></div>
+                <div class="commentator-name-card">GeordieGiant</div>
+                <div class="commentator-info">⚫ Newcastle • 🤣 Funny</div>
+                <div class="commentator-stats">
+                    <span>456 followers</span>
+                    <span>⭐ 4.3</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('GeordieGiant')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('BayernBeast')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24);"></div>
+                <div class="commentator-name-card">BayernBeast</div>
+                <div class="commentator-info">🔴 Bayern • 🔥 Hype</div>
+                <div class="commentator-stats">
+                    <span>2.1K followers</span>
+                    <span>⭐ 4.6</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('BayernBeast')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('WomensFootieFan')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #fd79a8, #e84393);"></div>
+                <div class="commentator-name-card">WomensFootieFan</div>
+                <div class="commentator-info">⚽ Women's Football • 🤣 Funny</div>
+                <div class="commentator-stats">
+                    <span>3.4K followers</span>
+                    <span>⭐ 4.8</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('WomensFootieFan')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('LaLigaLegend')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #ffd700, #ffed4e);"></div>
+                <div class="commentator-name-card">LaLigaLegend</div>
+                <div class="commentator-info">🇪🇸 La Liga • 🧠 Tactical</div>
+                <div class="commentator-stats">
+                    <span>5.2K followers</span>
+                    <span>⭐ 4.9</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('LaLigaLegend')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('SerieASuper')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #00b894, #55a3ff);"></div>
+                <div class="commentator-name-card">SerieASuper</div>
+                <div class="commentator-info">🇮🇹 Serie A • 😎 Neutral</div>
+                <div class="commentator-stats">
+                    <span>1.8K followers</span>
+                    <span>⭐ 4.5</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('SerieASuper')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('ChampionsChatter')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #667eea, #764ba2);"></div>
+                <div class="commentator-name-card">ChampionsChatter</div>
+                <div class="commentator-info">🏆 Champions League • 🔥 Hype</div>
+                <div class="commentator-stats">
+                    <span>6.7K followers</span>
+                    <span>⭐ 4.8</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('ChampionsChatter')">Follow</button>
+            </div>
+
+            <div class="commentator-card" onclick="showCommentatorPreview('ScottishScreamer')">
+                <div class="commentator-avatar" style="background: linear-gradient(45deg, #74b9ff, #0984e3);"></div>
+                <div class="commentator-name-card">ScottishScreamer</div>
+                <div class="commentator-info">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scottish • 🤣 Funny</div>
+                <div class="commentator-stats">
+                    <span>967 followers</span>
+                    <span>⭐ 4.4</span>
+                </div>
+                <button class="follow-btn" onclick="event.stopPropagation(); followCommentator('ScottishScreamer')">Follow</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crew Tab Content -->
+    <div id="crew-content" class="content-section">
+        <div class="section-header">
+            <div class="section-title">
+                <span>👥</span>
+                <span>Your Crew</span>
+            </div>
+        </div>
+
+        <div style="padding: 0 1rem;">
+            <div class="smart-home">
+                <div class="smart-title">
+                    <span>📊</span>
+                    <span>Crew Stats This Week</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #00ff88;">47</div>
+                        <div style="font-size: 0.8rem; color: #999;">Matches Watched</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #00ff88;">£23</div>
+                        <div style="font-size: 0.8rem; color: #999;">Tips Sent</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #00ff88;">8</div>
+                        <div style="font-size: 0.8rem; color: #999;">Active Friends</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="friends-section">
+                <div class="section-title" style="margin-bottom: 1rem;">
+                    <span>🏆</span>
+                    <span>Crew Leaderboard</span>
+                </div>
+                
+                <div class="friend-activity">
+                    <div style="background: #ffd700; color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
+                    <div class="friend-info">
+                        <div class="friend-names">You</div>
+                        <div class="friend-location">Level 12 • 1,247 XP this week</div>
+                    </div>
+                    <div style="color: #ffd700; font-weight: bold;">👑</div>
+                </div>
+
+                <div class="friend-activity">
+                    <div style="background: #c0c0c0; color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
+                    <div class="friend-info">
+                        <div class="friend-names">Jamie</div>
+                        <div class="friend-location">Level 11 • 1,156 XP this week</div>
+                    </div>
+                    <div style="color: #c0c0c0;">🥈</div>
+                </div>
+
+                <div class="friend-activity">
+                    <div style="background: #cd7f32; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
+                    <div class="friend-info">
+                        <div class="friend-names">Alex</div>
+                        <div class="friend-location">Level 9 • 923 XP this week</div>
+                    </div>
+                    <div style="color: #cd7f32;">🥉</div>
+                </div>
+
+                <div class="friend-activity">
+                    <div style="background: #666; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">4</div>
+                    <div class="friend-info">
+                        <div class="friend-names">Sophie</div>
+                        <div class="friend-location">Level 8 • 678 XP this week</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Tab Content -->
+    <div id="profile-content" class="content-section">
+        <div style="padding: 1rem;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="profile-icon" style="width: 80px; height: 80px; margin: 0 auto 1rem;"></div>
+                <h2>SuperFan_92</h2>
+                <div style="color: #999; margin: 0.5rem 0;">Level 12 • Super Fan</div>
+                <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: #00ff88;">47</div>
+                        <div style="font-size: 0.8rem; color: #999;">Following</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: #00ff88;">156</div>
+                        <div style="font-size: 0.8rem; color: #999;">Matches</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: #00ff88;">£124</div>
+                        <div style="font-size: 0.8rem; color: #999;">Tips Sent</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="smart-home">
+                <div class="smart-title">
+                    <span>🏆</span>
+                    <span>Achievements</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔥</div>
+                        <div style="font-size: 0.8rem;">7 Day Streak</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+                        <div style="font-size: 0.8rem;">Big Tipper</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚽</div>
+                        <div style="font-size: 0.8rem;">100 Matches</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
+                        <div style="font-size: 0.8rem;">Social Butterfly</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                        <div style="font-size: 0.8rem;">Predictor</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #333; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;">🏆</div>
+                        <div style="font-size: 0.8rem; opacity: 0.3;">Legend</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" onclick="showTab('live'); return false;">
+            <div class="nav-icon">🔴</div>
+            <div class="nav-label">Live</div>
+        </a>
+        <a href="#" class="nav-item" onclick="showTab('upcoming'); return false;">
+            <div class="nav-icon">⏰</div>
+            <div class="nav-label">Upcoming</div>
+        </a>
+        <a href="#" class="nav-item" onclick="showTab('discover'); return false;">
+            <div class="nav-icon">🎙️</div>
+            <div class="nav-label">Discover</div>
+        </a>
+        <a href="#" class="nav-item" onclick="showTab('crew'); return false;">
+            <div class="nav-icon">👥</div>
+            <div class="nav-label">Crew</div>
+            <div class="nav-badge">3</div>
+        </a>
+        <a href="#" class="nav-item" onclick="showTab('profile'); return false;">
+            <div class="nav-icon">⚡</div>
+            <div class="nav-label">You</div>
+        </a>
+    </nav>
+
+    <!-- Live Reactions -->
+    <div class="live-reactions">
+        <div class="reaction-btn" onclick="sendReaction('⚽')">⚽</div>
+        <div class="reaction-btn" onclick="sendReaction('🔥')">🔥</div>
+        <div class="reaction-btn" onclick="sendReaction('😱')">😱</div>
+        <div class="reaction-btn" onclick="sendReaction('👏')">👏</div>
+    </div>
+
+    <!-- Audio Preview Modal -->
+    <div id="audio-preview" class="audio-preview">
+        <div class="preview-content">
+            <div class="preview-avatar" id="preview-avatar"></div>
+            <h3 id="preview-name">Commentator Name</h3>
+            <p id="preview-info">Style and club info</p>
+            <div style="margin: 1rem 0; font-style: italic; color: #ccc;" id="preview-sample">
+                "Sample commentary goes here..."
+            </div>
+            <div class="preview-controls">
+                <button class="preview-btn" onclick="joinFromPreview()">Join Live</button>
+                <button class="preview-btn secondary" onclick="closePreview()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let currentCommentator = null;
+        let isListening = false;
+
+        function showTab(tab) {
+            // Prevent default link behavior
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // Remove active from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active to clicked nav item
+            if (event && event.target) {
+                event.target.closest('.nav-item').classList.add('active');
+            }
+            
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show relevant content
+            const contentMap = {
+                'live': 'live-content',
+                'upcoming': 'upcoming-content',
+                'discover': 'discover-content',
+                'crew': 'crew-content',
+                'profile': 'profile-content'
+            };
+            
+            const targetContent = document.getElementById(contentMap[tab]);
+            if (targetContent) {
+                targetContent.classList.add('active');
+                console.log(`Switched to ${tab} tab`);
+                showToast(`Switched to ${tab.charAt(0).toUpperCase() + tab.slice(1)} tab`, 'info');
+            } else {
+                console.error(`Could not find content for tab: ${tab}`);
+            }
+        }
+
+        function filterContent(filter) {
+            // Remove active from all filter chips
+            event.target.parentNode.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            
+            // Add active to clicked chip
+            event.target.classList.add('active');
+            
+            showToast(`Showing ${filter} content`, 'info');
+        }
+
+        function filterCommentators(filter) {
+            // Remove active from all filter chips
+            event.target.parentNode.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            
+            // Add active to clicked chip
+            event.target.classList.add('active');
+            
+            showToast(`Filtering by ${filter}`, 'info');
+        }
+
+        function joinRoom(commentator) {
+            // Visual feedback
+            document.querySelectorAll('.live-room').forEach(room => {
+                room.classList.remove('playing');
+            });
+            event.target.closest('.live-room').classList.add('playing');
+            
+            currentCommentator = commentator;
+            isListening = true;
+            
+            showToast(`Joined ${commentator}'s commentary!`, 'success');
+            
+            // Simulate navigation to commentary interface
+            setTimeout(() => {
+                showToast('🎧 Now listening live...', 'info');
+            }, 1000);
+        }
+
+        function openMatch(matchId) {
+            showToast(`Opening ${matchId} commentary room...`, 'success');
+        }
+
+        function quickTip(amount) {
+            showToast(`Tipped £${amount}! 💰`, 'success');
+            
+            // Vibration feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        function bookmark(matchId) {
+            showToast('Match bookmarked! 🔖', 'success');
+        }
+
+        function followCommentator(name) {
+            const btn = event.target;
+            if (btn.classList.contains('following')) {
+                btn.classList.remove('following');
+                btn.textContent = 'Follow';
+                showToast(`Unfollowed ${name}`, 'info');
+            } else {
+                btn.classList.add('following');
+                btn.textContent = 'Following';
+                showToast(`Now following ${name}! 🎉`, 'success');
+            }
+        }
+
+        function showCommentatorPreview(name) {
+            const modal = document.getElementById('audio-preview');
+            const avatar = document.getElementById('preview-avatar');
+            const nameEl = document.getElementById('preview-name');
+            const infoEl = document.getElementById('preview-info');
+            const sampleEl = document.getElementById('preview-sample');
+            
+            // Sample data
+            const commentators = {
+                'BigDave_MUFC': {
+                    style: 'linear-gradient(45deg, #667eea, #764ba2)',
+                    info: '🛡️ Man United • 🤣 Funny',
+                    sample: '"GET IN THERE! Rashford you absolute beauty! That\'s what we call a proper United goal!"'
+                },
+                'RedRiot': {
+                    style: 'linear-gradient(45deg, #ff7675, #fd79a8)',
+                    info: '🔴 Liverpool • 🔥 Hype',
+                    sample: '"YESSS! WHAT A HIT! The Kop is going absolutely mental! This is why we love this game!"'
+                },
+                'TacticalTim': {
+                    style: 'linear-gradient(45deg, #00b894, #55a3ff)',
+                    info: '🌐 Neutral • 🧠 Tactical',
+                    sample: '"Brilliant positional play there. Notice how the midfielder dropped deep to create that overload..."'
+                },
+                'SkySarah': {
+                    style: 'linear-gradient(45deg, #a8e6cf, #88d8a3)',
+                    info: '⚽ Multi-Club • 😎 Neutral',
+                    sample: '"Clean finish! The keeper had no chance with that placement. Textbook striker\'s goal."'
+                },
+                'BluesMood': {
+                    style: 'linear-gradient(45deg, #74b9ff, #0984e3)',
+                    info: '🔵 Chelsea • 🤣 Funny',
+                    sample: '"MASON MOUNT! The boy from Cobham does it again! Frank would be proud of that one!"'
+                },
+                'SpursSuper': {
+                    style: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
+                    info: '⚪ Tottenham • 🔥 Hype',
+                    sample: '"COME ON YOU SPURS! Kane with the magic! This is why we never give up hope!"'
+                },
+                'MadridMania': {
+                    style: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
+                    info: '⚪ Real Madrid • 🔥 Hype',
+                    sample: '"¡GOOOOOL! ¡HALA MADRID! Benzema with pure class! The Bernabéu is electric!"'
+                },
+                'PremierPaul': {
+                    style: 'linear-gradient(45deg, #6c5ce7, #a29bfe)',
+                    info: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England • 🧠 Tactical',
+                    sample: '"Notice the false 9 dropping deep here. Creates a numerical advantage in midfield..."'
+                },
+                'GeordieGiant': {
+                    style: 'linear-gradient(45deg, #fd79a8, #e84393)',
+                    info: '⚫ Newcastle • 🤣 Funny',
+                    sample: '"Howay the lads! That\'s why we love this club! Pure passion and Geordie grit!"'
+                },
+                'BayernBeast': {
+                    style: 'linear-gradient(45deg, #ff6b6b, #ee5a24)',
+                    info: '🔴 Bayern • 🔥 Hype',
+                    sample: '"MÜLLER! DAS IST FANTASTISCH! Bayern München showing why they\'re the kings!"'
+                },
+                'WomensFootieFan': {
+                    style: 'linear-gradient(45deg, #fd79a8, #e84393)',
+                    info: '⚽ Women\'s Football • 🤣 Funny',
+                    sample: '"What a strike! The women\'s game just keeps getting better and better!"'
+                },
+                'LaLigaLegend': {
+                    style: 'linear-gradient(45deg, #ffd700, #ffed4e)',
+                    info: '🇪🇸 La Liga • 🧠 Tactical',
+                    sample: '"Increíble! The technique, the vision... this is why La Liga is the most technical league!"'
+                },
+                'SerieASuper': {
+                    style: 'linear-gradient(45deg, #00b894, #55a3ff)',
+                    info: '🇮🇹 Serie A • 😎 Neutral',
+                    sample: '"Bellissimo! Classic Italian football - tactical brilliance meets individual flair!"'
+                },
+                'ChampionsChatter': {
+                    style: 'linear-gradient(45deg, #667eea, #764ba2)',
+                    info: '🏆 Champions League • 🔥 Hype',
+                    sample: '"CHAMPIONS LEAGUE MAGIC! These are the nights that legends are made!"'
+                },
+                'ScottishScreamer': {
+                    style: 'linear-gradient(45deg, #74b9ff, #0984e3)',
+                    info: '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scottish • 🤣 Funny',
+                    sample: '"GET INTAE THEM! That\'s proper Scottish football! None of that fancy southern nonsense!"'
+                }
+            };
+            
+            const data = commentators[name] || commentators['BigDave_MUFC'];
+            
+            avatar.style.background = data.style;
+            nameEl.textContent = name;
+            infoEl.textContent = data.info;
+            sampleEl.textContent = data.sample;
+            
+            modal.style.display = 'flex';
+            currentCommentator = name;
+        }
+
+        function closePreview() {
+            document.getElementById('audio-preview').style.display = 'none';
+        }
+
+        function joinFromPreview() {
+            closePreview();
+            showToast(`Joined ${currentCommentator}'s room!`, 'success');
+        }
+
+        function joinFriends(room) {
+            showToast(`Joining your crew in ${room} room...`, 'success');
+        }
+
+        function joinViralMoment() {
+            showToast('Joining the viral moment! 🚨', 'success');
+        }
+
+        function sendReaction(emoji) {
+            showToast(`Reaction sent: ${emoji}`, 'success');
+            
+            // Visual feedback
+            const btn = event.target;
+            btn.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 200);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Swipe gesture simulation
+        let startX, startY;
+        
+        document.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            if (!startX || !startY) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            
+            const diffX = startX - endX;
+            const diffY = startY - endY;
+            
+            // Check if it's a horizontal swipe on a match card
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                const matchCard = e.target.closest('.match-card');
+                if (matchCard && diffX > 0) {
+                    // Swipe left = join match
+                    const matchId = matchCard.dataset.match;
+                    if (matchId) {
+                        showToast('Swipe detected! Joining match...', 'success');
+                    }
+                }
+            }
+            
+            startX = null;
+            startY = null;
+        });
+
+        // Long press detection for commentator cards
+        let pressTimer;
+        
+        document.querySelectorAll('.commentator-card').forEach(card => {
+            card.addEventListener('touchstart', function(e) {
+                pressTimer = setTimeout(() => {
+                    const name = this.querySelector('.commentator-name-card').textContent;
+                    showCommentatorPreview(name);
+                    navigator.vibrate && navigator.vibrate(100);
+                }, 500);
+            });
+            
+            card.addEventListener('touchend', function() {
+                clearTimeout(pressTimer);
+            });
+        });
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update live listener counts
+            document.querySelectorAll('.room-listeners').forEach(el => {
+                const current = parseInt(el.textContent.match(/[\d.]+/)[0] * 1000);
+                const change = Math.random() > 0.5 ? 1 : -1;
+                const newCount = Math.max(100, current + (Math.random() * 50 * change));
+                const formatted = newCount > 1000 ? (newCount/1000).toFixed(1) + 'K' : newCount.toString();
+                el.textContent = `🎧 ${formatted}`;
+            });
+        }, 5000);
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('Welcome back to FanZap! 🎉', 'success');
+            
+            // Test that all content sections exist
+            const sections = ['live-content', 'upcoming-content', 'discover-content', 'crew-content', 'profile-content'];
+            sections.forEach(id => {
+                const element = document.getElementById(id);
+                if (!element) {
+                    console.error(`Missing content section: ${id}`);
+                } else {
+                    console.log(`Found content section: ${id}`);
+                }
+            });
+            
+            // Add click listeners to nav items as backup
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const label = this.querySelector('.nav-label').textContent.toLowerCase();
+                    const tabMap = {
+                        'live': 'live',
+                        'upcoming': 'upcoming', 
+                        'discover': 'discover',
+                        'crew': 'crew',
+                        'you': 'profile'
+                    };
+                    
+                    const tab = tabMap[label];
+                    if (tab) {
+                        // Remove active from all nav items
+                        document.querySelectorAll('.nav-item').forEach(nav => {
+                            nav.classList.remove('active');
+                        });
+                        
+                        // Add active to clicked item
+                        this.classList.add('active');
+                        
+                        // Hide all content sections
+                        document.querySelectorAll('.content-section').forEach(section => {
+                            section.classList.remove('active');
+                        });
+                        
+                        // Show target content
+                        const contentMap = {
+                            'live': 'live-content',
+                            'upcoming': 'upcoming-content',
+                            'discover': 'discover-content',
+                            'crew': 'crew-content',
+                            'profile': 'profile-content'
+                        };
+                        
+                        const targetContent = document.getElementById(contentMap[tab]);
+                        if (targetContent) {
+                            targetContent.classList.add('active');
+                            console.log(`Navigated to ${tab} tab`);
+                            showToast(`${tab.charAt(0).toUpperCase() + tab.slice(1)} page loaded`, 'info');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
