@@ -1107,7 +1107,14 @@
             <a href="#" class="see-all" onclick="showToast('Showing all live streams', 'info')">See all</a>
         </div>
         
-        <div class="live-carousel">
+            <!-- Test button for debugging -->
+            <div style="position: fixed; top: 50px; right: 10px; z-index: 1000;">
+                <button onclick="testClick('BigDave_MUFC')" style="background: #ff4757; color: white; border: none; padding: 0.5rem; border-radius: 8px; font-size: 0.8rem;">Test BigDave</button>
+            </div>
+            
+            <div style="position: fixed; top: 90px; right: 10px; z-index: 1000;">
+                <button onclick="joinRoom('BigDave_MUFC')" style="background: #00ff88; color: black; border: none; padding: 0.5rem; border-radius: 8px; font-size: 0.8rem;">Join BigDave</button>
+            </div>
             <div class="live-room" onclick="joinRoom('BigDave_MUFC')">
                 <div class="live-dot"></div>
                 <div class="room-avatar"></div>
@@ -1122,7 +1129,7 @@
                 </div>
             </div>
 
-            <div class="live-room playing" onclick="joinRoom('RedRiot')">
+            <div class="live-room" onclick="joinRoom('RedRiot')">
                 <div class="live-dot"></div>
                 <div class="room-avatar" style="background: linear-gradient(45deg, #ff7675, #fd79a8);"></div>
                 <div class="room-name">RedRiot</div>
@@ -2000,8 +2007,14 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast"></div>
+        <!-- Debug Info (remove in production) -->
+        <div id="debug-info" style="position: fixed; bottom: 100px; left: 10px; background: rgba(0,0,0,0.8); color: #00ff88; padding: 0.5rem; border-radius: 8px; font-size: 0.7rem; z-index: 999; max-width: 200px; display: none;">
+            <div>Debug Mode</div>
+            <div id="debug-text">Ready...</div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
 
     <script>
         let currentCommentator = null;
@@ -2015,84 +2028,163 @@
         };
 
         function joinRoom(commentator) {
-            // Hide main navigation and headers
-            document.querySelector('.mobile-header').style.display = 'none';
-            document.querySelector('.user-status').style.display = 'none';
-            document.querySelector('.bottom-nav').style.display = 'none';
+            console.log(`joinRoom called with: ${commentator}`);
+            updateDebugText(`Joining ${commentator}...`);
             
-            // Hide all content sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Show live commentary room
-            document.getElementById('live-commentary').classList.add('active');
-            
-            // Update room with commentator data
-            const commentatorData = {
-                'BigDave_MUFC': {
-                    name: 'BigDave_MUFC',
-                    info: '🛡️ Man United • 🤣 Funny',
-                    match: 'MAN UNITED vs ARSENAL',
-                    time: 'LIVE 67\' • Old Trafford',
-                    avatar: 'linear-gradient(45deg, #667eea, #764ba2)',
-                    listeners: 2300
-                },
-                'RedRiot': {
-                    name: 'RedRiot',
-                    info: '🔴 Liverpool • 🔥 Hype',
-                    match: 'LIVERPOOL vs CHELSEA',
-                    time: 'LIVE 23\' • Anfield',
-                    avatar: 'linear-gradient(45deg, #ff7675, #fd79a8)',
-                    listeners: 5700
-                },
-                'TacticalTim': {
-                    name: 'TacticalTim',
-                    info: '🌐 Neutral • 🧠 Tactical',
-                    match: 'MAN CITY vs TOTTENHAM',
-                    time: 'LIVE 89\' • Etihad Stadium',
-                    avatar: 'linear-gradient(45deg, #00b894, #55a3ff)',
-                    listeners: 1900
-                },
-                'MadridMania': {
-                    name: 'MadridMania',
-                    info: '⚪ Real Madrid • 🔥 Hype',
-                    match: 'REAL MADRID vs BARCELONA',
-                    time: 'LIVE 55\' • Santiago Bernabéu',
-                    avatar: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
-                    listeners: 12400
-                },
-                'BluesMood': {
-                    name: 'BluesMood',
-                    info: '🔵 Chelsea • 🤣 Funny',
-                    match: 'CHELSEA vs WEST HAM',
-                    time: 'LIVE 34\' • Stamford Bridge',
-                    avatar: 'linear-gradient(45deg, #74b9ff, #0984e3)',
-                    listeners: 1200
+            try {
+                // Hide main navigation and headers
+                const mobileHeader = document.querySelector('.mobile-header');
+                const userStatus = document.querySelector('.user-status');
+                const bottomNav = document.querySelector('.bottom-nav');
+                
+                if (mobileHeader) {
+                    mobileHeader.style.display = 'none';
+                    updateDebugText('Hidden header');
                 }
-            };
-            
-            const data = commentatorData[commentator] || commentatorData['BigDave_MUFC'];
-            
-            // Update UI elements
-            document.getElementById('live-commentator-name').textContent = data.name;
-            document.getElementById('live-commentator-full-name').textContent = data.name;
-            document.getElementById('live-commentator-info').textContent = data.info;
-            document.getElementById('live-match-title').textContent = data.match;
-            document.getElementById('live-match-time').textContent = data.time;
-            document.getElementById('live-listener-count').textContent = `🎧 ${(data.listeners/1000).toFixed(1)}K listening`;
-            document.getElementById('live-commentator-avatar').style.background = data.avatar;
-            
-            // Initialize chat
-            initializeChat();
-            
-            // Start live updates
-            startLiveUpdates();
-            
-            currentCommentator = commentator;
-            isListening = true;
-            showToast(`Joined ${commentator}'s live commentary!`, 'success');
+                if (userStatus) {
+                    userStatus.style.display = 'none';
+                    updateDebugText('Hidden status');
+                }
+                if (bottomNav) {
+                    bottomNav.style.display = 'none';
+                    updateDebugText('Hidden nav');
+                }
+                
+                // Hide all content sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                updateDebugText('Hidden all sections');
+                
+                // Show live commentary room
+                const liveRoom = document.getElementById('live-commentary');
+                if (!liveRoom) {
+                    console.error('Could not find live-commentary element');
+                    updateDebugText('ERROR: No live room found');
+                    showToast('Error: Could not open commentary room', 'info');
+                    return;
+                }
+                
+                liveRoom.classList.add('active');
+                updateDebugText('Showing live room');
+                console.log('Live commentary room should now be visible');
+                
+                // Update room with commentator data
+                const commentatorData = {
+                    'BigDave_MUFC': {
+                        name: 'BigDave_MUFC',
+                        info: '🛡️ Man United • 🤣 Funny',
+                        match: 'MAN UNITED vs ARSENAL',
+                        time: 'LIVE 67\' • Old Trafford',
+                        avatar: 'linear-gradient(45deg, #667eea, #764ba2)',
+                        listeners: 2300
+                    },
+                    'RedRiot': {
+                        name: 'RedRiot',
+                        info: '🔴 Liverpool • 🔥 Hype',
+                        match: 'LIVERPOOL vs CHELSEA',
+                        time: 'LIVE 23\' • Anfield',
+                        avatar: 'linear-gradient(45deg, #ff7675, #fd79a8)',
+                        listeners: 5700
+                    },
+                    'TacticalTim': {
+                        name: 'TacticalTim',
+                        info: '🌐 Neutral • 🧠 Tactical',
+                        match: 'MAN CITY vs TOTTENHAM',
+                        time: 'LIVE 89\' • Etihad Stadium',
+                        avatar: 'linear-gradient(45deg, #00b894, #55a3ff)',
+                        listeners: 1900
+                    },
+                    'MadridMania': {
+                        name: 'MadridMania',
+                        info: '⚪ Real Madrid • 🔥 Hype',
+                        match: 'REAL MADRID vs BARCELONA',
+                        time: 'LIVE 55\' • Santiago Bernabéu',
+                        avatar: 'linear-gradient(45deg, #ffeaa7, #fdcb6e)',
+                        listeners: 12400
+                    },
+                    'BluesMood': {
+                        name: 'BluesMood',
+                        info: '🔵 Chelsea • 🤣 Funny',
+                        match: 'CHELSEA vs WEST HAM',
+                        time: 'LIVE 34\' • Stamford Bridge',
+                        avatar: 'linear-gradient(45deg, #74b9ff, #0984e3)',
+                        listeners: 1200
+                    },
+                    'SkySarah': {
+                        name: 'SkySarah',
+                        info: '⚽ Multi-Club • 😎 Neutral',
+                        match: 'NEWCASTLE vs BRIGHTON',
+                        time: 'LIVE 78\' • St. James\' Park',
+                        avatar: 'linear-gradient(45deg, #a8e6cf, #88d8a3)',
+                        listeners: 891
+                    },
+                    'BayernBeast': {
+                        name: 'BayernBeast',
+                        info: '🔴 Bayern • 🔥 Hype',
+                        match: 'BAYERN vs DORTMUND',
+                        time: 'LIVE 41\' • Allianz Arena',
+                        avatar: 'linear-gradient(45deg, #fd79a8, #e84393)',
+                        listeners: 3200
+                    }
+                };
+                
+                const data = commentatorData[commentator] || commentatorData['BigDave_MUFC'];
+                console.log('Using commentator data:', data);
+                updateDebugText(`Loading ${data.name} data`);
+                
+                // Update UI elements - with error checking
+                const elements = {
+                    'live-commentator-name': data.name,
+                    'live-commentator-full-name': data.name,
+                    'live-commentator-info': data.info,
+                    'live-match-title': data.match,
+                    'live-match-time': data.time,
+                    'live-listener-count': `🎧 ${(data.listeners/1000).toFixed(1)}K listening`
+                };
+                
+                Object.entries(elements).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    } else {
+                        console.warn(`Could not find element: ${id}`);
+                        updateDebugText(`Missing: ${id}`);
+                    }
+                });
+                
+                const avatar = document.getElementById('live-commentator-avatar');
+                if (avatar) {
+                    avatar.style.background = data.avatar;
+                } else {
+                    console.warn('Could not find live-commentator-avatar element');
+                    updateDebugText('Missing avatar');
+                }
+                
+                // Initialize chat
+                initializeChat();
+                updateDebugText('Chat initialized');
+                
+                // Start live updates
+                startLiveUpdates();
+                updateDebugText('Live updates started');
+                
+                currentCommentator = commentator;
+                isListening = true;
+                showToast(`Joined ${commentator}'s live commentary!`, 'success');
+                updateDebugText(`SUCCESS: In ${commentator} room`);
+                
+            } catch (error) {
+                console.error('Error in joinRoom:', error);
+                updateDebugText(`ERROR: ${error.message}`);
+                showToast('Error joining room. Please try again.', 'info');
+            }
         }
+
+        // Make functions globally available for debugging
+        window.joinRoom = joinRoom;
+        window.testJoinRoom = testJoinRoom;
+        window.testClick = testClick;
 
         function leaveLiveRoom() {
             // Show main navigation and headers
@@ -2774,8 +2866,40 @@
             });
         }, 5000);
 
+        // Test function to verify clicks are working
+        function testClick(name) {
+            console.log(`Test click worked for: ${name}`);
+            showToast(`Clicked ${name}!`, 'success');
+        }
+
+        // Simplified test join function
+        function testJoinRoom() {
+            console.log('Test join room called');
+            showToast('Test join function works!', 'success');
+            joinRoom('BigDave_MUFC');
+        }
+
+        // Debug functions
+        function enableDebug() {
+            document.getElementById('debug-info').style.display = 'block';
+            updateDebugText('Debug enabled');
+        }
+
+        function updateDebugText(text) {
+            const debugEl = document.getElementById('debug-text');
+            if (debugEl) {
+                debugEl.textContent = text;
+                console.log('Debug:', text);
+            }
+        }
+
+        // Make debug functions globally available
+        window.enableDebug = enableDebug;
+        window.updateDebugText = updateDebugText;
+
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('FanZap app initializing...');
             showToast('Welcome back to FanZap! 🎉', 'success');
             
             // Test that all content sections exist
@@ -2788,55 +2912,43 @@
                     console.log(`Found content section: ${id}`);
                 }
             });
-            
-            // Add click listeners to nav items as backup
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function(e) {
+
+            // Add click listeners to live rooms as backup
+            console.log('Adding click listeners to live rooms...');
+            document.querySelectorAll('.live-room').forEach((room, index) => {
+                console.log(`Adding listener to room ${index}:`, room.querySelector('.room-name')?.textContent);
+                room.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    const label = this.querySelector('.nav-label').textContent.toLowerCase();
-                    const tabMap = {
-                        'live': 'live',
-                        'upcoming': 'upcoming', 
-                        'discover': 'discover',
-                        'crew': 'crew',
-                        'you': 'profile'
-                    };
+                    const commentatorName = this.querySelector('.room-name').textContent;
+                    console.log(`Event listener: Trying to join room for: ${commentatorName}`);
+                    joinRoom(commentatorName);
+                });
+            });
+            
+            // Add click listeners to match cards as backup
+            console.log('Adding click listeners to match cards...');
+            document.querySelectorAll('.match-card').forEach((card, index) => {
+                console.log(`Adding listener to match card ${index}:`, card.dataset.match);
+                card.addEventListener('click', function(e) {
+                    // Don't trigger if clicking on quick action buttons
+                    if (e.target.closest('.quick-actions')) {
+                        return;
+                    }
                     
-                    const tab = tabMap[label];
-                    if (tab) {
-                        // Remove active from all nav items
-                        document.querySelectorAll('.nav-item').forEach(nav => {
-                            nav.classList.remove('active');
-                        });
-                        
-                        // Add active to clicked item
-                        this.classList.add('active');
-                        
-                        // Hide all content sections
-                        document.querySelectorAll('.content-section').forEach(section => {
-                            section.classList.remove('active');
-                        });
-                        
-                        // Show target content
-                        const contentMap = {
-                            'live': 'live-content',
-                            'upcoming': 'upcoming-content',
-                            'discover': 'discover-content',
-                            'crew': 'crew-content',
-                            'profile': 'profile-content'
-                        };
-                        
-                        const targetContent = document.getElementById(contentMap[tab]);
-                        if (targetContent) {
-                            targetContent.classList.add('active');
-                            console.log(`Navigated to ${tab} tab`);
-                            showToast(`${tab.charAt(0).toUpperCase() + tab.slice(1)} page loaded`, 'info');
-                        }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const matchId = this.dataset.match;
+                    if (matchId) {
+                        console.log(`Event listener: Opening match: ${matchId}`);
+                        openMatch(matchId);
                     }
                 });
             });
+
+            console.log('FanZap initialization complete');
         });
     </script>
 </body>
