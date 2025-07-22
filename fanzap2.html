@@ -1,1 +1,2488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FanZap - UX Improved Mobile Wireframe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a2833;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .mobile-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, #27ae60 0%, #2ecc71 100%);
+            min-height: 100vh;
+            position: relative;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        
+        /* Header - Improved Contrast */
+        .header {
+            background: linear-gradient(to bottom, #1a2833 0%, #2c3e50 100%);
+            padding: 16px;
+            border-bottom: 3px solid #27ae60;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .logo {
+            font-weight: 900;
+            font-size: 24px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+        
+        .logo::before {
+            content: "⚽ ";
+            font-size: 20px;
+        }
+        
+        .header-status {
+            color: #27ae60;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .search-bar {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #27ae60;
+            border-radius: 25px;
+            background: #ffffff;
+            font-weight: 500;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        
+        .search-bar::placeholder {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        /* Onboarding Banner */
+        .onboarding-banner {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 2px solid #2980b9;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .onboarding-banner:hover {
+            background: linear-gradient(45deg, #2980b9, #3498db);
+        }
+        
+        .onboarding-banner.hidden {
+            display: none;
+        }
+        
+        /* System Status Improved */
+        .system-status {
+            background: linear-gradient(45deg, #1a2833 0%, #2c3e50 100%);
+            color: #27ae60;
+            padding: 14px 16px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #27ae60;
+            position: relative;
+        }
+        
+        .system-status::before {
+            content: "🔴";
+            position: absolute;
+            left: 16px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 50% { opacity: 1; transform: scale(1); }
+            51%, 100% { opacity: 0.6; transform: scale(0.9); }
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 20px 16px 100px 16px;
+            background: #ffffff;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        /* Simplified Section Headers */
+        .section {
+            margin-bottom: 32px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .section-title {
+            font-weight: 800;
+            font-size: 20px;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .section-subtitle {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        /* IMPROVED MATCH CARDS - Single Primary Action */
+        .match-card {
+            background: #ffffff;
+            border: 2px solid #ecf0f1;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            border-color: #27ae60;
+        }
+        
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .teams {
+            font-weight: 800;
+            font-size: 18px;
+            color: #2c3e50;
+            letter-spacing: 0.5px;
+        }
+        
+        .live-badge {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+            animation: live-pulse 2s infinite;
+        }
+        
+        @keyframes live-pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        /* SINGLE RECOMMENDED COMMENTATOR */
+        .recommended-commentator {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #27ae60;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .commentator-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .commentator-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: 3px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .commentator-details {
+            flex: 1;
+        }
+        
+        .commentator-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+        
+        .commentator-badge {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .commentator-stats {
+            font-size: 12px;
+            color: #7f8c8d;
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* SINGLE PRIMARY CTA */
+        .primary-cta {
+            width: 100%;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+        
+        .primary-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.4);
+        }
+        
+        /* PROGRESSIVE DISCLOSURE */
+        .more-options {
+            text-align: center;
+            color: #3498db;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .more-options:hover {
+            background: #f8f9fa;
+            color: #2980b9;
+        }
+        
+        .additional-commentators {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #ecf0f1;
+        }
+        
+        .additional-commentators.show {
+            display: block;
+        }
+        
+        .mini-commentator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .mini-commentator:last-child {
+            border-bottom: none;
+        }
+        
+        .mini-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .mini-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .mini-join {
+            background: #3498db;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* IMPROVED CREW CARDS - Consistent Layout */
+        .crew-card {
+            background: #ffffff;
+            border: 2px solid #ecf0f1;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .crew-card:hover {
+            border-color: #27ae60;
+            box-shadow: 0 4px 16px rgba(39, 174, 96, 0.1);
+        }
+        
+        .crew-header-new {
+            margin-bottom: 16px;
+        }
+        
+        .crew-name-new {
+            font-weight: 700;
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .crew-description-new {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .crew-status {
+            display: inline-block;
+            background: #e8f5e8;
+            color: #27ae60;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .crew-members-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .member-avatar-new {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .members-count {
+            color: #7f8c8d;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* DISCOVERY PAGE IMPROVEMENTS */
+        .filter-tabs {
+            background: #ffffff;
+            padding: 16px;
+            border-bottom: 2px solid #ecf0f1;
+            position: sticky;
+            top: 85px;
+            z-index: 99;
+        }
+        
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tab {
+            background: #f8f9fa;
+            border: 2px solid #ecf0f1;
+            border-radius: 25px;
+            padding: 10px 16px;
+            white-space: nowrap;
+            font-size: 14px;
+            color: #7f8c8d;
+            min-width: fit-content;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+        
+        /* SIMPLIFIED COMMENTATOR GRID */
+        .commentator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .commentator-card-simple {
+            background: #ffffff;
+            border: 2px solid #ecf0f1;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .commentator-card-simple:hover {
+            border-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .simple-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        
+        .simple-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .simple-team {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        .simple-rating {
+            font-size: 12px;
+            color: #f39c12;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .follow-btn-simple {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        
+        .follow-btn-simple:hover {
+            background: #2980b9;
+        }
+        
+        .follow-btn-simple.following {
+            background: #27ae60;
+        }
+        
+        /* ACCESSIBILITY IMPROVEMENTS */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* Focus states for accessibility */
+        button:focus, .nav-item:focus, .tab:focus {
+            outline: 3px solid #3498db;
+            outline-offset: 2px;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .match-card, .crew-card, .commentator-card-simple {
+                border-color: #000000;
+            }
+            
+            .primary-cta {
+                background: #000000;
+                border: 2px solid #ffffff;
+            }
+        }
+        
+        /* Bottom Navigation - Improved Accessibility */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 375px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-top: 3px solid #27ae60;
+            display: flex;
+            padding: 12px 0 8px 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 8px;
+            text-decoration: none;
+            color: #bdc3c7;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border-radius: 8px;
+            margin: 0 4px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .nav-item.active {
+            color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+        
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item.active .nav-icon {
+            background: rgba(39, 174, 96, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Progress Indicator for Onboarding */
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #27ae60;
+            width: 25%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 320px) {
+            .mobile-container {
+                max-width: 320px;
+            }
+            
+            .bottom-nav {
+                width: 320px;
+            }
+            
+            .commentator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Error States & Loading */
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #27ae60;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-state {
+            background: #fff5f5;
+            border: 2px solid #e74c3c;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        
+        .error-title {
+            color: #e74c3c;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .error-message {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .retry-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* Network Status Indicator */
+        .network-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #27ae60;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+        
+        .network-status.poor {
+            background: #f39c12;
+            animation: pulse 2s infinite;
+        }
+        
+        .network-status.offline {
+            background: #e74c3c;
+        }
+        
+        /* Feedback Toast Messages */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1002;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        
+        .toast.success {
+            background: #27ae60;
+        }
+        
+        .toast.error {
+            background: #e74c3c;
+        }
+        
+        /* Content Moderation Tools */
+        .content-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .match-card:hover .content-actions,
+        .crew-card:hover .content-actions {
+            opacity: 1;
+        }
+        
+        .action-menu-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .action-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            min-width: 120px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .action-menu.show {
+            display: block;
+        }
+        
+        .action-menu-item {
+            padding: 8px 12px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 12px;
+            color: #2c3e50;
+            cursor: pointer;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .action-menu-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .action-menu-item.danger {
+            color: #e74c3c;
+        }
+        
+        .action-menu-item.danger:hover {
+            background: #fff5f5;
+        }
+        
+        /* Quick Settings Panel */
+        .quick-settings {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+            z-index: 1003;
+            transition: right 0.3s ease;
+            padding: 20px;
+        }
+        
+        .quick-settings.open {
+            right: 0;
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .settings-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #7f8c8d;
+            cursor: pointer;
+        }
+        
+        .setting-group {
+            margin-bottom: 20px;
+        }
+        
+        .setting-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .setting-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #bdc3c7;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #27ae60;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Payment Flow Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1004;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 320px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .modal-subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .tip-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .tip-amount {
+            background: #f8f9fa;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tip-amount.selected {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+        
+        .custom-tip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .custom-tip input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-btn.primary {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .modal-btn.secondary {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+        
+        /* Sync Status Indicator */
+        .sync-status {
+            position: fixed;
+            bottom: 130px;
+            left: 16px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 1001;
+            display: none;
+        }
+        
+        .sync-status.show {
+            display: block;
+        }
+        
+        .sync-status.synced {
+            background: rgba(39, 174, 96, 0.9);
+        }
+        
+        .sync-status.syncing {
+            background: rgba(243, 156, 18, 0.9);
+        }
+        
+        .sync-status.out-of-sync {
+            background: rgba(231, 76, 60, 0.9);
+        }
+        
+        /* Advanced Features Progressive Reveal */
+        .feature-unlock {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-unlock::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .unlock-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .unlock-description {
+            font-size: 13px;
+            margin-bottom: 12px;
+            opacity: 0.9;
+        }
+        
+        .unlock-progress {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        
+        .unlock-progress-bar {
+            background: #27ae60;
+            height: 100%;
+            width: 70%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .unlock-cta {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        /* Quality Indicators */
+        .quality-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #e8f5e8;
+            color: #27ae60;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .quality-badge.verified {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .quality-badge.premium {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .quality-badge.warning {
+            background: #fff5f5;
+            color: #e74c3c;
+        }
+        
+        /* Responsive Improvements */
+        @media (max-width: 320px) {
+            .mobile-container {
+                max-width: 320px;
+            }
+            
+            .bottom-nav {
+                width: 320px;
+            }
+            
+            .commentator-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-settings {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .modal {
+                width: 95%;
+                padding: 16px;
+            }
+        }
+        
+        /* Performance Optimizations */
+        .will-change-transform {
+            will-change: transform;
+        }
+        
+        .gpu-accelerated {
+            transform: translateZ(0);
+        }
+        
+        /* Reduced Motion Compliance */
+        @media (prefers-reduced-motion: reduce) {
+            .loading-spinner,
+            .live-pulse,
+            .pulse,
+            .shimmer {
+                animation: none;
+            }
+            
+            .toast,
+            .modal-overlay,
+            .quick-settings {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Network Status Indicator -->
+        <div class="network-status" id="network-status" title="Connection Status"></div>
+        
+        <!-- Progress Indicator for Onboarding -->
+        <div class="progress-indicator">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <div class="logo">FanZap</div>
+                <div class="header-status" id="onboarding-step">STEP 1 OF 4</div>
+                <button class="action-menu-btn" onclick="toggleSettings()" aria-label="Settings">⚙️</button>
+            </div>
+            <input type="text" class="search-bar" placeholder="🔍 Find your team's commentary..." aria-label="Search commentary">
+        </header>
+        
+        <!-- Onboarding Banner -->
+        <div class="onboarding-banner" id="onboarding-banner">
+            👋 New here? We'll show you the best commentary for your first match!
+        </div>
+        
+        <!-- Quick Settings Panel -->
+        <div class="quick-settings" id="quick-settings">
+            <div class="settings-header">
+                <div class="settings-title">Settings</div>
+                <button class="close-settings" onclick="toggleSettings()" aria-label="Close settings">×</button>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Audio Quality</label>
+                <select class="setting-control">
+                    <option>High (requires good connection)</option>
+                    <option selected>Standard (recommended)</option>
+                    <option>Low (for poor connections)</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Auto-Sync with TV</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Notification Preferences</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Preferred Commentary Style</label>
+                <select class="setting-control">
+                    <option>Passionate Fan</option>
+                    <option selected>Balanced Analysis</option>
+                    <option>Tactical Focus</option>
+                    <option>Comedy/Entertainment</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- HOME PAGE -->
+        <div id="home-page" class="page-content active">
+            <!-- System Status -->
+            <div class="system-status">
+                🔴 3 LIVE MATCHES • MATCHDAY ACTIVE
+            </div>
+            
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Feature Unlock Teaser -->
+                <div class="feature-unlock" style="display: none;" id="feature-unlock">
+                    <div class="unlock-title">🏆 Unlock Crew Features!</div>
+                    <div class="unlock-description">Listen to 2 more matches to join crews and chat with other fans</div>
+                    <div class="unlock-progress">
+                        <div class="unlock-progress-bar"></div>
+                    </div>
+                    <button class="unlock-cta">Learn More</button>
+                </div>
+                
+                <!-- Live Matches Section -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Live Now</h2>
+                        <span class="section-subtitle">Choose your voice</span>
+                    </div>
+                    
+                    <!-- IMPROVED MATCH CARD WITH MODERATION -->
+                    <div class="match-card">
+                        <div class="content-actions">
+                            <button class="action-menu-btn" onclick="toggleActionMenu('match1-menu')" aria-label="More options">⋯</button>
+                            <div class="action-menu" id="match1-menu">
+                                <button class="action-menu-item">📌 Save Match</button>
+                                <button class="action-menu-item">🔔 Get Notifications</button>
+                                <button class="action-menu-item">📊 View Stats</button>
+                                <button class="action-menu-item danger">🚨 Report Issue</button>
+                            </div>
+                        </div>
+                        
+                        <div class="match-header">
+                            <div class="teams">Arsenal vs Chelsea</div>
+                            <div class="live-badge">LIVE 67'</div>
+                        </div>
+                        
+                        <!-- SINGLE RECOMMENDED COMMENTATOR WITH QUALITY INDICATORS -->
+                        <div class="recommended-commentator">
+                            <div class="commentator-main">
+                                <div class="commentator-avatar">🎙️</div>
+                                <div class="commentator-details">
+                                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+                                        <div class="commentator-badge">RECOMMENDED</div>
+                                        <div class="quality-badge verified">✓ VERIFIED</div>
+                                    </div>
+                                    <div class="commentator-name">BigDave_MUFC</div>
+                                    <div class="commentator-stats">
+                                        <span>👥 2.3k listening</span>
+                                        <span>⭐ 4.8 rating</span>
+                                        <span>🎯 95% uptime</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- SINGLE PRIMARY CTA WITH LOADING STATE -->
+                            <button class="primary-cta" id="join-btn-1" onclick="joinCommentary('BigDave_MUFC')" aria-label="Join BigDave_MUFC's commentary for Arsenal vs Chelsea">
+                                ⚡ JOIN COMMENTARY
+                            </button>
+                        </div>
+                        
+                        <!-- PROGRESSIVE DISCLOSURE -->
+                        <div class="more-options" onclick="toggleOptions('match1')">
+                            + 2 more commentary options
+                        </div>
+                        
+                        <div class="additional-commentators" id="match1-options">
+                            <div class="mini-commentator">
+                                <div class="mini-info">
+                                    <div class="mini-avatar">🎙️</div>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+                                            ChelseaFanSarah
+                                            <div class="quality-badge premium">⭐ PREMIUM</div>
+                                        </div>
+                                        <div style="font-size: 11px; color: #7f8c8d;">👥 1.8k • ⭐ 4.6</div>
+                                    </div>
+                                </div>
+                                <button class="mini-join" onclick="showTipModal('ChelseaFanSarah')">Join</button>
+                            </div>
+                            
+                            <div class="mini-commentator">
+                                <div class="mini-info">
+                                    <div class="mini-avatar">🎙️</div>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 13px;">NeutralVoice</div>
+                                        <div style="font-size: 11px; color: #7f8c8d;">👥 892 • ⭐ 4.4</div>
+                                    </div>
+                                </div>
+                                <button class="mini-join">Join</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ERROR STATE EXAMPLE -->
+                    <div class="error-state" style="display: none;" id="connection-error">
+                        <div class="error-title">⚠️ Connection Issue</div>
+                        <div class="error-message">Unable to load live commentary. Check your connection and try again.</div>
+                        <button class="retry-btn" onclick="retryConnection()">Retry Connection</button>
+                    </div>
+                    
+                    <!-- Second Match Card -->
+                    <div class="match-card">
+                        <div class="content-actions">
+                            <button class="action-menu-btn" onclick="toggleActionMenu('match2-menu')" aria-label="More options">⋯</button>
+                            <div class="action-menu" id="match2-menu">
+                                <button class="action-menu-item">📌 Save Match</button>
+                                <button class="action-menu-item">🔔 Get Notifications</button>
+                                <button class="action-menu-item">📊 View Stats</button>
+                                <button class="action-menu-item danger">🚨 Report Issue</button>
+                            </div>
+                        </div>
+                        
+                        <div class="match-header">
+                            <div class="teams">Man City vs Liverpool</div>
+                            <div class="live-badge">LIVE 23'</div>
+                        </div>
+                        
+                        <div class="recommended-commentator">
+                            <div class="commentator-main">
+                                <div class="commentator-avatar">🎙️</div>
+                                <div class="commentator-details">
+                                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+                                        <div class="commentator-badge">TOP RATED</div>
+                                        <div class="quality-badge verified">✓ VERIFIED</div>
+                                    </div>
+                                    <div class="commentator-name">ScouseVoice</div>
+                                    <div class="commentator-stats">
+                                        <span>👥 3.1k listening</span>
+                                        <span>⭐ 4.9 rating</span>
+                                        <span>🔥 Trending #1</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="primary-cta" onclick="joinCommentary('ScouseVoice')" aria-label="Join ScouseVoice's commentary for Man City vs Liverpool">
+                                ⚡ JOIN COMMENTARY
+                            </button>
+                        </div>
+                        
+                        <div class="more-options" onclick="toggleOptions('match2')">
+                            + 1 more commentary option
+                        </div>
+                        
+                        <div class="additional-commentators" id="match2-options">
+                            <div class="mini-commentator">
+                                <div class="mini-info">
+                                    <div class="mini-avatar">🎙️</div>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 13px;">CityTactical</div>
+                                        <div style="font-size: 11px; color: #7f8c8d;">👥 1.2k • ⭐ 4.5</div>
+                                    </div>
+                                </div>
+                                <button class="mini-join">Join</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Your Activity Section -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Your Activity</h2>
+                        <span class="section-subtitle">Recent & upcoming</span>
+                    </div>
+                    
+                    <div class="crew-card">
+                        <div class="content-actions">
+                            <button class="action-menu-btn" onclick="toggleActionMenu('crew1-menu')" aria-label="More options">⋯</button>
+                            <div class="action-menu" id="crew1-menu">
+                                <button class="action-menu-item">🔕 Mute Notifications</button>
+                                <button class="action-menu-item">👥 Invite Friends</button>
+                                <button class="action-menu-item">⚙️ Crew Settings</button>
+                                <button class="action-menu-item danger">🚪 Leave Crew</button>
+                            </div>
+                        </div>
+                        
+                        <div class="crew-header-new">
+                            <div class="crew-name-new">Leeds United Lads</div>
+                            <div class="crew-description-new">Your most active crew</div>
+                            <div class="crew-status">Currently watching Arsenal vs Chelsea</div>
+                        </div>
+                        
+                        <div class="crew-members-preview">
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="members-count">+4 members active</div>
+                        </div>
+                        
+                        <button class="primary-cta" onclick="rejoinCrew('leeds-lads')" aria-label="Rejoin Leeds United Lads crew">
+                            👥 REJOIN CREW
+                        </button>
+                    </div>
+                </section>
+            </main>
+        </div>
+        
+        <!-- DISCOVER PAGE -->
+        <div id="discover-page" class="page-content">
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <div class="tabs-container">
+                    <div class="tab active">For You</div>
+                    <div class="tab">By Team</div>
+                    <div class="tab">Rising Stars</div>
+                    <div class="tab">Near You</div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Personalization Hint -->
+                <div class="feature-unlock" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                    <div class="unlock-title">🎯 Personalized for You</div>
+                    <div class="unlock-description">Based on your Chelsea support and listening history</div>
+                </div>
+                
+                <!-- Trending Section -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Recommended</h2>
+                        <span class="section-subtitle">Perfect matches for you</span>
+                    </div>
+                    <div class="commentator-grid">
+                        <div class="commentator-card-simple">
+                            <div class="content-actions">
+                                <button class="action-menu-btn" onclick="toggleActionMenu('discover1-menu')" aria-label="More options">⋯</button>
+                                <div class="action-menu" id="discover1-menu">
+                                    <button class="action-menu-item">🔔 Get Notifications</button>
+                                    <button class="action-menu-item">👁️ Preview Style</button>
+                                    <button class="action-menu-item">📊 View Stats</button>
+                                    <button class="action-menu-item danger">🚫 Not Interested</button>
+                                </div>
+                            </div>
+                            <div class="simple-avatar">🎙️</div>
+                            <div style="display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;">
+                                <div class="quality-badge verified">✓ VERIFIED</div>
+                            </div>
+                            <div class="simple-name">BigDave_MUFC</div>
+                            <div class="simple-team">Man United</div>
+                            <div class="simple-rating">⭐ 4.8 • 12.5k followers</div>
+                            <button class="follow-btn-simple" onclick="followCommentator('BigDave_MUFC')">Follow</button>
+                        </div>
+                        
+                        <div class="commentator-card-simple">
+                            <div class="content-actions">
+                                <button class="action-menu-btn" onclick="toggleActionMenu('discover2-menu')" aria-label="More options">⋯</button>
+                                <div class="action-menu" id="discover2-menu">
+                                    <button class="action-menu-item">🔔 Get Notifications</button>
+                                    <button class="action-menu-item">👁️ Preview Style</button>
+                                    <button class="action-menu-item">📊 View Stats</button>
+                                    <button class="action-menu-item danger">🚫 Not Interested</button>
+                                </div>
+                            </div>
+                            <div class="simple-avatar">🎙️</div>
+                            <div style="display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;">
+                                <div class="quality-badge verified">✓ VERIFIED</div>
+                                <div class="quality-badge premium">⭐ PREMIUM</div>
+                            </div>
+                            <div class="simple-name">ScouseVoice</div>
+                            <div class="simple-team">Liverpool</div>
+                            <div class="simple-rating">⭐ 4.9 • 8.2k followers</div>
+                            <button class="follow-btn-simple following">Following</button>
+                        </div>
+                        
+                        <div class="commentator-card-simple">
+                            <div class="simple-avatar">🎙️</div>
+                            <div style="display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;">
+                                <div class="quality-badge verified">✓ VERIFIED</div>
+                            </div>
+                            <div class="simple-name">TacticalTom</div>
+                            <div class="simple-team">Neutral</div>
+                            <div class="simple-rating">⭐ 4.7 • 15.1k followers</div>
+                            <button class="follow-btn-simple" onclick="followCommentator('TacticalTom')">Follow</button>
+                        </div>
+                        
+                        <div class="commentator-card-simple">
+                            <div class="simple-avatar">🎙️</div>
+                            <div style="display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;">
+                                <div class="quality-badge warning">⚠️ NEW</div>
+                            </div>
+                            <div class="simple-name">ChelseaFanSarah</div>
+                            <div class="simple-team">Chelsea</div>
+                            <div class="simple-rating">⭐ 4.6 • 6.7k followers</div>
+                            <button class="follow-btn-simple" onclick="followCommentator('ChelseaFanSarah')">Follow</button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Learning Algorithm Feedback -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Help Us Learn</h2>
+                        <span class="section-subtitle">Rate these suggestions</span>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; border-radius: 12px; padding: 16px; text-align: center;">
+                        <div style="font-weight: 600; margin-bottom: 8px;">Was BigDave_MUFC a good recommendation?</div>
+                        <div style="display: flex; gap: 8px; justify-content: center;">
+                            <button onclick="rateSuggestion('BigDave_MUFC', 'yes')" style="background: #27ae60; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 12px;">👍 Yes</button>
+                            <button onclick="rateSuggestion('BigDave_MUFC', 'no')" style="background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-size: 12px;">👎 No</button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+        
+        <!-- CREWS PAGE -->
+        <div id="crews-page" class="page-content">
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Quick Actions -->
+                <section class="section">
+                    <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                        <button class="primary-cta" style="flex: 1;" onclick="createCrew()">+ Create Crew</button>
+                        <button style="flex: 1; background: #3498db; color: white; padding: 14px 20px; border: none; border-radius: 25px; font-weight: 700;" onclick="findCrews()">🔍 Find Crews</button>
+                    </div>
+                </section>
+                
+                <!-- Active Crew Alert -->
+                <div style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; border-radius: 12px; padding: 16px; margin-bottom: 20px; animation: pulse 2s infinite;">
+                    <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">🔴 Your Crew is Live!</div>
+                    <div style="font-size: 14px; margin-bottom: 12px;">Leeds United Lads are watching Arsenal vs Chelsea</div>
+                    <button onclick="rejoinCrew('leeds-lads')" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 20px; padding: 8px 16px; font-weight: 600;">REJOIN NOW</button>
+                </div>
+                
+                <!-- Your Crews Section -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Your Crews</h2>
+                        <span class="section-subtitle">3 active crews</span>
+                    </div>
+                    
+                    <div class="crew-card">
+                        <div class="content-actions">
+                            <button class="action-menu-btn" onclick="toggleActionMenu('crew1-menu')" aria-label="More options">⋯</button>
+                            <div class="action-menu" id="crew1-menu">
+                                <button class="action-menu-item">🔕 Mute Notifications</button>
+                                <button class="action-menu-item">👥 Invite Friends</button>
+                                <button class="action-menu-item">⚙️ Crew Settings</button>
+                                <button class="action-menu-item danger">🚪 Leave Crew</button>
+                            </div>
+                        </div>
+                        
+                        <div class="crew-header-new">
+                            <div class="crew-name-new">Leeds United Lads</div>
+                            <div class="crew-description-new">Your main crew for Leeds matches</div>
+                            <div class="crew-status">Live now: Arsenal vs Chelsea</div>
+                        </div>
+                        
+                        <div class="crew-members-preview">
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="members-count">8 watching • 3 chatting</div>
+                        </div>
+                        
+                        <button class="primary-cta" onclick="rejoinCrew('leeds-lads')" aria-label="Rejoin Leeds United Lads crew">
+                            🔴 REJOIN LIVE
+                        </button>
+                    </div>
+                    
+                    <div class="crew-card">
+                        <div class="content-actions">
+                            <button class="action-menu-btn" onclick="toggleActionMenu('crew2-menu')" aria-label="More options">⋯</button>
+                            <div class="action-menu" id="crew2-menu">
+                                <button class="action-menu-item">🔔 Enable Notifications</button>
+                                <button class="action-menu-item">👥 Invite Friends</button>
+                                <button class="action-menu-item">⚙️ Crew Settings</button>
+                                <button class="action-menu-item danger">🚪 Leave Crew</button>
+                            </div>
+                        </div>
+                        
+                        <div class="crew-header-new">
+                            <div class="crew-name-new">University Mates</div>
+                            <div class="crew-description-new">Sheffield Uni Football Society</div>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <div class="crew-status">Next: Man United vs Spurs • Tomorrow 3pm</div>
+                                <div class="quality-badge">UNI</div>
+                            </div>
+                        </div>
+                        
+                        <div class="crew-members-preview">
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="members-count">12 members</div>
+                        </div>
+                        
+                        <button class="primary-cta" onclick="viewCrewSchedule('uni-mates')" aria-label="View University Mates crew schedule">
+                            📅 VIEW SCHEDULE
+                        </button>
+                    </div>
+                    
+                    <div class="crew-card">
+                        <div class="crew-header-new">
+                            <div class="crew-name-new">Tactical Analysis Group</div>
+                            <div class="crew-description-new">Deep tactical discussions and analysis</div>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <div class="crew-status">Offline • Last active 2 days ago</div>
+                                <div class="quality-badge premium">PRO</div>
+                            </div>
+                        </div>
+                        
+                        <div class="crew-members-preview">
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="members-count">24 members</div>
+                        </div>
+                        
+                        <button style="background: #bdc3c7; color: #7f8c8d; padding: 14px 20px; border: none; border-radius: 25px; font-weight: 700; width: 100%;" disabled>
+                            😴 INACTIVE
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Smart Crew Suggestions -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Suggested for You</h2>
+                        <span class="section-subtitle">Based on your interests</span>
+                    </div>
+                    
+                    <div class="crew-card" style="border: 2px solid #3498db;">
+                        <div class="crew-header-new">
+                            <div class="crew-name-new">Chelsea Supporters London</div>
+                            <div class="crew-description-new">Local Chelsea fans • 2.1km from you</div>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <div class="crew-status">Watching Arsenal vs Chelsea now</div>
+                                <div class="quality-badge verified">LOCAL</div>
+                                <div class="quality-badge">MATCH</div>
+                            </div>
+                        </div>
+                        
+                        <div class="crew-members-preview">
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="member-avatar-new"></div>
+                            <div class="members-count">18 members • 12 watching</div>
+                        </div>
+                        
+                        <button class="primary-cta" onclick="requestJoinCrew('chelsea-london')" aria-label="Request to join Chelsea Supporters London">
+                            💙 REQUEST TO JOIN
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Feature Unlock: Advanced Crew Features -->
+                <div class="feature-unlock" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+                    <div class="unlock-title">🏆 Unlock Crew Competitions!</div>
+                    <div class="unlock-description">Join 2 more crews to access crew vs crew challenges and leaderboards</div>
+                    <div class="unlock-progress">
+                        <div class="unlock-progress-bar" style="width: 33%;"></div>
+                    </div>
+                    <button class="unlock-cta">Learn More</button>
+                </div>
+            </main>
+        </div>
+        
+        
+        <!-- Payment/Tip Modal -->
+        <div class="modal-overlay" id="tip-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">💰 Support ChelseaFanSarah</div>
+                    <div class="modal-subtitle">Show appreciation for great commentary</div>
+                </div>
+                
+                <div class="tip-options">
+                    <button class="tip-amount" onclick="selectTip(1)">£1</button>
+                    <button class="tip-amount" onclick="selectTip(2)">£2</button>
+                    <button class="tip-amount" onclick="selectTip(5)">£5</button>
+                </div>
+                
+                <div class="custom-tip">
+                    <span>£</span>
+                    <input type="number" placeholder="Custom amount" min="1" max="100">
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="modal-btn secondary" onclick="closeTipModal()">Cancel</button>
+                    <button class="modal-btn primary" onclick="processTip()">Send Tip</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sync Status Indicator -->
+        <div class="sync-status synced" id="sync-status">
+            🎯 Synced with TV
+        </div>
+        
+        <!-- Toast Notifications -->
+        <div class="toast" id="toast"></div>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" data-page="home" aria-label="Home page">
+                <div class="nav-icon">🏠</div>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="#" class="nav-item" data-page="discover" aria-label="Discover commentators">
+                <div class="nav-icon">🔍</div>
+                <span class="nav-label">Discover</span>
+            </a>
+            <a href="#" class="nav-item" data-page="crews" aria-label="Your crews">
+                <div class="nav-icon">👥</div>
+                <span class="nav-label">Crews</span>
+            </a>
+            <a href="#" class="nav-item" data-page="compete" aria-label="Competitions">
+                <div class="nav-icon">🏆</div>
+                <span class="nav-label">Compete</span>
+            </a>
+            <a href="#" class="nav-item" data-page="profile" aria-label="Your profile">
+                <div class="nav-icon">👤</div>
+                <span class="nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
 
+    <script>
+        // Enhanced UX with comprehensive error handling and feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const pages = document.querySelectorAll('.page-content');
+            const progressBar = document.getElementById('progress-bar');
+            const onboardingBanner = document.getElementById('onboarding-banner');
+            const networkStatus = document.getElementById('network-status');
+            const syncStatus = document.getElementById('sync-status');
+            
+            let onboardingStep = 1;
+            const maxSteps = 4;
+            let selectedTipAmount = 0;
+            
+            // Initialize app state
+            initializeApp();
+            
+            function initializeApp() {
+                // Check network connection
+                updateNetworkStatus();
+                
+                // Show sync status briefly
+                showSyncStatus();
+                
+                // Set up periodic updates
+                setInterval(updateRealTimeData, 10000);
+                setInterval(updateNetworkStatus, 5000);
+                
+                // Feature unlock progression
+                setTimeout(showFeatureUnlock, 3000);
+            }
+            
+            // Navigation with enhanced progress tracking
+            navItems.forEach((item, index) => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all nav items and pages
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    pages.forEach(page => page.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Show corresponding page
+                    const targetPage = this.getAttribute('data-page');
+                    if (targetPage && document.getElementById(targetPage + '-page')) {
+                        document.getElementById(targetPage + '-page').classList.add('active');
+                    }
+                    
+                    // Update progress for onboarding
+                    updateOnboardingProgress(index + 1);
+                    
+                    // Show toast feedback
+                    showToast(`Switched to ${targetPage}`, 'success');
+                });
+            });
+            
+            function updateOnboardingProgress(step) {
+                if (step <= maxSteps) {
+                    onboardingStep = step;
+                    const progressPercent = (step / maxSteps) * 100;
+                    progressBar.style.width = progressPercent + '%';
+                    
+                    // Update header status
+                    const headerStatus = document.getElementById('onboarding-step');
+                    headerStatus.textContent = `STEP ${step} OF ${maxSteps}`;
+                    
+                    // Hide onboarding banner after step 2
+                    if (step > 2) {
+                        onboardingBanner.classList.add('hidden');
+                    }
+                    
+                    // Update feature unlock progress
+                    const unlockBar = document.querySelector('.unlock-progress-bar');
+                    if (unlockBar) {
+                        unlockBar.style.width = `${(step / maxSteps) * 100}%`;
+                    }
+                }
+            }
+            
+            // Network status monitoring
+            function updateNetworkStatus() {
+                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                
+                if (!navigator.onLine) {
+                    networkStatus.className = 'network-status offline';
+                    networkStatus.title = 'Offline';
+                    showToast('You\'re offline. Some features may not work.', 'error');
+                } else if (connection && connection.effectiveType === '2g') {
+                    networkStatus.className = 'network-status poor';
+                    networkStatus.title = 'Poor connection';
+                } else {
+                    networkStatus.className = 'network-status';
+                    networkStatus.title = 'Good connection';
+                }
+            }
+            
+            // Sync status management
+            function showSyncStatus() {
+                syncStatus.classList.add('show');
+                setTimeout(() => {
+                    syncStatus.classList.remove('show');
+                }, 3000);
+            }
+            
+            function updateSyncStatus(status) {
+                syncStatus.className = `sync-status ${status} show`;
+                switch(status) {
+                    case 'synced':
+                        syncStatus.textContent = '🎯 Synced with TV';
+                        break;
+                    case 'syncing':
+                        syncStatus.textContent = '⏳ Syncing...';
+                        break;
+                    case 'out-of-sync':
+                        syncStatus.textContent = '⚠️ Out of sync';
+                        break;
+                }
+                
+                setTimeout(() => {
+                    if (status !== 'out-of-sync') {
+                        syncStatus.classList.remove('show');
+                    }
+                }, 3000);
+            }
+            
+            // Toast notification system
+            function showToast(message, type = 'info') {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = `toast ${type} show`;
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Feature unlock progression
+            function showFeatureUnlock() {
+                const featureUnlock = document.getElementById('feature-unlock');
+                if (onboardingStep === 1) {
+                    featureUnlock.style.display = 'block';
+                }
+            }
+            
+            // Commentary joining with loading states
+            window.joinCommentary = function(commentatorName) {
+                const button = event.target;
+                const originalText = button.textContent;
+                
+                // Show loading state
+                button.innerHTML = '<div class="loading-spinner"></div> Connecting...';
+                button.disabled = true;
+                
+                // Update sync status
+                updateSyncStatus('syncing');
+                
+                // Simulate connection process
+                setTimeout(() => {
+                    if (Math.random() > 0.1) { // 90% success rate
+                        button.innerHTML = '🔴 LISTENING LIVE';
+                        button.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+                        showToast(`Joined ${commentatorName}'s commentary!`, 'success');
+                        updateSyncStatus('synced');
+                        
+                        // Update onboarding progress
+                        if (onboardingStep === 1) {
+                            updateOnboardingProgress(2);
+                        }
+                    } else {
+                        // Handle error
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        showToast('Connection failed. Please try again.', 'error');
+                        updateSyncStatus('out-of-sync');
+                        showConnectionError();
+                    }
+                }, 2000);
+            };
+            
+            // Error handling
+            function showConnectionError() {
+                const errorState = document.getElementById('connection-error');
+                errorState.style.display = 'block';
+            }
+            
+            window.retryConnection = function() {
+                const errorState = document.getElementById('connection-error');
+                errorState.style.display = 'none';
+                showToast('Retrying connection...', 'info');
+            };
+            
+            // Real-time data updates
+            function updateRealTimeData() {
+                // Update listener counts
+                const listenerCounts = document.querySelectorAll('.commentator-stats span:first-child');
+                listenerCounts.forEach(count => {
+                    if (count.textContent.includes('👥')) {
+                        const currentNumber = parseInt(count.textContent.match(/[\d,]+/)[0].replace(',', ''));
+                        const variation = Math.floor(Math.random() * 50) - 25; // +/- 25 listeners
+                        const newNumber = Math.max(0, currentNumber + variation);
+                        count.textContent = `👥 ${newNumber.toLocaleString()} listening`;
+                    }
+                });
+                
+                // Randomly show sync issues
+                if (Math.random() < 0.05) { // 5% chance
+                    updateSyncStatus('out-of-sync');
+                }
+            }
+            
+            // Dismiss onboarding banner
+            onboardingBanner.addEventListener('click', function() {
+                this.classList.add('hidden');
+                showToast('Onboarding dismissed. Access help anytime in settings.', 'info');
+            });
+            
+            // Settings panel
+            window.toggleSettings = function() {
+                const settings = document.getElementById('quick-settings');
+                settings.classList.toggle('open');
+            };
+            
+            // Action menus
+            window.toggleActionMenu = function(menuId) {
+                const menu = document.getElementById(menuId);
+                
+                // Close all other menus
+                document.querySelectorAll('.action-menu').forEach(m => {
+                    if (m.id !== menuId) {
+                        m.classList.remove('show');
+                    }
+                });
+                
+                menu.classList.toggle('show');
+            };
+            
+            // Close menus when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.content-actions')) {
+                    document.querySelectorAll('.action-menu').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                }
+                
+                if (!e.target.closest('.quick-settings') && !e.target.closest('.action-menu-btn')) {
+                    document.getElementById('quick-settings').classList.remove('open');
+                }
+            });
+            
+            // Tip modal functionality
+            window.showTipModal = function(commentatorName) {
+                const modal = document.getElementById('tip-modal');
+                modal.querySelector('.modal-title').textContent = `💰 Support ${commentatorName}`;
+                modal.classList.add('show');
+            };
+            
+            window.closeTipModal = function() {
+                document.getElementById('tip-modal').classList.remove('show');
+                selectedTipAmount = 0;
+                // Reset tip selections
+                document.querySelectorAll('.tip-amount').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+            };
+            
+            window.selectTip = function(amount) {
+                selectedTipAmount = amount;
+                document.querySelectorAll('.tip-amount').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+            };
+            
+            window.processTip = function() {
+                const customAmount = document.querySelector('.custom-tip input').value;
+                const amount = customAmount || selectedTipAmount;
+                
+                if (!amount || amount < 1) {
+                    showToast('Please select or enter a tip amount', 'error');
+                    return;
+                }
+                
+                // Simulate payment processing
+                const button = event.target;
+                button.innerHTML = '<div class="loading-spinner"></div> Processing...';
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    closeTipModal();
+                    showToast(`£${amount} tip sent successfully! 🎉`, 'success');
+                    
+                    // Update onboarding progress
+                    if (onboardingStep === 2) {
+                        updateOnboardingProgress(3);
+                    }
+                }, 2000);
+            };
+            
+            // Crew functionality
+            window.rejoinCrew = function(crewId) {
+                const button = event.target;
+                button.innerHTML = '<div class="loading-spinner"></div> Rejoining...';
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    button.innerHTML = '🔴 IN CREW CHAT';
+                    button.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+                    showToast('Rejoined crew successfully!', 'success');
+                    
+                    // Update onboarding progress
+                    if (onboardingStep === 3) {
+                        updateOnboardingProgress(4);
+                    }
+                }, 1500);
+            };
+            
+            // Follow commentator functionality
+            window.followCommentator = function(commentatorName) {
+                const button = event.target;
+                const originalText = button.textContent;
+                
+                if (button.classList.contains('following')) {
+                    // Unfollow
+                    button.innerHTML = '<div class="loading-spinner"></div>';
+                    
+                    setTimeout(() => {
+                        button.textContent = 'Follow';
+                        button.classList.remove('following');
+                        showToast(`Unfollowed ${commentatorName}`, 'info');
+                    }, 1000);
+                } else {
+                    // Follow
+                    button.innerHTML = '<div class="loading-spinner"></div>';
+                    
+                    setTimeout(() => {
+                        button.textContent = 'Following';
+                        button.classList.add('following');
+                        showToast(`Now following ${commentatorName}! 🎉`, 'success');
+                        
+                        // Update onboarding progress
+                        if (onboardingStep === 2) {
+                            updateOnboardingProgress(3);
+                        }
+                    }, 1000);
+                }
+            };
+            
+            // Rating system for recommendations
+            window.rateSuggestion = function(commentatorName, rating) {
+                const container = event.target.closest('div').closest('div');
+                
+                if (rating === 'yes') {
+                    container.innerHTML = '<div style="color: #27ae60; font-weight: 600; text-align: center;">✅ Thanks! We\'ll show you more like this.</div>';
+                } else {
+                    container.innerHTML = '<div style="color: #e74c3c; font-weight: 600; text-align: center;">👎 Got it. We\'ll adjust your recommendations.</div>';
+                }
+                
+                showToast('Feedback recorded - recommendations improving!', 'success');
+            };
+            
+            // Crew creation flow
+            window.createCrew = function() {
+                const button = event.target;
+                button.innerHTML = '<div class="loading-spinner"></div> Creating...';
+                button.disabled = true;
+                
+                // Simulate crew creation flow
+                setTimeout(() => {
+                    showToast('Crew creation wizard coming soon!', 'info');
+                    button.textContent = '+ Create Crew';
+                    button.disabled = false;
+                }, 1500);
+            };
+            
+            // Find crews functionality
+            window.findCrews = function() {
+                showToast('Discovering crews near you...', 'info');
+                
+                // Simulate loading new crew suggestions
+                setTimeout(() => {
+                    showToast('Found 12 crews in your area!', 'success');
+                }, 2000);
+            };
+            
+            // Request to join crew
+            window.requestJoinCrew = function(crewId) {
+                const button = event.target;
+                button.innerHTML = '<div class="loading-spinner"></div> Requesting...';
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    button.innerHTML = '✅ REQUEST SENT';
+                    button.style.background = '#27ae60';
+                    showToast('Join request sent! You\'ll hear back soon.', 'success');
+                }, 2000);
+            };
+            
+            // View crew schedule
+            window.viewCrewSchedule = function(crewId) {
+                showToast('Opening crew schedule...', 'info');
+                
+                // Simulate navigation to schedule view
+                setTimeout(() => {
+                    showToast('Schedule feature coming soon!', 'info');
+                }, 1000);
+            };
+            
+            // Enhanced error handling with user feedback
+            window.addEventListener('error', function(e) {
+                console.error('App Error:', e.error);
+                showToast('Something went wrong. Please try again.', 'error');
+                
+                // Log error for debugging (in real app, send to error tracking service)
+                if (window.navigator.onLine) {
+                    // Send error report
+                    console.log('Error reported:', e.error.message);
+                }
+            });
+            
+            // Network status change handling
+            window.addEventListener('online', function() {
+                updateNetworkStatus();
+                showToast('Back online! 🎉', 'success');
+            });
+            
+            window.addEventListener('offline', function() {
+                updateNetworkStatus();
+                showToast('You\'re offline. Limited functionality available.', 'error');
+            });
+            
+            // Performance monitoring
+            function logPerformanceMetrics() {
+                if ('performance' in window) {
+                    const navigation = performance.getEntriesByType('navigation')[0];
+                    const loadTime = navigation.loadEventEnd - navigation.loadEventStart;
+                    
+                    if (loadTime > 3000) {
+                        console.warn('Slow load time detected:', loadTime + 'ms');
+                        // In real app, this would be sent to analytics
+                    }
+                }
+            }
+            
+            // Initialize performance monitoring
+            setTimeout(logPerformanceMetrics, 1000);
+            
+            // User engagement tracking
+            let userEngagementScore = 0;
+            let lastInteractionTime = Date.now();
+            
+            document.addEventListener('click', function() {
+                userEngagementScore++;
+                lastInteractionTime = Date.now();
+            });
+            
+            // Check for user inactivity
+            setInterval(function() {
+                const timeSinceLastInteraction = Date.now() - lastInteractionTime;
+                
+                if (timeSinceLastInteraction > 300000) { // 5 minutes
+                    // User seems inactive, maybe show engagement prompt
+                    if (Math.random() < 0.1) { // 10% chance
+                        showToast('Missing any good goals? Check what\'s live!', 'info');
+                    }
+                }
+            }, 60000); // Check every minute
+            
+            // Advanced accessibility features
+            function announceToScreenReader(message) {
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.textContent = message;
+                
+                document.body.appendChild(announcement);
+                
+                setTimeout(() => {
+                    document.body.removeChild(announcement);
+                }, 1000);
+            }
+            
+            // Screen reader announcements for key actions
+            const originalShowToast = showToast;
+            showToast = function(message, type) {
+                originalShowToast(message, type);
+                announceToScreenReader(message);
+            };
+            
+            // Smart cache management
+            if ('serviceWorker' in navigator) {
+                // Register service worker for offline functionality
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('SW registered:', registration);
+                }).catch(function(error) {
+                    console.log('SW registration failed:', error);
+                });
+            }
+            
+            // Memory management for mobile devices
+            let componentInstances = new WeakMap();
+            
+            function cleanupUnusedComponents() {
+                // Clean up any unused event listeners or data
+                // This would be more comprehensive in a real app
+                const hiddenPages = document.querySelectorAll('.page-content:not(.active)');
+                hiddenPages.forEach(page => {
+                    // Remove any active timers or listeners from hidden pages
+                    const buttons = page.querySelectorAll('button[disabled]');
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.innerHTML = btn.getAttribute('data-original-text') || 'Action';
+                    });
+                });
+            }
+            
+            // Advanced accessibility features (continued)
+            
+            // Accessibility improvements
+            document.addEventListener('keydown', function(e) {
+                // Escape key functionality
+                if (e.key === 'Escape') {
+                    // Close modals
+                    document.querySelectorAll('.modal-overlay').forEach(modal => {
+                        modal.classList.remove('show');
+                    });
+                    
+                    // Close settings
+                    document.getElementById('quick-settings').classList.remove('open');
+                    
+                    // Close action menus
+                    document.querySelectorAll('.action-menu').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                    
+                    // Close expanded options
+                    const expandedOptions = document.querySelectorAll('.additional-commentators.show');
+                    expandedOptions.forEach(option => {
+                        option.classList.remove('show');
+                        const toggle = option.previousElementSibling;
+                        toggle.textContent = toggle.textContent.replace('- Hide', '+ ');
+                    });
+                    
+                    announceToScreenReader('Closed all open menus and dialogs');
+                }
+                
+                // Arrow key navigation for bottom nav
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    const activeNav = document.querySelector('.nav-item.active');
+                    const navItems = Array.from(document.querySelectorAll('.nav-item'));
+                    const currentIndex = navItems.indexOf(activeNav);
+                    
+                    let newIndex;
+                    if (e.key === 'ArrowRight') {
+                        newIndex = (currentIndex + 1) % navItems.length;
+                    } else {
+                        newIndex = currentIndex === 0 ? navItems.length - 1 : currentIndex - 1;
+                    }
+                    
+                    navItems[newIndex].click();
+                    navItems[newIndex].focus();
+                    e.preventDefault();
+                }
+                
+                // Space or Enter to activate focused elements
+                if (e.key === ' ' || e.key === 'Enter') {
+                    const focused = document.activeElement;
+                    if (focused && focused.classList.contains('more-options')) {
+                        focused.click();
+                        e.preventDefault();
+                    }
+                }
+            });
+            
+            // Voice control preparation (future feature)
+            if ('webkitSpeechRecognition' in window) {
+                console.log('Voice control available - future feature');
+                // Speech recognition setup would go here
+            }
+            
+            // Haptic feedback for mobile devices
+            function triggerHapticFeedback(type = 'light') {
+                if ('vibrate' in navigator) {
+                    switch(type) {
+                        case 'light':
+                            navigator.vibrate(10);
+                            break;
+                        case 'medium':
+                            navigator.vibrate(50);
+                            break;
+                        case 'heavy':
+                            navigator.vibrate([100, 50, 100]);
+                            break;
+                    }
+                }
+            }
+            
+            // Add haptic feedback to key interactions
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('primary-cta')) {
+                    triggerHapticFeedback('medium');
+                } else if (e.target.classList.contains('nav-item')) {
+                    triggerHapticFeedback('light');
+                }
+            });
+        });
+        
+        // Progressive disclosure for match options (enhanced)
+        function toggleOptions(matchId) {
+            const options = document.getElementById(matchId + '-options');
+            const toggle = options.previousElementSibling;
+            
+            if (options.classList.contains('show')) {
+                options.classList.remove('show');
+                toggle.textContent = toggle.textContent.replace('- Hide', '+ ');
+                toggle.setAttribute('aria-expanded', 'false');
+            } else {
+                options.classList.add('show');
+                toggle.textContent = toggle.textContent.replace('+ ', '- Hide ');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+        }
+    </script>
+        });
+        
+        // Progressive disclosure for match options
+        function toggleOptions(matchId) {
+            const options = document.getElementById(matchId + '-options');
+            const toggle = options.previousElementSibling;
+            
+            if (options.classList.contains('show')) {
+                options.classList.remove('show');
+                toggle.textContent = toggle.textContent.replace('- Hide', '+ ');
+            } else {
+                options.classList.add('show');
+                toggle.textContent = toggle.textContent.replace('+ ', '- Hide ');
+            }
+        }
+    </script>
+</body>
+</html>
