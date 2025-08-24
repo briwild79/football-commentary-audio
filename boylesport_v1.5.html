@@ -1193,6 +1193,17 @@
         
         // Show page
         function showPage(page) {
+            // Hide all content sections
+            document.getElementById('sports-content').style.display = 'none';
+            document.getElementById('casino-content').style.display = 'none';
+            
+            // Show appropriate content
+            if (page === 'casino' || page === 'live-casino') {
+                document.getElementById('casino-content').style.display = 'block';
+            } else {
+                document.getElementById('sports-content').style.display = 'block';
+            }
+            
             // Update desktop nav
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active');
