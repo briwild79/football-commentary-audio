@@ -605,9 +605,157 @@
             transition: all 0.2s;
         }
         
-        .odd-value:hover {
-            background-color: #2400f6;
+        /* Netflix-style Casino Layout */
+        .casino-hero {
+            background: linear-gradient(135deg, #8B0000, #FF6B35);
             color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .casino-hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .casino-hero p {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        .netflix-row {
+            margin-bottom: 2rem;
+        }
+        
+        .netflix-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .netflix-header h3 {
+            font-size: 1.25rem;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .netflix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+        
+        .game-tile {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            aspect-ratio: 16/9;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .game-tile:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        .game-thumbnail {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .game-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 1rem;
+        }
+        
+        .game-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .game-provider {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        
+        .jackpot-banner {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1a1a1a;
+            text-align: center;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .jackpot-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .category-pills {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        
+        .category-pill {
+            background-color: #333;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .category-pill:hover {
+            background-color: #555;
+        }
+        
+        .category-pill.active {
+            background-color: #2400f6;
+        }
+        
+        @media (max-width: 768px) {
+            .netflix-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .casino-hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .casino-hero p {
+                font-size: 1.2rem;
+            }
+            
+            .jackpot-amount {
+                font-size: 2rem;
+            }
         }
         
         /* Mobile Responsive */
@@ -757,134 +905,109 @@
     
     <!-- Main Content Area -->
     <main class="main-content">
-        <!-- Hero Banner -->
-        <div class="content-block hero-banner">
-            <div class="banner-content">
-                <h2>2+ EARLY PAYOUT</h2>
-                <p>When your team goes 2 goals ahead, we pay out!</p>
-                <button class="cta-btn">Bet Here</button>
+        <!-- Sports Content -->
+        <div id="sports-content" style="display: block;">
+            <!-- Hero Banner -->
+            <div class="content-block" style="height: 120px;"></div>
+            
+            <!-- Live Events Strip -->
+            <div style="display: flex; gap: 1rem; overflow-x: auto; margin-bottom: 1.5rem; padding-bottom: 0.5rem;">
+                <div class="content-block" style="height: 60px; min-width: 250px;"></div>
+                <div class="content-block" style="height: 60px; min-width: 250px;"></div>
+                <div class="content-block" style="height: 60px; min-width: 250px;"></div>
+                <div class="content-block" style="height: 60px; min-width: 250px;"></div>
+                <div class="content-block" style="height: 60px; min-width: 250px;"></div>
+            </div>
+            
+            <!-- Sports Categories Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="content-block" style="height: 80px;"></div>
+                <div class="content-block" style="height: 80px;"></div>
+                <div class="content-block" style="height: 80px;"></div>
+                <div class="content-block" style="height: 80px;"></div>
+                <div class="content-block" style="height: 80px;"></div>
+                <div class="content-block" style="height: 80px;"></div>
+                <div class="content-block" style="height: 80px;"></div>
+                <div class="content-block" style="height: 80px;"></div>
+            </div>
+            
+            <!-- Featured Matches List -->
+            <div class="content-block" style="height: 240px; margin-bottom: 1.5rem;"></div>
+            
+            <!-- Two Column Layout -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <!-- Main Content -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="content-block" style="height: 160px;"></div>
+                    <div class="content-block" style="height: 120px;"></div>
+                </div>
+                <!-- Sidebar -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="content-block" style="height: 100px;"></div>
+                    <div class="content-block" style="height: 80px;"></div>
+                    <div class="content-block" style="height: 90px;"></div>
+                </div>
+            </div>
+            
+            <!-- Bottom Promotions -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div class="content-block" style="height: 140px;"></div>
+                <div class="content-block" style="height: 140px;"></div>
+                <div class="content-block" style="height: 140px;"></div>
             </div>
         </div>
         
-        <!-- Quick Links Section -->
-        <div class="section-header">
-            <h3>⚡ Today's Racing</h3>
-            <span class="view-all">View All →</span>
-        </div>
-        <div class="cards-row">
-            <div class="promo-card">
-                <div class="card-icon">🏇</div>
-                <h4>Cheltenham</h4>
-                <p>12:30 - 5:15</p>
+        <!-- Casino Content -->
+        <div id="casino-content" style="display: none;">
+            <!-- Hero Block -->
+            <div class="content-block" style="height: 160px;"></div>
+            
+            <!-- Category Pills -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; overflow-x: auto;">
+                <div class="content-block" style="height: 32px; width: 80px; border-radius: 16px;"></div>
+                <div class="content-block" style="height: 32px; width: 60px; border-radius: 16px;"></div>
+                <div class="content-block" style="height: 32px; width: 90px; border-radius: 16px;"></div>
+                <div class="content-block" style="height: 32px; width: 70px; border-radius: 16px;"></div>
+                <div class="content-block" style="height: 32px; width: 50px; border-radius: 16px;"></div>
             </div>
-            <div class="promo-card">
-                <div class="card-icon">🏁</div>
-                <h4>Ascot</h4>
-                <p>1:00 - 4:45</p>
+            
+            <!-- Netflix Row 1 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
             </div>
-            <div class="promo-card">
-                <div class="card-icon">🐎</div>
-                <h4>Newmarket</h4>
-                <p>2:15 - 5:30</p>
+            
+            <!-- Jackpot Banner -->
+            <div class="content-block" style="height: 120px; border-radius: 12px;"></div>
+            
+            <!-- Netflix Row 2 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
             </div>
-            <div class="promo-card">
-                <div class="card-icon">🎯</div>
-                <h4>Daily Special</h4>
-                <p>Enhanced Odds</p>
+            
+            <!-- Netflix Row 3 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
             </div>
-        </div>
-        
-        <!-- Popular Matches -->
-        <div class="section-header">
-            <h3>⚽ Popular Matches</h3>
-            <span class="view-all">View All →</span>
-        </div>
-        <div class="content-block">
-            <div class="match-item">
-                <span class="live-badge">LIVE</span>
-                <div class="teams">
-                    <span>Man United vs Chelsea</span>
-                </div>
-                <div class="odds-row">
-                    <button class="odd-btn">2.45</button>
-                    <button class="odd-btn">3.20</button>
-                    <button class="odd-btn">2.90</button>
-                </div>
-            </div>
-            <div class="match-item">
-                <span class="time">20:00</span>
-                <div class="teams">
-                    <span>Liverpool vs Arsenal</span>
-                </div>
-                <div class="odds-row">
-                    <button class="odd-btn">1.85</button>
-                    <button class="odd-btn">3.40</button>
-                    <button class="odd-btn">4.20</button>
-                </div>
-            </div>
-            <div class="match-item">
-                <span class="time">17:30</span>
-                <div class="teams">
-                    <span>Barcelona vs Real Madrid</span>
-                </div>
-                <div class="odds-row">
-                    <button class="odd-btn">2.10</button>
-                    <button class="odd-btn">3.30</button>
-                    <button class="odd-btn">3.40</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Promotions Grid -->
-        <div class="section-header">
-            <h3>🎁 Promotions</h3>
-            <span class="view-all">View All →</span>
-        </div>
-        <div class="promo-grid">
-            <div class="promo-tile">
-                <div class="promo-icon">💰</div>
-                <h4>25% Boost</h4>
-                <p>All PL Matches</p>
-            </div>
-            <div class="promo-tile">
-                <div class="promo-icon">🎰</div>
-                <h4>Daily Deals</h4>
-                <p>Casino Specials</p>
-            </div>
-            <div class="promo-tile">
-                <div class="promo-icon">🎁</div>
-                <h4>Free Spins</h4>
-                <p>50 Bonus Spins</p>
-            </div>
-            <div class="promo-tile">
-                <div class="promo-icon">⚡</div>
-                <h4>Acca Boost</h4>
-                <p>Up to 100%</p>
-            </div>
-        </div>
-        
-        <!-- Featured Section -->
-        <div class="section-header">
-            <h3>⭐ Featured</h3>
-        </div>
-        <div class="content-block featured">
-            <div class="featured-header">
-                <span class="live-badge">LIVE</span>
-                <h4>Premier League - Outright Winner</h4>
-            </div>
-            <div class="featured-odds">
-                <div class="odd-option">
-                    <span class="team">Man City</span>
-                    <button class="odd-value">4/5</button>
-                </div>
-                <div class="odd-option">
-                    <span class="team">Arsenal</span>
-                    <button class="odd-value">9/2</button>
-                </div>
-                <div class="odd-option">
-                    <span class="team">Liverpool</span>
-                    <button class="odd-value">7/1</button>
-                </div>
+            
+            <!-- Netflix Row 4 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
+                <div class="content-block" style="height: 100px; border-radius: 8px;"></div>
             </div>
         </div>
     </main>
