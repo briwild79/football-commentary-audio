@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Sports Betting Platform</title>
+    <style>
+        /* CSS Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Root elements setup for sticky header */
+        html {
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f6fa;
+            color: #2c3e50;
+            line-height: 1.6;
+            min-width: 320px;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Utility Classes */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .hidden-mobile {
+            display: block;
+        }
+        
+        .hidden-desktop {
+            display: none;
+        }
+        
+        /* Header - Comprehensive sticky implementation */
+        .header {
+            background-color: #2400f6;
+            color: white;
+            position: -webkit-sticky; /* For Safari */
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* Force layer creation */
+            will-change: transform;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+        }
+        
+        /* Fallback for browsers that don't support sticky */
+        @supports not (position: sticky) {
+            .header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+            }
+            body {
+                padding-top: 60px;
+            }
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1rem;
+            max-width: 100%;
+        }
+        
+        /* Ensure all direct children in header sections are vertically centered */
+        .header-left > *,
+        .header-right > * {
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .burger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            width: 24px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .burger-icon {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background-color: white;
+            position: relative;
+            transition: background-color 0.3s;
+            margin: 0;
+        }
+        
+        .burger-icon::before,
+        .burger-icon::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 24px;
+            height: 2px;
+            background-color: white;
+            transition: transform 0.3s;
+        }
+        
+        .burger-icon::before {
+            top: -8px;
+        }
+        
+        .burger-icon::after {
+            top: 8px;
+        }
+        
+        .burger-btn.active .burger-icon {
+            background-color: transparent;
+        }
+        
+        .burger-btn.active .burger-icon::before {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        
+        .burger-btn.active .burger-icon::after {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+        
+        .logo img {
+            height: 32px;
+            width: auto;
+            display: block;
+            max-width: 180px;
+            object-fit: contain;
+        }
+        
+        .desktop-nav {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-btn.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 36px;
+        }
+        
+        .search-toggle {
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .search-toggle:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .search-input {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 36px;
+            width: 36px;
+            background-color: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 18px;
+            color: white;
+            font-size: 0.875rem;
+            outline: none;
+            padding: 0 45px 0 15px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            line-height: 1;
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .search-input.expanded {
+            width: 200px;
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .balance {
+            font-weight: 600;
+            color: white;
+            background-color: rgba(255,255,255,0.2);
+            padding: 0 0.875rem;
+            border-radius: 18px;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        
+        .balance:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .user-avatar:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 85%;
+            max-width: 320px;
+            height: 100vh;
+            background-color: #1a1f2e;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 10000;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+        
+        .mobile-menu-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .mobile-menu-nav {
+            padding: 0.5rem 0;
+        }
+        
+        .mobile-menu-section {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 0.5rem 0;
+        }
+        
+        .mobile-menu-section:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-menu-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+        
+        .mobile-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.9375rem;
+        }
+        
+        .mobile-nav-item:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        .mobile-nav-item.active {
+            background-color: rgba(36, 0, 246, 0.2);
+            color: #2400f6;
+            border-left: 3px solid #2400f6;
+        }
+        
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 9998;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Local Navigation */
+        .local-nav {
+            background-color: #2c3e50;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            position: relative;
+        }
+        
+        .local-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .local-nav-content {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            min-width: max-content;
+        }
+        
+        .local-nav-item {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            border-radius: 20px;
+            transition: all 0.2s;
+            line-height: 1.2;
+        }
+        
+        .local-nav-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .local-nav-item.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        /* Sub Navigation */
+        .sub-nav {
+            background-color: #ecf0f1;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .sub-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .sub-nav-content {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            min-width: max-content;
+        }
+        
+        .sub-nav-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            color: #2c3e50;
+            padding: 0.375rem 1rem;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            white-space: nowrap;
+            border-radius: 20px;
+            transition: all 0.2s;
+            line-height: 1.2;
+        }
+        
+        .sub-nav-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .sub-nav-item.active {
+            background-color: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+        
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 60px);
+            padding-bottom: 5rem; /* Account for bottom nav on mobile */
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #e1e8ed;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+            z-index: 9996;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .bottom-nav-content {
+            display: flex;
+            padding: 0.25rem;
+        }
+        
+        .bottom-nav-item {
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.6875rem;
+            transition: all 0.2s ease;
+            border-radius: 12px;
+            margin: 0.25rem;
+            flex: 1;
+            min-width: 0;
+            min-height: 44px;
+        }
+        
+        .bottom-nav-item:hover {
+            color: #2c3e50;
+        }
+        
+        .bottom-nav-item.active {
+            background-color: rgba(36, 0, 246, 0.08);
+            color: #2400f6;
+        }
+        
+        .bottom-nav-item.active .bottom-nav-icon,
+        .bottom-nav-item.active span {
+            color: #2400f6;
+        }
+        
+        .bottom-nav-icon {
+            font-size: 1.25rem;
+        }
+        
+        /* Bet Slip */
+        .bet-slip {
+            position: fixed;
+            right: -400px;
+            top: 60px;
+            bottom: 0;
+            width: 400px;
+            background-color: white;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 9997;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .bet-slip.active {
+            right: 0;
+        }
+        
+        .bet-slip-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bet-slip-title {
+            font-weight: 600;
+        }
+        
+        .bet-slip-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .bet-slip-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .bet-slip-empty {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 2rem;
+        }
+        
+        .bet-slip-footer {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-top: 1px solid #e1e8ed;
+        }
+        
+        .place-bet-btn {
+            width: 100%;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .place-bet-btn:hover {
+            background-color: #229954;
+        }
+        
+        .place-bet-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 10px;
+            font-weight: 600;
+            min-width: 16px;
+            text-align: center;
+        }
+        
+        .bottom-nav-item .notification-badge {
+            top: 4px;
+            right: calc(50% - 24px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            /* Ensure header stays sticky on mobile */
+            .header {
+                position: -webkit-sticky;
+                position: sticky;
+                top: 0;
+            }
+            
+            .hidden-mobile {
+                display: none;
+            }
+            
+            .hidden-desktop {
+                display: block;
+            }
+            
+            .burger-btn {
+                display: flex;
+            }
+            
+            .desktop-nav {
+                display: none;
+            }
+            
+            /* Hide search on mobile - handled by Discover tab */
+            .search-container {
+                display: none;
+            }
+            
+            .balance {
+                display: flex;
+                font-size: 1rem;
+                padding: 0 0.625rem;
+            }
+            
+            .header-right {
+                gap: 0.75rem;
+            }
+            
+            /* Adjust logo size on mobile for better spacing */
+            .logo img {
+                height: 28px;
+            }
+            
+            .bottom-nav {
+                display: block;
+            }
+            
+            .main-content {
+                padding-bottom: 5rem;
+            }
+            
+            .bet-slip {
+                width: 100%;
+                right: -100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 0 1rem;
+            }
+            
+            .logo {
+                font-size: 1.25rem;
+            }
+            
+            /* Even smaller logo on very small screens */
+            .logo img {
+                height: 24px;
+            }
+            
+            .burger-btn {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="burger-btn" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false">
+                    <span class="burger-icon"></span>
+                </button>
+                <a href="#" class="logo">
+                    <img src="https://briwild79.github.io/football-commentary-audio/boylesport_logo.png" alt="BoyleSports" style="height: 32px; width: auto; display: block;">
+                </a>
+                <nav class="desktop-nav">
+                    <button class="nav-btn active" onclick="showPage('home')">Home</button>
+                    <button class="nav-btn" onclick="showPage('discover')">Discover</button>
+                    <button class="nav-btn" onclick="showPage('my-bets')">My Bets</button>
+                    <button class="nav-btn" onclick="showPage('promotions')">Promotions</button>
+                    <button class="nav-btn" onclick="showPage('casino')">Casino</button>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="search-container">
+                    <button class="search-toggle" aria-label="Search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="white" stroke-width="3px" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <input type="text" class="search-input" placeholder="Search games, teams..." aria-label="Search">
+                </div>
+                <div class="balance hidden-mobile" onclick="alert('Balance history would open here')">€245.75 +</div>
+                <div class="user-avatar">RS</div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Local Navigation -->
+    <nav class="local-nav" aria-label="Sports categories">
+        <div class="local-nav-content">
+            <button class="local-nav-item">⚡ Live & Upcoming</button>
+            <button class="local-nav-item active">⚽ Soccer</button>
+            <button class="local-nav-item">🏀 Basketball</button>
+            <button class="local-nav-item">🎾 Tennis</button>
+            <button class="local-nav-item">🏈 American Football</button>
+            <button class="local-nav-item">⚾ Baseball</button>
+            <button class="local-nav-item">🏒 Ice Hockey</button>
+            <button class="local-nav-item">🎯 My Bets</button>
+        </div>
+    </nav>
+    
+    <!-- Sub Navigation -->
+    <nav class="sub-nav" aria-label="Soccer leagues">
+        <div class="sub-nav-content">
+            <button class="sub-nav-item active">All Soccer</button>
+            <button class="sub-nav-item">⭐ Featured</button>
+            <button class="sub-nav-item">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+            <button class="sub-nav-item">🇪🇸 La Liga</button>
+            <button class="sub-nav-item">🇩🇪 Bundesliga</button>
+            <button class="sub-nav-item">🇮🇹 Serie A</button>
+            <button class="sub-nav-item">🏆 Champions League</button>
+            <button class="sub-nav-item">🌍 International</button>
+        </div>
+    </nav>
+    
+    <!-- Mobile Menu -->
+    <nav class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
+        <div class="mobile-menu-header">
+            <div class="logo">
+                <img src="https://briwild79.github.io/football-commentary-audio/boylesport_logo.png" alt="BoyleSports" style="height: 28px; width: auto; display: block;">
+            </div>
+        </div>
+        <div class="mobile-menu-nav">
+            <div class="mobile-menu-section">
+                <div class="mobile-menu-section-title">Quick Links</div>
+                <div class="mobile-nav-item active" onclick="navigateTo('home')">
+                    <span aria-hidden="true">⚽</span>
+                    <span>Sports</span>
+                </div>
+                <div class="mobile-nav-item" onclick="navigateTo('casino')">
+                    <span aria-hidden="true">🎰</span>
+                    <span>Casino</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span aria-hidden="true">🎲</span>
+                    <span>Live Casino</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span aria-hidden="true">🎱</span>
+                    <span>Bingo</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span aria-hidden="true">♠️</span>
+                    <span>Poker</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span aria-hidden="true">🎟️</span>
+                    <span>Lotto</span>
+                </div>
+            </div>
+            <div class="mobile-menu-section">
+                <div class="mobile-menu-section-title">Tools</div>
+                <div class="mobile-nav-item" onclick="navigateTo('promotions')">
+                    <span aria-hidden="true">🎁</span>
+                    <span>Promotions</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span aria-hidden="true">🛡️</span>
+                    <span>Responsible Gambling</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span aria-hidden="true">⚙️</span>
+                    <span>Settings</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span aria-hidden="true">💬</span>
+                    <span>Help & Support</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+    
+    <!-- Bet Slip -->
+    <aside class="bet-slip" id="betSlip" aria-label="Bet slip">
+        <div class="bet-slip-header">
+            <h2 class="bet-slip-title">Bet Slip (2)</h2>
+            <button class="bet-slip-close" onclick="hideBetSlip()" aria-label="Close bet slip">×</button>
+        </div>
+        <div class="bet-slip-content">
+            <div class="bet-slip-empty">
+                Select odds to add bets to your slip
+            </div>
+        </div>
+        <div class="bet-slip-footer">
+            <button class="place-bet-btn" disabled>Place Bet</button>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Your main content goes here -->
+    </main>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="Mobile bottom navigation">
+        <div class="bottom-nav-content">
+            <button class="bottom-nav-item active" onclick="showPage('home')">
+                <span class="bottom-nav-icon" aria-hidden="true">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showPage('discover')">
+                <span class="bottom-nav-icon" aria-hidden="true">🔍</span>
+                <span>Discover</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showBetSlip()" style="position: relative;">
+                <span class="bottom-nav-icon" aria-hidden="true">🎯</span>
+                <span>My Bets</span>
+                <span class="notification-badge">2</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showPage('promotions')">
+                <span class="bottom-nav-icon" aria-hidden="true">🎁</span>
+                <span>Promos</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showPage('casino')">
+                <span class="bottom-nav-icon" aria-hidden="true">🎰</span>
+                <span>Casino</span>
+            </button>
+        </div>
+    </nav>
+    
+    <script>
+        // State management
+        let betSlipItems = [];
+        
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchToggle = document.querySelector('.search-toggle');
+            const searchInput = document.querySelector('.search-input');
+            
+            if (searchToggle && searchInput) {
+                // Toggle search when clicking the icon
+                searchToggle.addEventListener('click', function() {
+                    if (searchInput.classList.contains('expanded')) {
+                        // Close search
+                        searchInput.classList.remove('expanded');
+                        searchInput.value = '';
+                        searchInput.blur();
+                    } else {
+                        // Open search
+                        searchInput.classList.add('expanded');
+                        setTimeout(() => {
+                            searchInput.focus();
+                        }, 300);
+                    }
+                });
+                
+                // Handle search on Enter key
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && searchInput.value.trim()) {
+                        console.log('Searching for:', searchInput.value);
+                        // Here you would implement actual search functionality
+                        alert('Searching for: ' + searchInput.value);
+                        // Close search after searching
+                        searchInput.classList.remove('expanded');
+                        searchInput.blur();
+                    }
+                });
+                
+                // Close search when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.search-container') && searchInput.classList.contains('expanded')) {
+                        searchInput.classList.remove('expanded');
+                        searchInput.value = '';
+                        searchInput.blur();
+                    }
+                });
+            }
+        });
+        
+        // Menu Toggle
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('overlay');
+            const burger = document.querySelector('.burger-btn');
+            
+            const isActive = menu.classList.contains('active');
+            
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            burger.classList.toggle('active');
+            
+            // Update aria-expanded
+            burger.setAttribute('aria-expanded', !isActive);
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+        }
+        
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('overlay');
+            const burger = document.querySelector('.burger-btn');
+            
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            burger.classList.remove('active');
+            burger.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        
+        function navigateTo(page) {
+            closeMenu();
+            showPage(page);
+        }
+        
+        // Navigation content for different pages
+        const navContent = {
+            'home': {
+                local: [
+                    { text: 'Live & Upcoming', icon: '⚡', active: true },
+                    { text: 'Football', icon: '⚽' },
+                    { text: 'Basketball', icon: '🏀' },
+                    { text: 'Tennis', icon: '🎾' },
+                    { text: 'Golf', icon: '⛳' },
+                    { text: 'Boxing', icon: '🥊' },
+                    { text: 'Darts', icon: '🎯' },
+                    { text: 'Racing', icon: '🏇' },
+                    { text: 'Dogs', icon: '🐕' },
+                    { text: 'Cricket', icon: '🏏' },
+                    { text: 'Rugby Union', icon: '🏉' },
+                    { text: 'American Football', icon: '🏈' },
+                    { text: 'Baseball', icon: '⚾' },
+                    { text: 'Ice Hockey', icon: '🏒' },
+                    { text: 'eSports', icon: '🎮' }
+                ],
+                sub: [
+                    { text: 'All Football', active: true },
+                    { text: 'Featured', icon: '⭐' },
+                    { text: 'Premier League', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+                    { text: 'Champions League', icon: '🏆' },
+                    { text: 'La Liga', icon: '🇪🇸' },
+                    { text: 'Serie A', icon: '🇮🇹' },
+                    { text: 'Bundesliga', icon: '🇩🇪' },
+                    { text: 'Ligue 1', icon: '🇫🇷' }
+                ]
+            },
+            'casino': {
+                local: [
+                    { text: 'All Games', icon: '🌟', active: true },
+                    { text: 'Slots', icon: '🎰' },
+                    { text: 'Vegas', icon: '🎲' },
+                    { text: 'Spotlight', icon: '✨' },
+                    { text: 'Roulette', icon: '🎲' },
+                    { text: 'Blackjack', icon: '🃏' },
+                    { text: 'Sling', icon: '🎯' },
+                    { text: 'Jackpots', icon: '💎' }
+                ],
+                sub: [
+                    { text: 'All Providers', active: true },
+                    { text: 'Pragmatic Play' },
+                    { text: 'NetEnt' },
+                    { text: 'Evolution' },
+                    { text: 'Play\'n GO' },
+                    { text: 'Microgaming' },
+                    { text: 'Red Tiger' },
+                    { text: 'Big Time Gaming' }
+                ]
+            }
+        };
+        
+        // Update navigation content
+        function updateNavigationContent(page) {
+            const content = navContent[page];
+            
+            // If no content defined for this page, use home as default
+            if (!content) {
+                // For pages without defined content, we could show home content
+                // or leave the navigation as is
+                return;
+            }
+            
+            // Update local nav
+            const localNavContent = document.querySelector('.local-nav-content');
+            if (localNavContent) {
+                localNavContent.innerHTML = '';
+                content.local.forEach(item => {
+                    const button = document.createElement('button');
+                    button.className = 'local-nav-item' + (item.active ? ' active' : '');
+                    
+                    // Ensure consistent text structure with icon first, then text
+                    let innerHTML = '';
+                    if (item.icon) {
+                        innerHTML = item.icon + ' ';
+                    }
+                    innerHTML += item.text;
+                    button.innerHTML = innerHTML;
+                    
+                    button.addEventListener('click', function() {
+                        document.querySelectorAll('.local-nav-item').forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                    localNavContent.appendChild(button);
+                });
+            }
+            
+            // Update sub nav
+            const subNavContent = document.querySelector('.sub-nav-content');
+            if (subNavContent) {
+                subNavContent.innerHTML = '';
+                content.sub.forEach(item => {
+                    const button = document.createElement('button');
+                    button.className = 'sub-nav-item' + (item.active ? ' active' : '');
+                    
+                    // Ensure consistent text structure
+                    let innerHTML = '';
+                    if (item.icon) {
+                        innerHTML = item.icon + ' ';
+                    }
+                    innerHTML += item.text;
+                    button.innerHTML = innerHTML;
+                    
+                    button.addEventListener('click', function() {
+                        document.querySelectorAll('.sub-nav-item').forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                    subNavContent.appendChild(button);
+                });
+            }
+        }
+        
+        // Page Navigation
+        function showPage(page) {
+            // Update nav states
+            updateNavStates(page);
+            
+            // Update navigation content
+            updateNavigationContent(page);
+            
+            // Close bet slip when changing pages
+            hideBetSlip();
+        }
+        
+        function updateNavStates(page) {
+            // Desktop nav
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mobile nav
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Bottom nav
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Set active states based on page
+            const pageMapping = {
+                'home': 0,
+                'discover': 1,
+                'my-bets': 2,
+                'promotions': 3,
+                'casino': 4
+            };
+            
+            const pageIndex = pageMapping[page];
+            
+            if (pageIndex !== undefined) {
+                const desktopBtns = document.querySelectorAll('.nav-btn');
+                const mobileBtns = document.querySelectorAll('.mobile-nav-item');
+                const bottomBtns = document.querySelectorAll('.bottom-nav-item');
+                
+                if (desktopBtns[pageIndex]) desktopBtns[pageIndex].classList.add('active');
+                if (mobileBtns[pageIndex]) mobileBtns[pageIndex].classList.add('active');
+                if (bottomBtns[pageIndex]) bottomBtns[pageIndex].classList.add('active');
+            }
+        }
+        
+        // Bet Slip functionality
+        function showBetSlip() {
+            const betSlip = document.getElementById('betSlip');
+            const overlay = document.getElementById('overlay');
+            
+            betSlip.classList.add('active');
+            overlay.classList.add('active');
+            
+            // On mobile, prevent body scroll
+            if (window.innerWidth <= 768) {
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function hideBetSlip() {
+            const betSlip = document.getElementById('betSlip');
+            const overlay = document.getElementById('overlay');
+            
+            betSlip.classList.remove('active');
+            
+            // Only remove overlay if mobile menu is also closed
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (!mobileMenu.classList.contains('active')) {
+                overlay.classList.remove('active');
+            }
+            
+            document.body.style.overflow = '';
+        }
+        
+        // Handle overlay clicks
+        document.getElementById('overlay').addEventListener('click', function() {
+            const menu = document.getElementById('mobileMenu');
+            const betSlip = document.getElementById('betSlip');
+            
+            if (menu.classList.contains('active')) {
+                closeMenu();
+            }
+            
+            if (betSlip.classList.contains('active')) {
+                hideBetSlip();
+            }
+        });
+        
+        // Initialize with home page content
+        updateNavigationContent('home');
+        
+        // Handle resize events
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 768) {
+                    closeMenu();
+                    hideBetSlip();
+                }
+            }, 250);
+        });
+        
+        // Touch events for better mobile experience
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const menu = document.getElementById('mobileMenu');
+            const betSlip = document.getElementById('betSlip');
+            
+            // Swipe left to close menu
+            if (touchEndX < touchStartX - swipeThreshold && menu.classList.contains('active')) {
+                closeMenu();
+            }
+            
+            // Swipe right to close bet slip
+            if (touchEndX > touchStartX + swipeThreshold && betSlip.classList.contains('active')) {
+                hideBetSlip();
+            }
+            
+            // Swipe right from left edge to open menu
+            if (touchStartX < 20 && touchEndX > touchStartX + swipeThreshold && !menu.classList.contains('active')) {
+                toggleMenu();
+            }
+        }
+    </script>
+</body>
+</html>
