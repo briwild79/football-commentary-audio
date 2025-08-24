@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Betting Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background-color: #2400f6;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 9997;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1rem;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .burger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 24px;
+            height: 36px;
+            align-items: center;
+        }
+        
+        .burger-icon {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background-color: white;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+        
+        .burger-icon::before,
+        .burger-icon::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 24px;
+            height: 2px;
+            background-color: white;
+            transition: transform 0.3s;
+        }
+        
+        .burger-icon::before { top: -8px; }
+        .burger-icon::after { top: 8px; }
+        
+        .burger-btn.active .burger-icon {
+            background-color: transparent;
+        }
+        
+        .burger-btn.active .burger-icon::before {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        
+        .burger-btn.active .burger-icon::after {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+        
+        .logo {
+            height: 36px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+        
+        .desktop-nav {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-btn.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .balance {
+            font-weight: 600;
+            color: white;
+            background-color: rgba(255,255,255,0.2);
+            padding: 0 0.875rem;
+            border-radius: 18px;
+            font-size: 1.125rem;
+            height: 36px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Local Navigation */
+        .local-nav {
+            background-color: #333;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .local-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .local-nav-content {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            min-width: max-content;
+        }
+        
+        .local-nav-item {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        
+        .local-nav-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .local-nav-item.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        /* Sub Navigation */
+        .sub-nav {
+            background-color: #f5f5f5;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .sub-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .sub-nav-content {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            min-width: max-content;
+        }
+        
+        .sub-nav-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            color: #333;
+            padding: 0.375rem 1rem;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            white-space: nowrap;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        
+        .sub-nav-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .sub-nav-item.active {
+            background-color: #333;
+            color: white;
+            border-color: #333;
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 85%;
+            max-width: 320px;
+            height: 100vh;
+            background-color: #1a1f2e;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 10000;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+        
+        .mobile-menu-nav {
+            padding: 1rem 0 0.5rem 0;
+        }
+        
+        .mobile-menu-section {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 0.5rem 0;
+        }
+        
+        .mobile-menu-section:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.9375rem;
+        }
+        
+        .mobile-nav-item:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        .mobile-nav-item.active {
+            background-color: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,1);
+        }
+        
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 9998;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #ddd;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+            z-index: 9996;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .bottom-nav-content {
+            display: flex;
+            padding: 0.25rem;
+        }
+        
+        .bottom-nav-item {
+            background: none;
+            border: none;
+            color: #999;
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8125rem;
+            transition: all 0.2s ease;
+            border-radius: 12px;
+            margin: 0.25rem;
+            flex: 1;
+            position: relative;
+        }
+        
+        .bottom-nav-item:hover {
+            color: #333;
+        }
+        
+        .bottom-nav-item.active {
+            background-color: rgba(0, 0, 0, 0.06);
+            color: #333;
+        }
+        
+        .bottom-nav-icon {
+            font-size: 1.25rem;
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: 4px;
+            right: calc(50% - 24px);
+            background-color: #e74c3c;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 10px;
+            font-weight: 600;
+            min-width: 16px;
+            text-align: center;
+        }
+        
+        /* Main placeholder */
+        .main-content {
+            min-height: calc(100vh - 60px);
+            padding: 1rem;
+            padding-bottom: 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Content Blocks */
+        .content-block {
+            background-color: #efefef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-banner {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .banner-content h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .banner-content p {
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+        
+        .cta-btn {
+            background-color: #c3f000;
+            color: #000;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1.5rem 0 1rem 0;
+        }
+        
+        .section-header h3 {
+            font-size: 1.125rem;
+            color: #333;
+        }
+        
+        .view-all {
+            color: #999;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .promo-card {
+            background-color: #efefef;
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .promo-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .promo-card h4 {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            color: #333;
+        }
+        
+        .promo-card p {
+            font-size: 0.75rem;
+            color: #999;
+        }
+        
+        .match-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .match-item:last-child {
+            border-bottom: none;
+        }
+        
+        .live-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            font-weight: 600;
+            margin-right: 1rem;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .time {
+            color: #999;
+            font-size: 0.875rem;
+            margin-right: 1rem;
+            min-width: 40px;
+        }
+        
+        .teams {
+            flex: 1;
+            font-size: 0.875rem;
+            color: #333;
+        }
+        
+        .odds-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .odd-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .odd-btn:hover {
+            background-color: #2400f6;
+            color: white;
+            border-color: #2400f6;
+        }
+        
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .promo-tile {
+            background-color: #efefef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .promo-tile:hover {
+            background-color: #e8e8e8;
+        }
+        
+        .promo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .promo-tile h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            color: #333;
+        }
+        
+        .promo-tile p {
+            font-size: 0.8125rem;
+            color: #999;
+        }
+        
+        .featured {
+            padding: 0;
+        }
+        
+        .featured-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .featured-header h4 {
+            color: #333;
+            font-size: 0.875rem;
+        }
+        
+        .featured-odds {
+            padding: 1rem;
+        }
+        
+        .odd-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+        }
+        
+        .odd-option .team {
+            color: #333;
+            font-size: 0.875rem;
+        }
+        
+        .odd-value {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #2400f6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .odd-value:hover {
+            background-color: #2400f6;
+            color: white;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .burger-btn {
+                display: flex;
+            }
+            
+            .desktop-nav {
+                display: none;
+            }
+            
+            .balance {
+                font-size: 1rem;
+                padding: 0 0.625rem;
+            }
+            
+            .header-right {
+                gap: 0.75rem;
+            }
+            
+            .logo img {
+                height: 28px;
+            }
+            
+            .bottom-nav {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo img {
+                height: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="burger-btn" onclick="toggleMenu()">
+                    <span class="burger-icon"></span>
+                </button>
+                <a href="#" class="logo">
+                    <img src="https://briwild79.github.io/football-commentary-audio/boylesport_logo.png" alt="BoyleSports">
+                </a>
+                <nav class="desktop-nav">
+                    <button class="nav-btn active" onclick="showPage('home')">Home</button>
+                    <button class="nav-btn" onclick="showPage('discover')">Discover</button>
+                    <button class="nav-btn" onclick="showPage('my-bets')">My Bets</button>
+                    <button class="nav-btn" onclick="showPage('promotions')">Promotions</button>
+                    <button class="nav-btn" onclick="showPage('casino')">Casino</button>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="balance">£245.75 +</div>
+                <div class="user-avatar">VP</div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Local Navigation -->
+    <nav class="local-nav">
+        <div class="local-nav-content">
+            <button class="local-nav-item active">⚡ Live & Upcoming</button>
+            <button class="local-nav-item">⚽ Football</button>
+            <button class="local-nav-item">🏀 Basketball</button>
+            <button class="local-nav-item">🎾 Tennis</button>
+            <button class="local-nav-item">⛳ Golf</button>
+            <button class="local-nav-item">🥊 Boxing</button>
+            <button class="local-nav-item">🎯 Darts</button>
+            <button class="local-nav-item">🏇 Racing</button>
+            <button class="local-nav-item">🐕 Dogs</button>
+            <button class="local-nav-item">🏏 Cricket</button>
+            <button class="local-nav-item">🏉 Rugby Union</button>
+            <button class="local-nav-item">🏈 American Football</button>
+            <button class="local-nav-item">⚾ Baseball</button>
+            <button class="local-nav-item">🏒 Ice Hockey</button>
+            <button class="local-nav-item">🎮 eSports</button>
+        </div>
+    </nav>
+    
+    <!-- Sub Navigation -->
+    <nav class="sub-nav">
+        <div class="sub-nav-content">
+            <button class="sub-nav-item active">All Football</button>
+            <button class="sub-nav-item">⭐ Featured</button>
+            <button class="sub-nav-item">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+            <button class="sub-nav-item">🏆 Champions League</button>
+            <button class="sub-nav-item">🇪🇸 La Liga</button>
+            <button class="sub-nav-item">🇮🇹 Serie A</button>
+            <button class="sub-nav-item">🇩🇪 Bundesliga</button>
+            <button class="sub-nav-item">🇫🇷 Ligue 1</button>
+        </div>
+    </nav>
+    
+    <!-- Mobile Menu -->
+    <nav class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-nav">
+            <div class="mobile-menu-section">
+                <div class="mobile-nav-item active" onclick="navigateTo('sports')">
+                    <span>⚽</span>
+                    <span>Sports</span>
+                </div>
+                <div class="mobile-nav-item" onclick="navigateTo('casino')">
+                    <span>🎰</span>
+                    <span>Casino</span>
+                </div>
+                <div class="mobile-nav-item" onclick="navigateTo('live-casino')">
+                    <span>🎲</span>
+                    <span>Live Casino</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span>🎱</span>
+                    <span>Bingo</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span>♦️</span>
+                    <span>Poker</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span>🎟️</span>
+                    <span>Lotto</span>
+                </div>
+            </div>
+            <div class="mobile-menu-section">
+                <div class="mobile-nav-item">
+                    <span>🎁</span>
+                    <span>Promotions</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span>🛡️</span>
+                    <span>Responsible Gambling</span>
+                </div>
+                <div class="mobile-nav-item">
+                    <span>💬</span>
+                    <span>Help & Support</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Hero Banner -->
+        <div class="content-block hero-banner">
+            <div class="banner-content">
+                <h2>2+ EARLY PAYOUT</h2>
+                <p>When your team goes 2 goals ahead, we pay out!</p>
+                <button class="cta-btn">Bet Here</button>
+            </div>
+        </div>
+        
+        <!-- Quick Links Section -->
+        <div class="section-header">
+            <h3>⚡ Today's Racing</h3>
+            <span class="view-all">View All →</span>
+        </div>
+        <div class="cards-row">
+            <div class="promo-card">
+                <div class="card-icon">🏇</div>
+                <h4>Cheltenham</h4>
+                <p>12:30 - 5:15</p>
+            </div>
+            <div class="promo-card">
+                <div class="card-icon">🏁</div>
+                <h4>Ascot</h4>
+                <p>1:00 - 4:45</p>
+            </div>
+            <div class="promo-card">
+                <div class="card-icon">🐎</div>
+                <h4>Newmarket</h4>
+                <p>2:15 - 5:30</p>
+            </div>
+            <div class="promo-card">
+                <div class="card-icon">🎯</div>
+                <h4>Daily Special</h4>
+                <p>Enhanced Odds</p>
+            </div>
+        </div>
+        
+        <!-- Popular Matches -->
+        <div class="section-header">
+            <h3>⚽ Popular Matches</h3>
+            <span class="view-all">View All →</span>
+        </div>
+        <div class="content-block">
+            <div class="match-item">
+                <span class="live-badge">LIVE</span>
+                <div class="teams">
+                    <span>Man United vs Chelsea</span>
+                </div>
+                <div class="odds-row">
+                    <button class="odd-btn">2.45</button>
+                    <button class="odd-btn">3.20</button>
+                    <button class="odd-btn">2.90</button>
+                </div>
+            </div>
+            <div class="match-item">
+                <span class="time">20:00</span>
+                <div class="teams">
+                    <span>Liverpool vs Arsenal</span>
+                </div>
+                <div class="odds-row">
+                    <button class="odd-btn">1.85</button>
+                    <button class="odd-btn">3.40</button>
+                    <button class="odd-btn">4.20</button>
+                </div>
+            </div>
+            <div class="match-item">
+                <span class="time">17:30</span>
+                <div class="teams">
+                    <span>Barcelona vs Real Madrid</span>
+                </div>
+                <div class="odds-row">
+                    <button class="odd-btn">2.10</button>
+                    <button class="odd-btn">3.30</button>
+                    <button class="odd-btn">3.40</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Promotions Grid -->
+        <div class="section-header">
+            <h3>🎁 Promotions</h3>
+            <span class="view-all">View All →</span>
+        </div>
+        <div class="promo-grid">
+            <div class="promo-tile">
+                <div class="promo-icon">💰</div>
+                <h4>25% Boost</h4>
+                <p>All PL Matches</p>
+            </div>
+            <div class="promo-tile">
+                <div class="promo-icon">🎰</div>
+                <h4>Daily Deals</h4>
+                <p>Casino Specials</p>
+            </div>
+            <div class="promo-tile">
+                <div class="promo-icon">🎁</div>
+                <h4>Free Spins</h4>
+                <p>50 Bonus Spins</p>
+            </div>
+            <div class="promo-tile">
+                <div class="promo-icon">⚡</div>
+                <h4>Acca Boost</h4>
+                <p>Up to 100%</p>
+            </div>
+        </div>
+        
+        <!-- Featured Section -->
+        <div class="section-header">
+            <h3>⭐ Featured</h3>
+        </div>
+        <div class="content-block featured">
+            <div class="featured-header">
+                <span class="live-badge">LIVE</span>
+                <h4>Premier League - Outright Winner</h4>
+            </div>
+            <div class="featured-odds">
+                <div class="odd-option">
+                    <span class="team">Man City</span>
+                    <button class="odd-value">4/5</button>
+                </div>
+                <div class="odd-option">
+                    <span class="team">Arsenal</span>
+                    <button class="odd-value">9/2</button>
+                </div>
+                <div class="odd-option">
+                    <span class="team">Liverpool</span>
+                    <button class="odd-value">7/1</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-content">
+            <button class="bottom-nav-item active">
+                <span class="bottom-nav-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🔍</span>
+                <span>Discover</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🎯</span>
+                <span>My Bets</span>
+                <span class="notification-badge">2</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🎁</span>
+                <span>Promos</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🎰</span>
+                <span>Casino</span>
+            </button>
+        </div>
+    </nav>
+    
+    <script>
+        // Navigation content
+        const navContent = {
+            'home': {
+                local: [
+                    { text: 'Live & Upcoming', icon: '⚡', active: true },
+                    { text: 'Football', icon: '⚽' },
+                    { text: 'Basketball', icon: '🏀' },
+                    { text: 'Tennis', icon: '🎾' },
+                    { text: 'Golf', icon: '⛳' },
+                    { text: 'Boxing', icon: '🥊' },
+                    { text: 'Darts', icon: '🎯' },
+                    { text: 'Racing', icon: '🏇' },
+                    { text: 'Dogs', icon: '🐕' },
+                    { text: 'Cricket', icon: '🏏' },
+                    { text: 'Rugby Union', icon: '🏉' },
+                    { text: 'American Football', icon: '🏈' },
+                    { text: 'Baseball', icon: '⚾' },
+                    { text: 'Ice Hockey', icon: '🏒' },
+                    { text: 'eSports', icon: '🎮' }
+                ],
+                sub: [
+                    { text: 'All Football', active: true },
+                    { text: 'Featured', icon: '⭐' },
+                    { text: 'Premier League', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+                    { text: 'Champions League', icon: '🏆' },
+                    { text: 'La Liga', icon: '🇪🇸' },
+                    { text: 'Serie A', icon: '🇮🇹' },
+                    { text: 'Bundesliga', icon: '🇩🇪' },
+                    { text: 'Ligue 1', icon: '🇫🇷' }
+                ]
+            },
+            'casino': {
+                local: [
+                    { text: 'All Games', icon: '🌟', active: true },
+                    { text: 'Slots', icon: '🎰' },
+                    { text: 'Vegas', icon: '🎲' },
+                    { text: 'Spotlight', icon: '✨' },
+                    { text: 'Roulette', icon: '🎲' },
+                    { text: 'Blackjack', icon: '🃏' },
+                    { text: 'Sling', icon: '🎯' },
+                    { text: 'Jackpots', icon: '💎' }
+                ],
+                sub: [
+                    { text: 'All Providers', active: true },
+                    { text: 'Pragmatic Play' },
+                    { text: 'NetEnt' },
+                    { text: 'Evolution' },
+                    { text: 'Play\'n GO' },
+                    { text: 'Microgaming' },
+                    { text: 'Red Tiger' },
+                    { text: 'Big Time Gaming' }
+                ]
+            },
+            'live-casino': {
+                local: [
+                    { text: 'All Tables', icon: '🎯', active: true },
+                    { text: 'Roulette', icon: '🎲' },
+                    { text: 'Blackjack', icon: '🃏' },
+                    { text: 'Baccarat', icon: '💰' },
+                    { text: 'Poker', icon: '🎴' },
+                    { text: 'Game Shows', icon: '🎪' },
+                    { text: 'VIP Tables', icon: '👑' },
+                    { text: 'Favorites', icon: '⭐' }
+                ],
+                sub: [
+                    { text: 'All Studios', active: true },
+                    { text: 'Evolution' },
+                    { text: 'Pragmatic Live' },
+                    { text: 'Playtech' },
+                    { text: 'Ezugi' },
+                    { text: 'Authentic Gaming' }
+                ]
+            }
+        };
+        
+        // Toggle menu
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('overlay');
+            const burger = document.querySelector('.burger-btn');
+            
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            burger.classList.toggle('active');
+            document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+        }
+        
+        // Close menu
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('overlay');
+            const burger = document.querySelector('.burger-btn');
+            
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            burger.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Navigate to page
+        function navigateTo(page) {
+            closeMenu();
+            
+            // Map navigation items to pages
+            const pageMap = {
+                'sports': 'home',
+                'casino': 'casino',
+                'live-casino': 'live-casino'
+            };
+            
+            showPage(pageMap[page] || 'home');
+        }
+        
+        // Update navigation content
+        function updateNavContent(page) {
+            const content = navContent[page];
+            if (!content) return;
+            
+            // Update local nav
+            const localNav = document.querySelector('.local-nav-content');
+            if (localNav) {
+                localNav.innerHTML = '';
+                content.local.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'local-nav-item' + (item.active ? ' active' : '');
+                    btn.innerHTML = (item.icon || '') + ' ' + item.text;
+                    btn.onclick = function() {
+                        document.querySelectorAll('.local-nav-item').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    };
+                    localNav.appendChild(btn);
+                });
+            }
+            
+            // Update sub nav
+            const subNav = document.querySelector('.sub-nav-content');
+            if (subNav) {
+                subNav.innerHTML = '';
+                content.sub.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'sub-nav-item' + (item.active ? ' active' : '');
+                    btn.innerHTML = (item.icon || '') + ' ' + item.text;
+                    btn.onclick = function() {
+                        document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    };
+                    subNav.appendChild(btn);
+                });
+            }
+        }
+        
+        // Show page
+        function showPage(page) {
+            // Update desktop nav
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                const btnText = btn.textContent.toLowerCase();
+                if ((page === 'home' && btnText === 'home') ||
+                    (page === 'casino' && btnText === 'casino') ||
+                    (page === 'discover' && btnText === 'discover') ||
+                    (page === 'my-bets' && btnText === 'my bets') ||
+                    (page === 'promotions' && btnText === 'promotions')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update bottom nav
+            const pageIndexMap = {
+                'home': 0,
+                'discover': 1,
+                'my-bets': 2,
+                'promotions': 3,
+                'casino': 4
+            };
+            
+            document.querySelectorAll('.bottom-nav-item').forEach((btn, idx) => {
+                btn.classList.remove('active');
+                if (pageIndexMap[page] === idx) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update burger menu
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+                const itemText = item.textContent.toLowerCase();
+                if ((page === 'home' && itemText.includes('sports')) ||
+                    (page === 'casino' && itemText.includes('casino') && !itemText.includes('live')) ||
+                    (page === 'live-casino' && itemText.includes('live casino')) ||
+                    (page === 'promotions' && itemText.includes('promotions'))) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update navigation content (for home, casino, and live-casino)
+            if (page === 'home' || page === 'casino' || page === 'live-casino') {
+                updateNavContent(page);
+            }
+        }
+        
+        // Handle bottom nav clicks
+        document.querySelectorAll('.bottom-nav-item').forEach((btn, idx) => {
+            btn.onclick = function() {
+                const pages = ['home', 'discover', 'my-bets', 'promotions', 'casino'];
+                if (pages[idx]) showPage(pages[idx]);
+            };
+        });
+        
+        // Handle desktop nav clicks
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.onclick = function() {
+                const text = this.textContent.toLowerCase();
+                let page = text;
+                if (text === 'my bets') page = 'my-bets';
+                showPage(page);
+            };
+        });
+        
+        // Initialize
+        updateNavContent('home');
+    </script>
+</body>
+</html>
