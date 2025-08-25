@@ -1,150 +1,868 @@
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="description" content="A product of emergent.sh" />
-        <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-        <!--
-      Notice the use of  in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Betting Platform - Audio Commentary Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background-color: #2400f6;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 9997;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1rem;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .burger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 24px;
+            height: 36px;
+            align-items: center;
+        }
+        
+        .burger-icon {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background-color: white;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+        
+        .burger-icon::before,
+        .burger-icon::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 24px;
+            height: 2px;
+            background-color: white;
+            transition: transform 0.3s;
+        }
+        
+        .burger-icon::before { top: -8px; }
+        .burger-icon::after { top: 8px; }
+        
+        .logo {
+            height: 36px;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .desktop-nav {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-btn.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .balance {
+            font-weight: 600;
+            color: white;
+            background-color: rgba(255,255,255,0.2);
+            padding: 0 0.875rem;
+            border-radius: 18px;
+            font-size: 1.125rem;
+            height: 36px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
 
-      Unlike "/favicon.ico" or "favicon.ico", "/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-        <title>Emergent | Fullstack App</title>
-    <script defer src="/static/js/bundle.js"></script></head>
-    <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
-        <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+        /* Audio Commentary Widget Styles */
+        .audio-widget {
+            position: fixed;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 9995;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+        .widget-controls {
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 2vw, 12px);
+            height: clamp(50px, 12vw, 60px);
+            padding: clamp(6px, 2vw, 10px) clamp(8px, 2.5vw, 12px);
+            background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+        }
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-        <a
-            id="emergent-badge"
-            target="_blank"
-            href="https://app.emergent.sh/?utm_source=emergent-badge"
-            style="
-                display: flex !important;
-                align-items: center !important;
-                position: fixed !important;
-                bottom: 20px;
-                right: 20px;
-                text-decoration: none;
-                padding: 6px 10px;
-                font-family: -apple-system, BlinkMacSystemFont,
-                    &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell,
-                    &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;,
-                    sans-serif !important;
-                font-size: 12px !important;
-                z-index: 9999 !important;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-                border-radius: 8px !important;
-                background-color: #ffffff !important;
-                border: 1px solid rgba(255, 255, 255, 0.25) !important;
-            "
-        >
-            <div
-                style="display: flex; flex-direction: row; align-items: center"
-            >
-                <img
-                    style="width: 20px; height: 20px; margin-right: 8px"
-                    src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4"
-                />
-                <p
-                    style="
-                        color: #000000;
-                        font-family: -apple-system, BlinkMacSystemFont,
-                            &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu,
-                            Cantarell, &quot;Open Sans&quot;,
-                            &quot;Helvetica Neue&quot;, sans-serif !important;
-                        font-size: 12px !important;
-                        align-items: center;
-                        margin-bottom: 0;
-                    "
-                >
-                    Made with Emergent
-                </p>
+        .play-button {
+            width: clamp(36px, 10vw, 44px);
+            height: clamp(36px, 10vw, 44px);
+            border-radius: 50%;
+            background: #2400f6;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(36, 0, 246, 0.3);
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-button.loading {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .play-button.error {
+            background: #dc2626;
+        }
+
+        .play-icon, .pause-icon {
+            width: clamp(14px, 3.5vw, 18px);
+            height: clamp(14px, 3.5vw, 18px);
+            fill: white;
+        }
+
+        .loading-spinner {
+            width: clamp(14px, 3.5vw, 18px);
+            height: clamp(14px, 3.5vw, 18px);
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .live-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: clamp(8px, 2.5vw, 10px);
+            height: clamp(8px, 2.5vw, 10px);
+            background: #ff3b3b;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse-dot 2s infinite;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-width: 0;
+            overflow: hidden;
+            padding: 0 clamp(4px, 1.5vw, 8px);
+        }
+
+        .match-info {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .match-details {
+            display: flex;
+            align-items: center;
+            gap: clamp(4px, 1.5vw, 8px);
+            max-width: 100%;
+        }
+
+        .team-name {
+            width: clamp(45px, 16vw, 65px);
+            font-size: clamp(12px, 3.5vw, 14px);
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score-box {
+            min-width: clamp(50px, 16vw, 65px);
+            background: #2400f6;
+            color: white;
+            padding: clamp(4px, 1.2vw, 8px) clamp(8px, 2vw, 12px);
+            border-radius: 6px;
+            text-align: center;
+            font-size: clamp(14px, 4.5vw, 18px);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .waveform-display {
+            width: clamp(36px, 10vw, 44px);
+            height: clamp(36px, 10vw, 44px);
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-left: clamp(4px, 1.5vw, 8px);
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .wave-bar {
+            width: 3px;
+            background: #2400f6;
+            border-radius: 2px;
+            opacity: 0.9;
+            transition: all 0.05s ease;
+            height: 3px;
+            min-height: 3px;
+        }
+
+        /* Autoplay warning */
+        .autoplay-notice {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            z-index: 10000;
+            max-width: 90%;
+            text-align: center;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #ddd;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+            z-index: 9996;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .bottom-nav-content {
+            display: flex;
+            padding: 0.25rem;
+        }
+        
+        .bottom-nav-item {
+            background: none;
+            border: none;
+            color: #999;
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8125rem;
+            transition: all 0.2s ease;
+            border-radius: 12px;
+            margin: 0.25rem;
+            flex: 1;
+            position: relative;
+        }
+        
+        .bottom-nav-item:hover {
+            color: #333;
+        }
+        
+        .bottom-nav-item.active {
+            background-color: rgba(0, 0, 0, 0.06);
+            color: #333;
+        }
+        
+        .bottom-nav-icon {
+            font-size: 1.25rem;
+        }
+        
+        /* Main placeholder */
+        .main-content {
+            min-height: calc(100vh - 60px);
+            padding: 1rem;
+            padding-bottom: 8rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Content Blocks */
+        .content-block {
+            background-color: #efefef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .burger-btn {
+                display: flex;
+            }
+            
+            .desktop-nav {
+                display: none;
+            }
+            
+            .balance {
+                font-size: 1rem;
+                padding: 0 0.625rem;
+            }
+            
+            .header-right {
+                gap: 0.75rem;
+            }
+            
+            .bottom-nav {
+                display: block;
+            }
+
+            .audio-widget {
+                bottom: 60px;
+            }
+
+            .main-content {
+                padding-bottom: 9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .team-name {
+                font-size: 11px;
+            }
+            .score-box {
+                font-size: 13px;
+                padding: 3px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Autoplay Notice -->
+    <div class="autoplay-notice" id="autoplayNotice">
+        🔊 Click the play button below to hear live football commentary
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="burger-btn">
+                    <span class="burger-icon"></span>
+                </button>
+                <a href="#" class="logo">BoyleSports</a>
+                <nav class="desktop-nav">
+                    <button class="nav-btn active">Home</button>
+                    <button class="nav-btn">Discover</button>
+                    <button class="nav-btn">My Bets</button>
+                    <button class="nav-btn">Promotions</button>
+                    <button class="nav-btn">Casino</button>
+                </nav>
             </div>
-        </a>
-        <script>
-            !(function (t, e) {
-                var o, n, p, r;
-                e.__SV ||
-                    ((window.posthog = e),
-                    (e._i = []),
-                    (e.init = function (i, s, a) {
-                        function g(t, e) {
-                            var o = e.split(".");
-                            2 == o.length && ((t = t[o[0]]), (e = o[1])),
-                                (t[e] = function () {
-                                    t.push(
-                                        [e].concat(
-                                            Array.prototype.slice.call(
-                                                arguments,
-                                                0,
-                                            ),
-                                        ),
-                                    );
-                                });
+            <div class="header-right">
+                <div class="balance">£245.75 +</div>
+                <div class="user-avatar">VP</div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Hero Banner -->
+        <div class="content-block" style="height: 140px; margin-bottom: 1.5rem;">
+            <h2 style="padding: 2rem; color: #333;">🎯 Audio Commentary Widget Demo</h2>
+            <p style="padding: 0 2rem; color: #666;">Experience live football commentary with real-time waveform visualization. Click the play button in the widget below to hear West Ham vs Chelsea commentary.</p>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="content-block" style="margin-bottom: 1.5rem;">
+            <h3 style="margin-bottom: 1rem; color: #333;">📱 How to Use:</h3>
+            <ul style="padding-left: 2rem; color: #666;">
+                <li><strong>Play Button:</strong> Click to start/stop audio commentary</li>
+                <li><strong>Swipe Navigation:</strong> Swipe left/right on the score to change games</li>
+                <li><strong>Live Waveform:</strong> Visual representation of real audio frequencies</li>
+                <li><strong>Mobile Optimized:</strong> Perfect for job interview demos</li>
+            </ul>
+        </div>
+        
+        <!-- More content blocks for demo -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="content-block" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #666;">⚽ Football</span>
+            </div>
+            <div class="content-block" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #666;">🏀 Basketball</span>
+            </div>
+            <div class="content-block" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #666;">🎾 Tennis</span>
+            </div>
+            <div class="content-block" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #666;">🏇 Racing</span>
+            </div>
+        </div>
+        
+        <div class="content-block" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; color: #666;">
+                <h3>👇 Audio Widget Below 👇</h3>
+                <p>Sticky positioned above bottom navigation</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Audio Commentary Widget -->
+    <div class="audio-widget" id="audioWidget">
+        <div class="widget-controls">
+            <!-- Play Button -->
+            <button class="play-button" id="playButton">
+                <svg class="play-icon" id="playIcon" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg class="pause-icon" id="pauseIcon" viewBox="0 0 24 24" style="display: none;">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                </svg>
+                <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
+                <div class="live-dot" id="liveDot" style="display: none;"></div>
+            </button>
+
+            <!-- Content Area -->
+            <div class="content-area" id="contentArea">
+                <div class="match-info">
+                    <div class="match-details">
+                        <div class="team-name" id="homeTeam">West Ham</div>
+                        <div class="score-box" id="scoreBox">1 - 5</div>
+                        <div class="team-name" id="awayTeam">Chelsea</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waveform Display -->
+            <div class="waveform-display">
+                <div class="waveform" id="waveform">
+                    <!-- Bars will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-content">
+            <button class="bottom-nav-item active">
+                <span class="bottom-nav-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🔍</span>
+                <span>Discover</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🎯</span>
+                <span>My Bets</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🎁</span>
+                <span>Promos</span>
+            </button>
+            <button class="bottom-nav-item">
+                <span class="bottom-nav-icon">🎰</span>
+                <span>Casino</span>
+            </button>
+        </div>
+    </nav>
+    
+    <script>
+        // Audio Commentary Widget Class - Browser Autoplay Friendly
+        class AudioCommentaryWidget {
+            constructor() {
+                this.isPlaying = false;
+                this.selectedMatch = 'westham-chelsea';
+                this.audioLoading = false;
+                this.audioError = null;
+                this.userHasInteracted = false;
+                
+                // Audio elements
+                this.audio = null;
+                this.audioContext = null;
+                this.analyser = null;
+                this.dataArray = null;
+                this.animationId = null;
+                
+                // Audio URL - Using your GitHub repository
+                this.audioUrl = 'https://briwild79.github.io/football-commentary-audio/cfc_wh.mp3';
+                
+                // Match data
+                this.matches = [
+                    { id: 'westham-chelsea', homeTeam: 'West Ham', awayTeam: 'Chelsea', homeScore: 1, awayScore: 5 },
+                    { id: 'arsenal-tottenham', homeTeam: 'Arsenal', awayTeam: 'Tottenham', homeScore: 2, awayScore: 0 },
+                    { id: 'liverpool-united', homeTeam: 'Liverpool', awayTeam: 'Man United', homeScore: 0, awayScore: 1 }
+                ];
+                
+                this.currentMatchIndex = 0;
+                this.touchStartX = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('🚀 Initializing Audio Commentary Widget...');
+                this.setupElements();
+                this.setupEventListeners();
+                this.generateWaveformBars();
+                this.initializeAudio();
+                this.updateDisplay();
+                this.showAutoplayNotice();
+            }
+            
+            setupElements() {
+                this.playButton = document.getElementById('playButton');
+                this.playIcon = document.getElementById('playIcon');
+                this.pauseIcon = document.getElementById('pauseIcon');
+                this.loadingSpinner = document.getElementById('loadingSpinner');
+                this.liveDot = document.getElementById('liveDot');
+                this.homeTeam = document.getElementById('homeTeam');
+                this.awayTeam = document.getElementById('awayTeam');
+                this.scoreBox = document.getElementById('scoreBox');
+                this.waveform = document.getElementById('waveform');
+                this.contentArea = document.getElementById('contentArea');
+                this.autoplayNotice = document.getElementById('autoplayNotice');
+            }
+            
+            setupEventListeners() {
+                // Play button with user interaction tracking
+                this.playButton.addEventListener('click', () => {
+                    this.userHasInteracted = true;
+                    this.hideAutoplayNotice();
+                    this.togglePlayback();
+                });
+                
+                // Touch events for swiping
+                this.contentArea.addEventListener('touchstart', (e) => {
+                    this.touchStartX = e.touches[0].clientX;
+                });
+                
+                this.contentArea.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const diff = this.touchStartX - touchEndX;
+                    
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) {
+                            this.nextMatch();
+                        } else {
+                            this.previousMatch();
                         }
-                        ((p = t.createElement("script")).type =
-                            "text/javascript"),
-                            (p.crossOrigin = "anonymous"),
-                            (p.async = !0),
-                            (p.src =
-                                s.api_host.replace(
-                                    ".i.posthog.com",
-                                    "-assets.i.posthog.com",
-                                ) + "/static/array.js"),
-                            (r =
-                                t.getElementsByTagName(
-                                    "script",
-                                )[0]).parentNode.insertBefore(p, r);
-                        var u = e;
-                        for (
-                            void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
-                                u.people = u.people || [],
-                                u.toString = function (t) {
-                                    var e = "posthog";
-                                    return (
-                                        "posthog" !== a && (e += "." + a),
-                                        t || (e += " (stub)"),
-                                        e
-                                    );
-                                },
-                                u.people.toString = function () {
-                                    return u.toString(1) + ".people (stub)";
-                                },
-                                o =
-                                    "init me ws ys ps bs capture je Di ks register register_once register_for_session unregister unregister_for_session Ps getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Es $s createPersonProfile Is opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Ss debug xs getPageViewId captureTraceFeedback captureTraceMetric".split(
-                                        " ",
-                                    ),
-                                n = 0;
-                            n < o.length;
-                            n++
-                        )
-                            g(u, o[n]);
-                        e._i.push([i, s, a]);
-                    }),
-                    (e.__SV = 1));
-            })(document, window.posthog || []);
-            posthog.init("phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE", {
-                api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well
-            });
-        </script>
-    </body>
+                    }
+                });
+
+                // Track any user interaction
+                document.addEventListener('click', () => {
+                    this.userHasInteracted = true;
+                    this.hideAutoplayNotice();
+                }, { once: true });
+            }
+            
+            showAutoplayNotice() {
+                setTimeout(() => {
+                    if (!this.userHasInteracted && this.autoplayNotice) {
+                        this.autoplayNotice.style.display = 'block';
+                        setTimeout(() => this.hideAutoplayNotice(), 5000);
+                    }
+                }, 2000);
+            }
+            
+            hideAutoplayNotice() {
+                if (this.autoplayNotice) {
+                    this.autoplayNotice.style.display = 'none';
+                }
+            }
+            
+            generateWaveformBars() {
+                this.waveform.innerHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'wave-bar';
+                    this.waveform.appendChild(bar);
+                }
+                this.startWaveformAnimation();
+            }
+            
+            async initializeAudio() {
+                try {
+                    this.setLoadingState(true);
+                    console.log('🎵 Loading audio from GitHub Pages...');
+                    
+                    this.audio = new Audio();
+                    this.audio.crossOrigin = 'anonymous';
+                    this.audio.preload = 'auto';
+                    this.audio.src = this.audioUrl;
+                    
+                    this.audio.addEventListener('loadeddata', () => {
+                        console.log('✅ Audio loaded successfully!');
+                        this.setupWebAudio();
+                        this.setLoadingState(false);
+                    });
+                    
+                    this.audio.addEventListener('error', (e) => {
+                        console.error('❌ Audio loading failed:', e);
+                        this.setAudioError('Audio file not accessible');
+                    });
+                    
+                    this.audio.addEventListener('ended', () => {
+                        this.setPlayingState(false);
+                    });
+                    
+                    // Handle autoplay blocking
+                    this.audio.addEventListener('pause', () => {
+                        if (this.isPlaying && !this.userHasInteracted) {
+                            console.log('⚠️ Autoplay was blocked by browser');
+                            this.showAutoplayNotice();
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('Audio initialization error:', error);
+                    this.setAudioError('Audio not supported');
+                }
+            }
+            
+            setupWebAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.analyser = this.audioContext.createAnalyser();
+                    this.analyser.fftSize = 256;
+                    
+                    const bufferLength = this.analyser.frequencyBinCount;
+                    this.dataArray = new Uint8Array(bufferLength);
+                    
+                    const source = this.audioContext.createMediaElementSource(this.audio);
+                    source.connect(this.analyser);
+                    this.analyser.connect(this.audioContext.destination);
+                    
+                    console.log('✅ Web Audio API ready for live waveform');
+                } catch (error) {
+                    console.error('Web Audio API setup error:', error);
+                }
+            }
+            
+            async togglePlayback() {
+                if (this.audioLoading || this.audioError) {
+                    console.log('⚠️ Cannot play: loading or error state');
+                    return;
+                }
+                
+                try {
+                    if (!this.isPlaying) {
+                        console.log('▶️ Starting playback...');
+                        
+                        // Resume audio context (required for autoplay policy)
+                        if (this.audioContext && this.audioContext.state === 'suspended') {
+                            console.log('🔊 Resuming audio context...');
+                            await this.audioContext.resume();
+                        }
+                        
+                        await this.audio.play();
+                        this.setPlayingState(true);
+                        console.log('✅ Audio is now playing!');
+                        
+                    } else {
+                        console.log('⏸️ Pausing playback...');
+                        this.audio.pause();
+                        this.setPlayingState(false);
+                    }
+                } catch (error) {
+                    console.error('❌ Playback error:', error);
+                    if (error.name === 'NotAllowedError') {
+                        this.setAudioError('Browser blocked autoplay - please click play');
+                        this.showAutoplayNotice();
+                    } else {
+                        this.setAudioError('Playback failed');
+                    }
+                }
+            }
+            
+            setPlayingState(playing) {
+                this.isPlaying = playing;
+                this.playIcon.style.display = playing ? 'none' : 'block';
+                this.pauseIcon.style.display = playing ? 'block' : 'none';
+                this.liveDot.style.display = playing ? 'block' : 'none';
+            }
+            
+            setLoadingState(loading) {
+                this.audioLoading = loading;
+                this.loadingSpinner.style.display = loading ? 'block' : 'none';
+                this.playIcon.style.display = loading ? 'none' : 'block';
+                this.playButton.classList.toggle('loading', loading);
+                this.playButton.title = loading ? 'Loading audio...' : 'Play commentary';
+            }
+            
+            setAudioError(error) {
+                this.audioError = error;
+                this.playButton.classList.add('error');
+                this.playButton.title = error;
+                this.setLoadingState(false);
+                console.error('🚨 Audio Error:', error);
+            }
+            
+            nextMatch() {
+                this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
+                this.switchMatch();
+            }
+            
+            previousMatch() {
+                this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
+                this.switchMatch();
+            }
+            
+            switchMatch() {
+                if (this.audio && this.isPlaying) {
+                    this.audio.pause();
+                    this.setPlayingState(false);
+                }
+                this.updateDisplay();
+                console.log('🔄 Switched to:', this.matches[this.currentMatchIndex].homeTeam, 'vs', this.matches[this.currentMatchIndex].awayTeam);
+            }
+            
+            updateDisplay() {
+                const match = this.matches[this.currentMatchIndex];
+                this.homeTeam.textContent = match.homeTeam;
+                this.awayTeam.textContent = match.awayTeam;
+                this.scoreBox.textContent = `${match.homeScore} - ${match.awayScore}`;
+            }
+            
+            startWaveformAnimation() {
+                const bars = this.waveform.querySelectorAll('.wave-bar');
+                
+                const animate = () => {
+                    if (this.isPlaying && this.analyser && this.dataArray) {
+                        // Real audio visualization
+                        this.analyser.getByteFrequencyData(this.dataArray);
+                        
+                        bars.forEach((bar, index) => {
+                            const dataIndex = Math.floor((index / 4) * (this.dataArray.length / 8));
+                            const audioValue = this.dataArray[dataIndex] || 0;
+                            const height = 3 + (audioValue / 255) * 35;
+                            bar.style.height = `${Math.max(3, height)}px`;
+                        });
+                    } else {
+                        // Idle animation
+                        const time = Date.now() / 300;
+                        bars.forEach((bar, index) => {
+                            const pulse = Math.sin(time + index * 0.2) * 3;
+                            const height = Math.max(3, 3 + pulse);
+                            bar.style.height = `${height}px`;
+                        });
+                    }
+                    
+                    this.animationId = requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📱 GitHub Pages Audio Widget Demo Loading...');
+            new AudioCommentaryWidget();
+        });
+    </script>
+</body>
 </html>
